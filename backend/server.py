@@ -640,6 +640,336 @@ async def get_random_suggestion():
     else:
         return {"type": "position", "data": random.choice(POSITION_SUGGESTIONS)}
 
+# ================= LOVE DICE =================
+@api_router.get("/love-dice/roll")
+async def roll_love_dice():
+    action = random.choice(LOVE_DICE_ACTIONS)
+    body_part = random.choice(LOVE_DICE_BODY_PARTS)
+    duration = random.choice(LOVE_DICE_DURATION)
+    
+    return {
+        "action": action,
+        "body_part": body_part,
+        "duration": duration,
+        "full_text": f"{action} {body_part} {duration}"
+    }
+
+# ================= WISHLIST =================
+@api_router.post("/wishlist", response_model=WishlistItem)
+async def add_wishlist_item(input: WishlistItemCreate):
+    # Check if partner already has this wish
+    user = await db.users.find_one({"id": input.user_id})
+    if user and user.get("partner_id"):
+        partner_wish = await db.wishlist.find_one({
+            "couple_code": input.couple_code,
+            "user_id": user["partner_id"],
+            "title": input.title
+        })
+        if partner_wish:
+            # Both want it! Unlock both
+            await db.wishlist.update_one(
+                {"id": partner_wish["id"]},
+                {"$set": {"partner_wants_too": True, "unlocked": True}}
+            )
+            item = WishlistItem(**input.dict(), partner_wants_too=True, unlocked=True)
+        else:
+            item = WishlistItem(**input.dict())
+    else:
+        item = WishlistItem(**input.dict())
+    
+    await db.wishlist.insert_one(item.dict())
+    return item
+
+@api_router.get("/wishlist/{couple_code}/{user_id}")
+async def get_wishlist(couple_code: str, user_id: str):
+    # Get user's own wishes
+    my_wishes = await db.wishlist.find({"couple_code": couple_code, "user_id": user_id}).to_list(100)
+    
+    # Get unlocked wishes (both partners want)
+    unlocked = await db.wishlist.find({"couple_code": couple_code, "unlocked": True}).to_list(100)
+    
+    # Get partner's wishes count (without revealing details)
+    user = await db.users.find_one({"id": user_id})
+    partner_wishes_count = 0
+    if user and user.get("partner_id"):
+        partner_wishes = await db.wishlist.find({
+            "couple_code": couple_code, 
+            "user_id": user["partner_id"],
+            "unlocked": False
+        }).to_list(100)
+        partner_wishes_count = len(partner_wishes)
+    
+    return {
+        "my_wishes": [WishlistItem(**w) for w in my_wishes],
+        "unlocked_wishes": [WishlistItem(**w) for w in unlocked],
+        "partner_secret_wishes_count": partner_wishes_count
+    }
+
+@api_router.delete("/wishlist/{item_id}")
+async def delete_wishlist_item(item_id: str):
+    await db.wishlist.delete_one({"id": item_id})
+    return {"message": "Deleted"}
+
+# ================= QUIZ COMPARATIVO =================
+@api_router.post("/quiz/answer")
+async def save_quiz_answer(input: QuizAnswerCreate):
+    # Remove existing answer for this question from this user
+    await db.quiz_answers.delete_many({
+        "couple_code": input.couple_code,
+        "user_id": input.user_id,
+        "question_id": input.question_id
+    })
+    
+    answer = QuizAnswer(**input.dict())
+    await db.quiz_answers.insert_one(answer.dict())
+    return answer
+
+@api_router.get("/quiz/results/{couple_code}")
+async def get_quiz_results(couple_code: str):
+    answers = await db.quiz_answers.find({"couple_code": couple_code}).to_list(200)
+    
+    # Get both users in couple
+    users = await db.users.find({"couple_code": couple_code}).to_list(2)
+    if len(users) < 2:
+        return {
+            "complete": False,
+            "message": "Entrambi i partner devono completare il quiz",
+            "compatibility_score": 0,
+            "comparisons": []
+        }
+    
+    user1_id = users[0]["id"]
+    user2_id = users[1]["id"]
+    user1_name = users[0]["name"]
+    user2_name = users[1]["name"]
+    
+    user1_answers = {a["question_id"]: a["answer_index"] for a in answers if a["user_id"] == user1_id}
+    user2_answers = {a["question_id"]: a["answer_index"] for a in answers if a["user_id"] == user2_id}
+    
+    # Check if both completed all questions
+    total_questions = len(COMPATIBILITY_QUESTIONS)
+    if len(user1_answers) < total_questions or len(user2_answers) < total_questions:
+        return {
+            "complete": False,
+            "message": f"Quiz incompleto. {user1_name}: {len(user1_answers)}/{total_questions}, {user2_name}: {len(user2_answers)}/{total_questions}",
+            "compatibility_score": 0,
+            "comparisons": []
+        }
+    
+    # Calculate compatibility
+    matches = 0
+    comparisons = []
+    
+    for q in COMPATIBILITY_QUESTIONS:
+        q_id = q["id"]
+        u1_answer = user1_answers.get(q_id, -1)
+        u2_answer = user2_answers.get(q_id, -1)
+        
+        is_match = u1_answer == u2_answer
+        if is_match:
+            matches += 1
+        
+        comparisons.append({
+            "question": q["question"],
+            "options": q["options"],
+            "user1_answer": q["options"][u1_answer] if 0 <= u1_answer < len(q["options"]) else "?",
+            "user2_answer": q["options"][u2_answer] if 0 <= u2_answer < len(q["options"]) else "?",
+            "user1_name": user1_name,
+            "user2_name": user2_name,
+            "match": is_match
+        })
+    
+    compatibility_score = int((matches / total_questions) * 100)
+    
+    # Fun interpretation
+    if compatibility_score >= 80:
+        interpretation = "Anime gemelle! Siete incredibilmente in sintonia"
+    elif compatibility_score >= 60:
+        interpretation = "Ottima intesa! Le differenze vi rendono interessanti"
+    elif compatibility_score >= 40:
+        interpretation = "Buona base! C'è spazio per scoprirvi ancora"
+    else:
+        interpretation = "Opposti che si attraggono! Esplorate le differenze"
+    
+    return {
+        "complete": True,
+        "compatibility_score": compatibility_score,
+        "matches": matches,
+        "total_questions": total_questions,
+        "interpretation": interpretation,
+        "comparisons": comparisons
+    }
+
+# ================= SPECIAL DATES / COUNTDOWN =================
+@api_router.post("/special-dates", response_model=SpecialDate)
+async def create_special_date(input: SpecialDateCreate):
+    date_obj = SpecialDate(**input.dict())
+    await db.special_dates.insert_one(date_obj.dict())
+    return date_obj
+
+@api_router.get("/special-dates/{couple_code}")
+async def get_special_dates(couple_code: str):
+    dates = await db.special_dates.find({"couple_code": couple_code}).to_list(50)
+    
+    # Sort by date
+    dates.sort(key=lambda x: x["date"])
+    
+    # Find next upcoming
+    from datetime import timedelta
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    upcoming = [d for d in dates if d["date"] >= today]
+    past = [d for d in dates if d["date"] < today]
+    
+    # Calculate countdown for next date
+    next_date = None
+    days_until = None
+    if upcoming:
+        next_date = upcoming[0]
+        next_date_obj = datetime.strptime(next_date["date"], "%Y-%m-%d")
+        days_until = (next_date_obj - datetime.utcnow()).days + 1
+    
+    return {
+        "upcoming": [SpecialDate(**d) for d in upcoming],
+        "past": [SpecialDate(**d) for d in past[-5:]],  # Last 5
+        "next_date": SpecialDate(**next_date) if next_date else None,
+        "days_until_next": days_until
+    }
+
+@api_router.delete("/special-dates/{date_id}")
+async def delete_special_date(date_id: str):
+    await db.special_dates.delete_one({"id": date_id})
+    return {"message": "Deleted"}
+
+# ================= WEEKLY CHALLENGE =================
+@api_router.get("/weekly-challenge/{couple_code}")
+async def get_weekly_challenge(couple_code: str):
+    now = datetime.utcnow()
+    week_number = now.isocalendar()[1]
+    year = now.year
+    
+    # Check if challenge exists for this week
+    existing = await db.weekly_challenges.find_one({
+        "couple_code": couple_code,
+        "week_number": week_number,
+        "year": year
+    })
+    
+    if existing:
+        return WeeklyChallenge(**existing)
+    
+    # Generate new weekly challenge
+    challenge = random.choice(WEEKLY_CHALLENGES_POOL)
+    weekly = WeeklyChallenge(
+        couple_code=couple_code,
+        week_number=week_number,
+        year=year,
+        challenge=challenge
+    )
+    await db.weekly_challenges.insert_one(weekly.dict())
+    
+    return weekly
+
+@api_router.put("/weekly-challenge/{couple_code}/complete")
+async def complete_weekly_challenge(couple_code: str):
+    now = datetime.utcnow()
+    week_number = now.isocalendar()[1]
+    year = now.year
+    
+    result = await db.weekly_challenges.update_one(
+        {"couple_code": couple_code, "week_number": week_number, "year": year},
+        {"$set": {"completed": True, "completed_at": now}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+    
+    return {"message": "Sfida settimanale completata!"}
+
+# ================= FERTILITY PREDICTIONS FOR HOME =================
+@api_router.get("/fertility/predictions/{user_id}")
+async def get_fertility_predictions(user_id: str):
+    """Get fertility predictions for display on home screen"""
+    # Get cycle data
+    cycle = await db.cycle_data.find_one({"user_id": user_id})
+    
+    if not cycle:
+        # Try partner's cycle
+        user = await db.users.find_one({"id": user_id})
+        if user and user.get("couple_code"):
+            cycle = await db.cycle_data.find_one({"couple_code": user["couple_code"]})
+    
+    if not cycle:
+        return {
+            "has_data": False,
+            "today_status": None,
+            "next_period": None,
+            "next_fertile_start": None,
+            "next_ovulation": None,
+            "fertility_tip": "Configura il ciclo per vedere le previsioni"
+        }
+    
+    from datetime import timedelta
+    
+    last_period = datetime.strptime(cycle["last_period_date"], "%Y-%m-%d")
+    cycle_length = cycle["cycle_length"]
+    period_length = cycle["period_length"]
+    today = datetime.utcnow().date()
+    
+    # Calculate current and next cycles
+    current_cycle_start = last_period
+    while (current_cycle_start + timedelta(days=cycle_length)).date() <= today:
+        current_cycle_start += timedelta(days=cycle_length)
+    
+    next_period = current_cycle_start + timedelta(days=cycle_length)
+    ovulation_date = current_cycle_start + timedelta(days=cycle_length - 14)
+    fertile_start = ovulation_date - timedelta(days=5)
+    fertile_end = ovulation_date + timedelta(days=1)
+    period_end = current_cycle_start + timedelta(days=period_length - 1)
+    
+    # Determine today's status
+    today_dt = datetime.combine(today, datetime.min.time())
+    
+    if current_cycle_start.date() <= today <= period_end.date():
+        status = "period"
+        status_text = "Ciclo mestruale"
+        status_color = "#ff4757"
+        tip = "Riposo e cura di te. Momenti di intimità possono aiutare con i crampi!"
+    elif fertile_start.date() <= today <= fertile_end.date():
+        if today == ovulation_date.date():
+            status = "ovulation"
+            status_text = "Ovulazione - Massima fertilità!"
+            status_color = "#ffa502"
+            tip = "Oggi è il giorno ideale per concepire! Massima fertilità."
+        else:
+            status = "fertile"
+            status_text = "Finestra fertile"
+            status_color = "#2ed573"
+            tip = "Alta probabilità di concepimento. Giorni ideali per provare!"
+    else:
+        status = "safe"
+        status_text = "Giorni sicuri"
+        status_color = "#1e90ff"
+        tip = "Bassa probabilità di concepimento. Momento ideale per intimità senza pensieri!"
+    
+    days_to_ovulation = (ovulation_date.date() - today).days
+    days_to_period = (next_period.date() - today).days
+    days_to_fertile = (fertile_start.date() - today).days
+    
+    return {
+        "has_data": True,
+        "today_status": status,
+        "today_status_text": status_text,
+        "today_status_color": status_color,
+        "fertility_tip": tip,
+        "next_period": next_period.strftime("%Y-%m-%d"),
+        "days_to_period": max(0, days_to_period),
+        "next_ovulation": ovulation_date.strftime("%Y-%m-%d"),
+        "days_to_ovulation": days_to_ovulation,
+        "next_fertile_start": fertile_start.strftime("%Y-%m-%d") if days_to_fertile > 0 else None,
+        "days_to_fertile": max(0, days_to_fertile) if days_to_fertile > 0 else 0,
+        "is_trying_to_conceive_day": status in ["fertile", "ovulation"]
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
