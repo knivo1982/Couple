@@ -603,6 +603,157 @@ async def get_fertility_calendar(user_id: str):
         "ovulation_days": ovulation_days
     }
 
+# ================= CYCLE HISTORY (Track actual periods) =================
+
+@api_router.post("/cycle/start-period")
+async def start_new_period(input: CycleHistoryCreate):
+    """Mark the start of a new period - updates predictions based on actual data"""
+    user = await db.users.find_one({"id": input.user_id})
+    couple_code = user.get("couple_code") if user else None
+    
+    # Get current cycle settings
+    current_cycle = await db.cycle_data.find_one({"user_id": input.user_id})
+    if not current_cycle:
+        # If no cycle data, try couple_code
+        if couple_code:
+            current_cycle = await db.cycle_data.find_one({"couple_code": couple_code})
+    
+    # Get last period from history
+    last_history = await db.cycle_history.find_one(
+        {"user_id": input.user_id},
+        sort=[("period_start_date", -1)]
+    )
+    
+    # Calculate actual cycle length
+    actual_cycle_length = None
+    was_early = None
+    days_difference = None
+    
+    if last_history:
+        last_period_date = datetime.strptime(last_history["period_start_date"], "%Y-%m-%d")
+        new_period_date = datetime.strptime(input.period_start_date, "%Y-%m-%d")
+        actual_cycle_length = (new_period_date - last_period_date).days
+        
+        # Compare with expected
+        expected_cycle_length = current_cycle["cycle_length"] if current_cycle else 28
+        days_difference = actual_cycle_length - expected_cycle_length
+        was_early = days_difference < 0
+    
+    # Create history entry
+    history_entry = CycleHistory(
+        user_id=input.user_id,
+        couple_code=couple_code,
+        period_start_date=input.period_start_date,
+        cycle_length=actual_cycle_length,
+        notes=input.notes,
+        was_early=was_early,
+        days_difference=days_difference
+    )
+    await db.cycle_history.insert_one(history_entry.dict())
+    
+    # Update cycle data with new last_period_date and optionally adjust cycle length
+    if current_cycle:
+        # Calculate average cycle length from history
+        all_history = await db.cycle_history.find(
+            {"user_id": input.user_id, "cycle_length": {"$ne": None}}
+        ).to_list(12)  # Last 12 cycles
+        
+        if len(all_history) >= 3:
+            avg_cycle_length = sum(h["cycle_length"] for h in all_history) / len(all_history)
+            avg_cycle_length = round(avg_cycle_length)
+        else:
+            avg_cycle_length = current_cycle["cycle_length"]
+        
+        # Update cycle data
+        await db.cycle_data.update_one(
+            {"id": current_cycle["id"]},
+            {"$set": {
+                "last_period_date": input.period_start_date,
+                "cycle_length": avg_cycle_length,
+                "updated_at": datetime.utcnow()
+            }}
+        )
+    else:
+        # Create new cycle data
+        new_cycle = CycleData(
+            user_id=input.user_id,
+            couple_code=couple_code,
+            last_period_date=input.period_start_date,
+            cycle_length=28,
+            period_length=5
+        )
+        await db.cycle_data.insert_one(new_cycle.dict())
+    
+    return {
+        "message": "Nuovo ciclo registrato!",
+        "actual_cycle_length": actual_cycle_length,
+        "was_early": was_early,
+        "days_difference": abs(days_difference) if days_difference else None,
+        "history_id": history_entry.id
+    }
+
+@api_router.get("/cycle/history/{user_id}")
+async def get_cycle_history(user_id: str):
+    """Get cycle history for a user"""
+    # Get user's history
+    history = await db.cycle_history.find({"user_id": user_id}).sort("period_start_date", -1).to_list(24)
+    
+    if not history:
+        # Try partner's history via couple_code
+        user = await db.users.find_one({"id": user_id})
+        if user and user.get("couple_code"):
+            history = await db.cycle_history.find(
+                {"couple_code": user["couple_code"]}
+            ).sort("period_start_date", -1).to_list(24)
+    
+    # Calculate statistics
+    cycles_with_length = [h for h in history if h.get("cycle_length")]
+    
+    stats = {
+        "total_tracked": len(history),
+        "average_cycle_length": None,
+        "shortest_cycle": None,
+        "longest_cycle": None,
+        "regularity": "unknown"
+    }
+    
+    if cycles_with_length:
+        lengths = [h["cycle_length"] for h in cycles_with_length]
+        stats["average_cycle_length"] = round(sum(lengths) / len(lengths), 1)
+        stats["shortest_cycle"] = min(lengths)
+        stats["longest_cycle"] = max(lengths)
+        
+        # Calculate regularity (standard deviation)
+        if len(lengths) >= 3:
+            mean = sum(lengths) / len(lengths)
+            variance = sum((x - mean) ** 2 for x in lengths) / len(lengths)
+            std_dev = variance ** 0.5
+            
+            if std_dev <= 2:
+                stats["regularity"] = "molto regolare"
+            elif std_dev <= 4:
+                stats["regularity"] = "regolare"
+            elif std_dev <= 7:
+                stats["regularity"] = "variabile"
+            else:
+                stats["regularity"] = "irregolare"
+    
+    return {
+        "history": [CycleHistory(**h) for h in history],
+        "stats": stats
+    }
+
+@api_router.put("/cycle/end-period/{history_id}")
+async def end_period(history_id: str, end_date: str):
+    """Mark the end of a period"""
+    result = await db.cycle_history.update_one(
+        {"id": history_id},
+        {"$set": {"period_end_date": end_date}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="History entry not found")
+    return {"message": "Fine ciclo registrata"}
+
 # Intimacy Routes
 @api_router.post("/intimacy", response_model=IntimacyEntry)
 async def log_intimacy(input: IntimacyEntryCreate):
