@@ -173,25 +173,52 @@ async def join_couple(user_id: str, couple_code: str):
 # Cycle Data Routes
 @api_router.post("/cycle", response_model=CycleData)
 async def save_cycle_data(input: CycleDataCreate):
+    # Get user to find couple_code
+    user = await db.users.find_one({"id": input.user_id})
+    couple_code = user.get("couple_code") if user else None
+    
     # Remove existing cycle data for this user
     await db.cycle_data.delete_many({"user_id": input.user_id})
     
-    cycle_obj = CycleData(**input.dict())
+    # If there's a couple_code, also update/remove any existing data with same couple_code
+    if couple_code:
+        await db.cycle_data.delete_many({"couple_code": couple_code})
+    
+    cycle_dict = input.dict()
+    cycle_dict["couple_code"] = couple_code
+    cycle_obj = CycleData(**cycle_dict)
     await db.cycle_data.insert_one(cycle_obj.dict())
     return cycle_obj
 
 @api_router.get("/cycle/{user_id}", response_model=Optional[CycleData])
 async def get_cycle_data(user_id: str):
+    # First try to find by user_id
     cycle = await db.cycle_data.find_one({"user_id": user_id})
     if cycle:
         return CycleData(**cycle)
+    
+    # If not found, try to find by couple_code (for partner)
+    user = await db.users.find_one({"id": user_id})
+    if user and user.get("couple_code"):
+        cycle = await db.cycle_data.find_one({"couple_code": user["couple_code"]})
+        if cycle:
+            return CycleData(**cycle)
+    
     return None
 
 @api_router.get("/cycle/fertility/{user_id}")
 async def get_fertility_calendar(user_id: str):
+    # First try to find by user_id
     cycle = await db.cycle_data.find_one({"user_id": user_id})
+    
+    # If not found, try to find by couple_code (for partner viewing)
     if not cycle:
-        return {"periods": [], "fertile_days": [], "ovulation_day": None}
+        user = await db.users.find_one({"id": user_id})
+        if user and user.get("couple_code"):
+            cycle = await db.cycle_data.find_one({"couple_code": user["couple_code"]})
+    
+    if not cycle:
+        return {"periods": [], "fertile_days": [], "ovulation_days": []}
     
     from datetime import timedelta
     last_period = datetime.strptime(cycle["last_period_date"], "%Y-%m-%d")
