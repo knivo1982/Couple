@@ -61,6 +61,9 @@ class IntimacyEntry(BaseModel):
     couple_code: str
     date: str  # YYYY-MM-DD
     quality_rating: int  # 1-5
+    positions_used: List[str] = []  # List of position IDs used
+    duration_minutes: Optional[int] = None
+    location: Optional[str] = None  # bedroom, shower, couch, etc.
     notes: Optional[str] = None
     created_by: str  # user_id
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -69,6 +72,9 @@ class IntimacyEntryCreate(BaseModel):
     couple_code: str
     date: str
     quality_rating: int
+    positions_used: List[str] = []
+    duration_minutes: Optional[int] = None
+    location: Optional[str] = None
     notes: Optional[str] = None
     created_by: str
 
