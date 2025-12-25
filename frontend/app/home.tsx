@@ -129,8 +129,8 @@ export default function Home() {
           )}
         </View>
 
-        {/* Fertility Status (for females) */}
-        {user?.gender === 'female' && (
+        {/* Fertility Status - shown for both if data available */}
+        {(fertilityData?.periods?.length > 0 || fertilityData?.fertile_days?.length > 0) && (
           <TouchableOpacity
             style={[styles.statusCard, { borderLeftColor: todayStatus.color }]}
             onPress={() => router.push('/calendar')}
@@ -139,7 +139,9 @@ export default function Home() {
               <Ionicons name="calendar" size={24} color={todayStatus.color} />
             </View>
             <View style={styles.statusContent}>
-              <Text style={styles.statusTitle}>Oggi</Text>
+              <Text style={styles.statusTitle}>
+                {user?.gender === 'male' ? 'Ciclo Partner - Oggi' : 'Oggi'}
+              </Text>
               <Text style={[styles.statusText, { color: todayStatus.color }]}>
                 {todayStatus.text}
               </Text>
