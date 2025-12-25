@@ -33,11 +33,9 @@ export default function Home() {
       setStats(statsData);
       setTodaySuggestion(suggestion);
 
-      // Load fertility data if female
-      if (user.gender === 'female') {
-        const fertility = await cycleAPI.getFertility(user.id);
-        setFertilityData(fertility);
-      }
+      // Load fertility data - works for both female (own) and male (partner's)
+      const fertility = await cycleAPI.getFertility(user.id);
+      setFertilityData(fertility);
 
       // Load partner name if connected
       if (user.partner_id) {
