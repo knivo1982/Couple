@@ -12,7 +12,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../store/useStore';
 import { intimacyAPI } from '../services/api';
-import { format, subDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
+import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
 import { it } from 'date-fns/locale';
 
 const { width } = Dimensions.get('window');
@@ -55,29 +55,25 @@ export default function StatsScreen() {
   };
 
   const getSessometroColor = (score: number) => {
+    if (score >= 9) return '#ff0000';
     if (score >= 8) return '#ff4757';
-    if (score >= 6) return '#ff6b8a';
+    if (score >= 7) return '#ff6b8a';
+    if (score >= 5.5) return '#ff9ff3';
     if (score >= 4) return '#ffa502';
-    if (score >= 2) return '#70a1ff';
+    if (score >= 2.5) return '#70a1ff';
     return '#888';
   };
 
-  const getQualityEmoji = (quality: number) => {
-    switch (quality) {
-      case 5:
-        return 'flame';
-      case 4:
-        return 'heart';
-      case 3:
-        return 'happy';
-      case 2:
-        return 'sad';
-      default:
-        return 'thumbs-down';
+  const getTrendIcon = (trend: string) => {
+    switch (trend) {
+      case 'rising': return { icon: 'trending-up', color: '#2ed573', text: 'In crescita' };
+      case 'cooling': return { icon: 'trending-down', color: '#ff6b8a', text: 'In calo' };
+      default: return { icon: 'remove', color: '#ffa502', text: 'Stabile' };
     }
   };
 
   const maxCount = Math.max(...monthlyData.map((d) => d.count), 1);
+  const trendInfo = getTrendIcon(stats?.passion_trend || 'stable');
 
   return (
     <SafeAreaView style={styles.container}>
@@ -93,7 +89,7 @@ export default function StatsScreen() {
         {/* Sessometro Card */}
         <View style={styles.sessometroCard}>
           <View style={styles.sessometroHeader}>
-            <Ionicons name="flame" size={32} color="#ff6b8a" />
+            <Text style={styles.sessometroEmoji}>{stats?.sessometro_level_emoji || '🌱'}</Text>
             <Text style={styles.sessometroTitle}>Sessometro</Text>
           </View>
 
@@ -118,27 +114,165 @@ export default function StatsScreen() {
               { color: getSessometroColor(stats?.sessometro_score || 0) },
             ]}
           >
-            {stats?.sessometro_level || 'Inizia a registrare'}
+            {stats?.sessometro_level || 'Nuova Coppia'}
           </Text>
 
-          <View style={styles.statsGrid}>
-            <View style={styles.statBox}>
-              <Ionicons name="calendar" size={24} color="#ff6b8a" />
-              <Text style={styles.statNumber}>{stats?.total_count || 0}</Text>
-              <Text style={styles.statLabel}>Totale</Text>
+          {/* Score Breakdown */}
+          {stats?.score_breakdown && (
+            <View style={styles.breakdownContainer}>
+              <Text style={styles.breakdownTitle}>Come viene calcolato:</Text>
+              <View style={styles.breakdownRow}>
+                <Text style={styles.breakdownLabel}>Frequenza (30%)</Text>
+                <View style={styles.miniGauge}>
+                  <View style={[styles.miniGaugeFill, { width: `${stats.score_breakdown.frequency * 10}%` }]} />
+                </View>
+              </View>
+              <View style={styles.breakdownRow}>
+                <Text style={styles.breakdownLabel}>Qualità (25%)</Text>
+                <View style={styles.miniGauge}>
+                  <View style={[styles.miniGaugeFill, { width: `${stats.score_breakdown.quality * 10}%` }]} />
+                </View>
+              </View>
+              <View style={styles.breakdownRow}>
+                <Text style={styles.breakdownLabel}>Costanza (20%)</Text>
+                <View style={styles.miniGauge}>
+                  <View style={[styles.miniGaugeFill, { width: `${stats.score_breakdown.consistency * 10}%` }]} />
+                </View>
+              </View>
+              <View style={styles.breakdownRow}>
+                <Text style={styles.breakdownLabel}>Trend (15%)</Text>
+                <View style={styles.miniGauge}>
+                  <View style={[styles.miniGaugeFill, { width: `${stats.score_breakdown.trend * 10}%` }]} />
+                </View>
+              </View>
+              <View style={styles.breakdownRow}>
+                <Text style={styles.breakdownLabel}>Varietà (10%)</Text>
+                <View style={styles.miniGauge}>
+                  <View style={[styles.miniGaugeFill, { width: `${stats.score_breakdown.variety * 10}%` }]} />
+                </View>
+              </View>
             </View>
-            <View style={styles.statBox}>
-              <Ionicons name="today" size={24} color="#ffa502" />
-              <Text style={styles.statNumber}>{stats?.monthly_count || 0}</Text>
-              <Text style={styles.statLabel}>Questo Mese</Text>
-            </View>
-            <View style={styles.statBox}>
-              <Ionicons name="star" size={24} color="#2ed573" />
-              <Text style={styles.statNumber}>{stats?.average_quality || 0}</Text>
-              <Text style={styles.statLabel}>Qualità Media</Text>
-            </View>
+          )}
+        </View>
+
+        {/* Quick Stats Grid */}
+        <View style={styles.quickStatsGrid}>
+          <View style={styles.quickStatBox}>
+            <Ionicons name="calendar" size={24} color="#ff6b8a" />
+            <Text style={styles.quickStatNumber}>{stats?.total_count || 0}</Text>
+            <Text style={styles.quickStatLabel}>Totale</Text>
+          </View>
+          <View style={styles.quickStatBox}>
+            <Ionicons name="today" size={24} color="#ffa502" />
+            <Text style={styles.quickStatNumber}>{stats?.monthly_count || 0}</Text>
+            <Text style={styles.quickStatLabel}>Questo Mese</Text>
+          </View>
+          <View style={styles.quickStatBox}>
+            <Ionicons name="flame" size={24} color="#ff4757" />
+            <Text style={styles.quickStatNumber}>{stats?.streak || 0}</Text>
+            <Text style={styles.quickStatLabel}>Streak Sett.</Text>
+          </View>
+          <View style={styles.quickStatBox}>
+            <Ionicons name="star" size={24} color="#2ed573" />
+            <Text style={styles.quickStatNumber}>{stats?.average_quality || 0}</Text>
+            <Text style={styles.quickStatLabel}>Qualità</Text>
           </View>
         </View>
+
+        {/* Trend & Favorite Day */}
+        <View style={styles.insightsRow}>
+          <View style={styles.insightCard}>
+            <Ionicons name={trendInfo.icon as any} size={28} color={trendInfo.color} />
+            <Text style={styles.insightLabel}>Passione</Text>
+            <Text style={[styles.insightValue, { color: trendInfo.color }]}>{trendInfo.text}</Text>
+          </View>
+          <View style={styles.insightCard}>
+            <Ionicons name="heart" size={28} color="#ff6b8a" />
+            <Text style={styles.insightLabel}>Giorno Preferito</Text>
+            <Text style={styles.insightValue}>{stats?.favorite_day || '-'}</Text>
+          </View>
+        </View>
+
+        {/* Fun Stats */}
+        {stats?.fun_stats && (
+          <View style={styles.funStatsCard}>
+            <Text style={styles.funStatsTitle}>Statistiche Curiose</Text>
+            
+            <View style={styles.funStatRow}>
+              <View style={styles.funStatIcon}>
+                <Ionicons name="time" size={20} color="#70a1ff" />
+              </View>
+              <View style={styles.funStatContent}>
+                <Text style={styles.funStatLabel}>Tempo insieme stimato</Text>
+                <Text style={styles.funStatValue}>{stats.fun_stats.total_hours_estimated} ore</Text>
+              </View>
+            </View>
+
+            <View style={styles.funStatRow}>
+              <View style={styles.funStatIcon}>
+                <Ionicons name="fitness" size={20} color="#ff6b8a" />
+              </View>
+              <View style={styles.funStatContent}>
+                <Text style={styles.funStatLabel}>Calorie bruciate stimate</Text>
+                <Text style={styles.funStatValue}>{stats.fun_stats.calories_burned_estimated} kcal</Text>
+              </View>
+            </View>
+
+            <View style={styles.funStatRow}>
+              <View style={styles.funStatIcon}>
+                <Ionicons name="happy" size={20} color="#2ed573" />
+              </View>
+              <View style={styles.funStatContent}>
+                <Text style={styles.funStatLabel}>Boost umore</Text>
+                <Text style={styles.funStatValue}>{stats.fun_stats.mood_boost_score}%</Text>
+              </View>
+            </View>
+
+            <View style={styles.funStatRow}>
+              <View style={styles.funStatIcon}>
+                <Ionicons name="shuffle" size={20} color="#ffa502" />
+              </View>
+              <View style={styles.funStatContent}>
+                <Text style={styles.funStatLabel}>Spontaneità</Text>
+                <Text style={styles.funStatValue}>{stats.fun_stats.spontaneity_score}%</Text>
+              </View>
+            </View>
+
+            <View style={styles.funStatRow}>
+              <View style={styles.funStatIcon}>
+                <Ionicons name="heart-half" size={20} color="#ff9ff3" />
+              </View>
+              <View style={styles.funStatContent}>
+                <Text style={styles.funStatLabel}>Stile coppia</Text>
+                <Text style={styles.funStatValue}>{stats.fun_stats.romance_vs_passion}</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Badges */}
+        {stats?.badges && stats.badges.length > 0 && (
+          <View style={styles.badgesCard}>
+            <Text style={styles.badgesTitle}>I Vostri Badge</Text>
+            <View style={styles.badgesGrid}>
+              {stats.badges.map((badge: any, index: number) => (
+                <View key={index} style={styles.badge}>
+                  <Text style={styles.badgeIcon}>{badge.icon}</Text>
+                  <Text style={styles.badgeName}>{badge.name}</Text>
+                  <Text style={styles.badgeDesc}>{badge.desc}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Next Milestone */}
+        {stats?.next_milestone && (
+          <View style={styles.milestoneCard}>
+            <Ionicons name="trophy" size={24} color="#ffd700" />
+            <Text style={styles.milestoneText}>{stats.next_milestone}</Text>
+          </View>
+        )}
 
         {/* Monthly Chart */}
         <View style={styles.chartCard}>
@@ -152,7 +286,7 @@ export default function StatsScreen() {
                   style={[
                     styles.bar,
                     {
-                      height: (item.count / maxCount) * 80,
+                      height: Math.max((item.count / maxCount) * 80, 4),
                       backgroundColor: item.count > 0 ? '#ff6b8a' : '#3a3a5e',
                     },
                   ]}
@@ -169,7 +303,7 @@ export default function StatsScreen() {
                     style={[
                       styles.bar,
                       {
-                        height: (item.count / maxCount) * 80,
+                        height: Math.max((item.count / maxCount) * 80, 4),
                         backgroundColor: item.count > 0 ? '#ff6b8a' : '#3a3a5e',
                       },
                     ]}
@@ -184,7 +318,7 @@ export default function StatsScreen() {
         {/* Recent Activity */}
         <View style={styles.activityCard}>
           <Text style={styles.activityTitle}>Attività Recente</Text>
-          {intimacyEntries.slice(0, 10).map((entry: any, index: number) => (
+          {intimacyEntries.slice(0, 5).map((entry: any, index: number) => (
             <View key={index} style={styles.activityItem}>
               <View style={styles.activityDate}>
                 <Text style={styles.activityDay}>
@@ -218,17 +352,6 @@ export default function StatsScreen() {
             <Text style={styles.emptyText}>Nessuna attività registrata</Text>
           )}
         </View>
-
-        {/* Tips */}
-        <View style={styles.tipsCard}>
-          <Ionicons name="bulb" size={24} color="#ffd700" />
-          <Text style={styles.tipsTitle}>Consiglio</Text>
-          <Text style={styles.tipsText}>
-            Per una relazione sana, gli esperti consigliano almeno 2-3 momenti
-            intimi a settimana. Comunicazione e qualità sono più importanti della
-            quantità!
-          </Text>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -257,13 +380,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#2a2a4e',
     borderRadius: 20,
     padding: 24,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   sessometroHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     marginBottom: 20,
+  },
+  sessometroEmoji: {
+    fontSize: 32,
   },
   sessometroTitle: {
     fontSize: 24,
@@ -297,33 +423,189 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
-  statsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  statBox: {
-    flex: 1,
-    alignItems: 'center',
+  breakdownContainer: {
+    backgroundColor: '#1a1a2e',
+    borderRadius: 12,
     padding: 12,
   },
-  statNumber: {
-    fontSize: 24,
+  breakdownTitle: {
+    fontSize: 12,
+    color: '#888',
+    marginBottom: 8,
+  },
+  breakdownRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  breakdownLabel: {
+    fontSize: 11,
+    color: '#888',
+    width: 100,
+  },
+  miniGauge: {
+    flex: 1,
+    height: 6,
+    backgroundColor: '#3a3a5e',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  miniGaugeFill: {
+    height: '100%',
+    backgroundColor: '#ff6b8a',
+    borderRadius: 3,
+  },
+  quickStatsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 16,
+  },
+  quickStatBox: {
+    flex: 1,
+    minWidth: (width - 64) / 2,
+    backgroundColor: '#2a2a4e',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+  },
+  quickStatNumber: {
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#fff',
     marginTop: 8,
   },
-  statLabel: {
+  quickStatLabel: {
     fontSize: 12,
     color: '#888',
     marginTop: 4,
+  },
+  insightsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  insightCard: {
+    flex: 1,
+    backgroundColor: '#2a2a4e',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+  },
+  insightLabel: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 8,
+  },
+  insightValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+    marginTop: 4,
+  },
+  funStatsCard: {
+    backgroundColor: '#2a2a4e',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+  },
+  funStatsTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 16,
+  },
+  funStatRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  funStatIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  funStatContent: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginLeft: 12,
+  },
+  funStatLabel: {
+    fontSize: 14,
+    color: '#888',
+  },
+  funStatValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  badgesCard: {
+    backgroundColor: '#2a2a4e',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+  },
+  badgesTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 16,
+  },
+  badgesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  badge: {
+    backgroundColor: '#1a1a2e',
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+    minWidth: 90,
+  },
+  badgeIcon: {
+    fontSize: 24,
+  },
+  badgeName: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#fff',
+    marginTop: 4,
+  },
+  badgeDesc: {
+    fontSize: 10,
+    color: '#888',
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  milestoneCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.3)',
+  },
+  milestoneText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#ffd700',
   },
   chartCard: {
     backgroundColor: '#2a2a4e',
     borderRadius: 20,
     padding: 20,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   chartTitle: {
     fontSize: 18,
@@ -403,24 +685,5 @@ const styles = StyleSheet.create({
     color: '#888',
     textAlign: 'center',
     paddingVertical: 20,
-  },
-  tipsCard: {
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
-    borderRadius: 20,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 215, 0, 0.3)',
-  },
-  tipsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffd700',
-    marginTop: 8,
-  },
-  tipsText: {
-    fontSize: 14,
-    color: '#888',
-    marginTop: 8,
-    lineHeight: 20,
   },
 });
