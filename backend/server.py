@@ -194,11 +194,31 @@ POSITION_SUGGESTIONS = [
 ]
 
 COMPATIBILITY_QUESTIONS = [
-    {"question": "Qual è il momento ideale per l'intimità?", "options": ["Mattina", "Pomeriggio", "Sera", "Notte fonda"]},
-    {"question": "Quanto è importante il romanticismo prima?", "options": ["Fondamentale", "Piacevole", "Non necessario", "Dipende"]},
-    {"question": "Preferisci sessioni lunghe o intense?", "options": ["Lunghe e slow", "Intense e veloci", "Un mix", "Dipende dall'umore"]},
-    {"question": "Quanto sei aperto a sperimentare?", "options": ["Molto aperto", "Abbastanza", "Poco", "Preferisco il classico"]},
-    {"question": "Cosa ti eccita di più?", "options": ["Parole dolci", "Contatto fisico", "Atmosfera", "Spontaneità"]},
+    {"id": 0, "question": "Qual è il momento ideale per l'intimità?", "options": ["Mattina", "Pomeriggio", "Sera", "Notte fonda"]},
+    {"id": 1, "question": "Quanto è importante il romanticismo prima?", "options": ["Fondamentale", "Piacevole", "Non necessario", "Dipende"]},
+    {"id": 2, "question": "Preferisci sessioni lunghe o intense?", "options": ["Lunghe e slow", "Intense e veloci", "Un mix", "Dipende dall'umore"]},
+    {"id": 3, "question": "Quanto sei aperto a sperimentare?", "options": ["Molto aperto", "Abbastanza", "Poco", "Preferisco il classico"]},
+    {"id": 4, "question": "Cosa ti eccita di più?", "options": ["Parole dolci", "Contatto fisico", "Atmosfera", "Spontaneità"]},
+    {"id": 5, "question": "Quanto spesso vorresti stare insieme?", "options": ["Ogni giorno", "3-4 volte a settimana", "1-2 volte a settimana", "Quando capita"]},
+    {"id": 6, "question": "Preferisci iniziare tu o che inizi il partner?", "options": ["Io sempre", "Il partner", "A turno", "Chi ha voglia"]},
+    {"id": 7, "question": "Luogo preferito?", "options": ["Camera da letto", "Divano", "Doccia/Bagno", "Ovunque!"]},
+    {"id": 8, "question": "Musica durante?", "options": ["Sempre", "A volte", "Mai", "Solo playlist speciale"]},
+    {"id": 9, "question": "Quanto è importante la comunicazione durante?", "options": ["Molto, parliamo sempre", "Abbastanza", "Poco, preferiamo il silenzio", "Solo feedback base"]},
+    {"id": 10, "question": "Dopo, cosa preferisci?", "options": ["Coccole lunghe", "Dormire subito", "Chiacchierare", "Snack time!"]},
+    {"id": 11, "question": "Fantasy: cosa ti intriga di più?", "options": ["Roleplay", "Nuovi posti", "Toys", "Niente di particolare"]},
+]
+
+WEEKLY_CHALLENGES_POOL = [
+    {"title": "Settimana del Massaggio", "description": "Ogni sera, 10 minuti di massaggio a turno prima di dormire", "difficulty": "facile"},
+    {"title": "Complimenti Quotidiani", "description": "Ogni giorno, ditevi 3 cose che amate dell'altro", "difficulty": "facile"},
+    {"title": "No Phone Zone", "description": "Almeno 2 sere questa settimana: telefoni spenti dopo cena", "difficulty": "medio"},
+    {"title": "Sorpresa Romantica", "description": "Organizza una sorpresa per il partner entro la settimana", "difficulty": "medio"},
+    {"title": "Nuova Posizione", "description": "Provate almeno una posizione nuova questa settimana", "difficulty": "spicy"},
+    {"title": "Appuntamento Settimanale", "description": "Pianificate e fate un vero appuntamento, come ai primi tempi", "difficulty": "facile"},
+    {"title": "Gioco di Ruolo", "description": "Inventate insieme un piccolo scenario e interpretatelo", "difficulty": "spicy"},
+    {"title": "Settimana Spontanea", "description": "Almeno 2 momenti completamente spontanei, non pianificati", "difficulty": "medio"},
+    {"title": "Esplorazione Sensoriale", "description": "Usate bende, piume, ghiaccio... esplorate i sensi", "difficulty": "spicy"},
+    {"title": "Lettere d'Amore", "description": "Scrivetevi una lettera (anche piccante) e scambiatevela a fine settimana", "difficulty": "romantico"},
 ]
 
 # ================= ROUTES =================
