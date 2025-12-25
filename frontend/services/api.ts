@@ -45,13 +45,16 @@ export const cycleAPI = {
 };
 
 export const intimacyAPI = {
-  log: async (coupleCode: string, date: string, qualityRating: number, createdBy: string, notes?: string) => {
+  log: async (coupleCode: string, date: string, qualityRating: number, createdBy: string, positionsUsed: string[] = [], durationMinutes?: number, location?: string, notes?: string) => {
     const response = await api.post('/intimacy', {
       couple_code: coupleCode,
       date,
       quality_rating: qualityRating,
-      created_by: createdBy,
+      positions_used: positionsUsed,
+      duration_minutes: durationMinutes,
+      location,
       notes,
+      created_by: createdBy,
     });
     return response.data;
   },
