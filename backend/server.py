@@ -428,20 +428,6 @@ POSITION_SUGGESTIONS = [
         "variation": "Su un divano o bordo del letto per più supporto"
     },
 ]
-]
-
-POSITION_SUGGESTIONS = [
-    {"name": "Missionario Classico", "difficulty": "facile", "description": "Intimo e romantico, perfetto per connessione visiva"},
-    {"name": "Cowgirl", "difficulty": "facile", "description": "Lei prende il controllo del ritmo"},
-    {"name": "Pecorina", "difficulty": "facile", "description": "Stimolazione profonda e intensa"},
-    {"name": "Cucchiaio", "difficulty": "facile", "description": "Romantico e rilassante, ideale per mattina"},
-    {"name": "Amazzone Inversa", "difficulty": "medio", "description": "Visuale diversa, sensazioni uniche"},
-    {"name": "Lotus", "difficulty": "medio", "description": "Connessione profonda faccia a faccia"},
-    {"name": "69", "difficulty": "medio", "description": "Piacere simultaneo per entrambi"},
-    {"name": "Ponte", "difficulty": "difficile", "description": "Richiede flessibilità ma molto intenso"},
-    {"name": "Standing", "difficulty": "difficile", "description": "Spontaneo e appassionato"},
-    {"name": "Sedia", "difficulty": "medio", "description": "Versatile, può essere ovunque ci sia una sedia"},
-]
 
 COMPATIBILITY_QUESTIONS = [
     {"id": 0, "question": "Qual è il momento ideale per l'intimità?", "options": ["Mattina", "Pomeriggio", "Sera", "Notte fonda"]},
