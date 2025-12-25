@@ -323,8 +323,31 @@ export default function CalendarScreen() {
           </View>
         )}
 
-        {/* Tip for men */}
-        {user?.gender === 'male' && (
+        {/* Partner's cycle info for men */}
+        {user?.gender === 'male' && partnerHasCycle && lastPeriodDate && (
+          <View style={styles.infoCard}>
+            <View style={styles.partnerInfoHeader}>
+              <Ionicons name="heart" size={20} color="#ff6b8a" />
+              <Text style={styles.infoTitle}>Ciclo della Partner</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Ultima mestruazione:</Text>
+              <Text style={styles.infoValue}>
+                {format(parseISO(lastPeriodDate), 'd MMMM yyyy', { locale: it })}
+              </Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Durata ciclo:</Text>
+              <Text style={styles.infoValue}>{cycleLength} giorni</Text>
+            </View>
+            <Text style={styles.syncText}>
+              Sincronizzato automaticamente
+            </Text>
+          </View>
+        )}
+
+        {/* Tip for men without partner cycle */}
+        {user?.gender === 'male' && !partnerHasCycle && (
           <View style={styles.tipCard}>
             <Ionicons name="information-circle" size={24} color="#70a1ff" />
             <Text style={styles.tipText}>
