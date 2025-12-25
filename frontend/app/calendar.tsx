@@ -45,6 +45,7 @@ export default function CalendarScreen() {
   const [notes, setNotes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [cycleConfigured, setCycleConfigured] = useState(false);
+  const [partnerHasCycle, setPartnerHasCycle] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -54,20 +55,25 @@ export default function CalendarScreen() {
     if (!user) return;
     
     try {
-      // Load cycle data for females
-      if (user.gender === 'female') {
-        const cycleData = await cycleAPI.get(user.id);
-        if (cycleData && cycleData.last_period_date) {
-          setLastPeriodDate(cycleData.last_period_date);
-          setCycleLength(String(cycleData.cycle_length));
-          setPeriodLength(String(cycleData.period_length));
-          setCycleConfigured(true);
-        } else {
-          setCycleConfigured(false);
+      // Load cycle data - works for both females (own data) and males (partner's data)
+      const cycleData = await cycleAPI.get(user.id);
+      if (cycleData && cycleData.last_period_date) {
+        setLastPeriodDate(cycleData.last_period_date);
+        setCycleLength(String(cycleData.cycle_length));
+        setPeriodLength(String(cycleData.period_length));
+        setCycleConfigured(true);
+        // If user is male and has cycle data, it means partner shared it
+        if (user.gender === 'male') {
+          setPartnerHasCycle(true);
         }
-        const fertility = await cycleAPI.getFertility(user.id);
-        setFertilityData(fertility);
+      } else {
+        setCycleConfigured(false);
+        setPartnerHasCycle(false);
       }
+      
+      // Load fertility calendar - API now returns partner's data if available
+      const fertility = await cycleAPI.getFertility(user.id);
+      setFertilityData(fertility);
 
       // Load intimacy entries
       if (user.couple_code) {
