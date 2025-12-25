@@ -623,6 +623,19 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 12,
   },
+  partnerInfoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  syncText: {
+    color: '#2ed573',
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 12,
+    fontStyle: 'italic',
+  },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
