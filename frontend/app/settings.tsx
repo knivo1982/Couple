@@ -101,7 +101,7 @@ export default function SettingsScreen() {
               />
             </View>
             <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>{user?.name}</Text>
+              <Text style={styles.profileName}>{user?.name || 'Utente'}</Text>
               <Text style={styles.profileGender}>
                 {user?.gender === 'male' ? 'Uomo' : 'Donna'}
               </Text>
