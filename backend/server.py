@@ -43,6 +43,7 @@ class UserCreate(BaseModel):
 class CycleData(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
+    couple_code: Optional[str] = None  # Per condivisione con partner
     last_period_date: str  # YYYY-MM-DD
     cycle_length: int = 28
     period_length: int = 5
@@ -50,6 +51,7 @@ class CycleData(BaseModel):
 
 class CycleDataCreate(BaseModel):
     user_id: str
+    couple_code: Optional[str] = None
     last_period_date: str
     cycle_length: int = 28
     period_length: int = 5
