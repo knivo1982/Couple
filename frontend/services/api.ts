@@ -97,4 +97,88 @@ export const challengeAPI = {
   },
 };
 
+export const loveDiceAPI = {
+  roll: async () => {
+    const response = await api.get('/love-dice/roll');
+    return response.data;
+  },
+};
+
+export const wishlistAPI = {
+  add: async (coupleCode: string, userId: string, title: string, description: string, category: string) => {
+    const response = await api.post('/wishlist', {
+      couple_code: coupleCode,
+      user_id: userId,
+      title,
+      description,
+      category,
+    });
+    return response.data;
+  },
+  get: async (coupleCode: string, userId: string) => {
+    const response = await api.get(`/wishlist/${coupleCode}/${userId}`);
+    return response.data;
+  },
+  delete: async (itemId: string) => {
+    const response = await api.delete(`/wishlist/${itemId}`);
+    return response.data;
+  },
+};
+
+export const quizAPI = {
+  saveAnswer: async (coupleCode: string, userId: string, questionId: number, answerIndex: number) => {
+    const response = await api.post('/quiz/answer', {
+      couple_code: coupleCode,
+      user_id: userId,
+      question_id: questionId,
+      answer_index: answerIndex,
+    });
+    return response.data;
+  },
+  getResults: async (coupleCode: string) => {
+    const response = await api.get(`/quiz/results/${coupleCode}`);
+    return response.data;
+  },
+};
+
+export const specialDatesAPI = {
+  create: async (coupleCode: string, title: string, date: string, createdBy: string, time?: string, notes?: string) => {
+    const response = await api.post('/special-dates', {
+      couple_code: coupleCode,
+      title,
+      date,
+      time,
+      notes,
+      created_by: createdBy,
+    });
+    return response.data;
+  },
+  getAll: async (coupleCode: string) => {
+    const response = await api.get(`/special-dates/${coupleCode}`);
+    return response.data;
+  },
+  delete: async (dateId: string) => {
+    const response = await api.delete(`/special-dates/${dateId}`);
+    return response.data;
+  },
+};
+
+export const weeklyAPI = {
+  get: async (coupleCode: string) => {
+    const response = await api.get(`/weekly-challenge/${coupleCode}`);
+    return response.data;
+  },
+  complete: async (coupleCode: string) => {
+    const response = await api.put(`/weekly-challenge/${coupleCode}/complete`);
+    return response.data;
+  },
+};
+
+export const fertilityAPI = {
+  getPredictions: async (userId: string) => {
+    const response = await api.get(`/fertility/predictions/${userId}`);
+    return response.data;
+  },
+};
+
 export default api;
