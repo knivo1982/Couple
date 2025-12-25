@@ -87,7 +87,83 @@ class ChallengeCreate(BaseModel):
     description: str
     category: str
 
+# New models for advanced features
+class WishlistItem(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    couple_code: str
+    user_id: str
+    title: str
+    description: str
+    category: str  # "romantic", "spicy", "adventure", "fantasy"
+    partner_wants_too: bool = False
+    unlocked: bool = False
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class WishlistItemCreate(BaseModel):
+    couple_code: str
+    user_id: str
+    title: str
+    description: str
+    category: str
+
+class QuizAnswer(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    couple_code: str
+    user_id: str
+    question_id: int
+    answer_index: int
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class QuizAnswerCreate(BaseModel):
+    couple_code: str
+    user_id: str
+    question_id: int
+    answer_index: int
+
+class SpecialDate(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    couple_code: str
+    title: str
+    date: str  # YYYY-MM-DD
+    time: Optional[str] = None  # HH:MM
+    notes: Optional[str] = None
+    created_by: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class SpecialDateCreate(BaseModel):
+    couple_code: str
+    title: str
+    date: str
+    time: Optional[str] = None
+    notes: Optional[str] = None
+    created_by: str
+
+class WeeklyChallenge(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    couple_code: str
+    week_number: int
+    year: int
+    challenge: dict
+    completed: bool = False
+    completed_at: Optional[datetime] = None
+
 # ================= CHALLENGES & SUGGESTIONS DATABASE =================
+
+# Love Dice data
+LOVE_DICE_ACTIONS = [
+    "Bacia", "Accarezza", "Massaggia", "Sussurra a", "Lecca", "Soffia su", 
+    "Mordicchia", "Abbraccia", "Strofina", "Tocca dolcemente"
+]
+
+LOVE_DICE_BODY_PARTS = [
+    "collo", "labbra", "orecchio", "schiena", "pancia", "interno coscia",
+    "piedi", "mani", "spalle", "petto"
+]
+
+LOVE_DICE_DURATION = [
+    "per 10 secondi", "per 30 secondi", "per 1 minuto", "finché non ride",
+    "finché non sospira", "a occhi chiusi", "lentamente", "intensamente"
+]
 
 SPICY_CHALLENGES = [
     {"title": "Serata Massaggio", "description": "Scambiatevi un massaggio sensuale di 20 minuti a turno", "category": "romantic"},
