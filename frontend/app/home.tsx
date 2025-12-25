@@ -66,13 +66,13 @@ export default function Home() {
   const getTodayStatus = () => {
     const today = format(new Date(), 'yyyy-MM-dd');
     
-    if (fertilityData.periods.includes(today)) {
+    if (fertilityData?.periods?.includes(today)) {
       return { status: 'period', color: '#ff4757', text: 'Ciclo' };
     }
-    if (fertilityData.ovulation_days.includes(today)) {
+    if (fertilityData?.ovulation_days?.includes(today)) {
       return { status: 'ovulation', color: '#ffa502', text: 'Ovulazione - Alta fertilità' };
     }
-    if (fertilityData.fertile_days.includes(today)) {
+    if (fertilityData?.fertile_days?.includes(today)) {
       return { status: 'fertile', color: '#2ed573', text: 'Giorni fertili' };
     }
     return { status: 'safe', color: '#1e90ff', text: 'Giorni sicuri' };
