@@ -56,6 +56,24 @@ class CycleDataCreate(BaseModel):
     cycle_length: int = 28
     period_length: int = 5
 
+# New: Cycle History for tracking actual periods
+class CycleHistory(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    couple_code: Optional[str] = None
+    period_start_date: str  # YYYY-MM-DD - when period actually started
+    period_end_date: Optional[str] = None  # When period ended
+    cycle_length: Optional[int] = None  # Days since last period (calculated)
+    notes: Optional[str] = None
+    was_early: Optional[bool] = None  # True if came early, False if late, None if on time
+    days_difference: Optional[int] = None  # How many days early (-) or late (+)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class CycleHistoryCreate(BaseModel):
+    user_id: str
+    period_start_date: str
+    notes: Optional[str] = None
+
 class IntimacyEntry(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     couple_code: str
