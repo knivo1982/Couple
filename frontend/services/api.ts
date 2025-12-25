@@ -42,6 +42,25 @@ export const cycleAPI = {
     const response = await api.get(`/cycle/fertility/${userId}`);
     return response.data;
   },
+  // New: Start new period
+  startPeriod: async (userId: string, periodStartDate: string, notes?: string) => {
+    const response = await api.post('/cycle/start-period', {
+      user_id: userId,
+      period_start_date: periodStartDate,
+      notes,
+    });
+    return response.data;
+  },
+  // New: Get cycle history
+  getHistory: async (userId: string) => {
+    const response = await api.get(`/cycle/history/${userId}`);
+    return response.data;
+  },
+  // New: End period
+  endPeriod: async (historyId: string, endDate: string) => {
+    const response = await api.put(`/cycle/end-period/${historyId}?end_date=${endDate}`);
+    return response.data;
+  },
 };
 
 export const intimacyAPI = {
