@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../store/useStore';
-import { intimacyAPI, challengeAPI, cycleAPI, userAPI } from '../services/api';
+import { intimacyAPI, challengeAPI, cycleAPI, userAPI, fertilityAPI, weeklyAPI, specialDatesAPI } from '../services/api';
 import { format, isToday } from 'date-fns';
 import { it } from 'date-fns/locale';
 
@@ -21,17 +21,28 @@ export default function Home() {
   const [refreshing, setRefreshing] = useState(false);
   const [todaySuggestion, setTodaySuggestion] = useState<any>(null);
   const [partnerName, setPartnerName] = useState<string | null>(null);
+  const [fertilityPredictions, setFertilityPredictions] = useState<any>(null);
+  const [weeklyChallenge, setWeeklyChallenge] = useState<any>(null);
+  const [specialDates, setSpecialDates] = useState<any>(null);
 
   const loadData = async () => {
     if (!user?.couple_code) return;
     
     try {
-      const [statsData, suggestion] = await Promise.all([
+      const [statsData, suggestion, weekly, dates] = await Promise.all([
         intimacyAPI.getStats(user.couple_code),
         challengeAPI.getRandom(),
+        weeklyAPI.get(user.couple_code),
+        specialDatesAPI.getAll(user.couple_code),
       ]);
       setStats(statsData);
       setTodaySuggestion(suggestion);
+      setWeeklyChallenge(weekly);
+      setSpecialDates(dates);
+
+      // Load fertility predictions
+      const predictions = await fertilityAPI.getPredictions(user.id);
+      setFertilityPredictions(predictions);
 
       // Load fertility data - works for both female (own) and male (partner's)
       const fertility = await cycleAPI.getFertility(user.id);
