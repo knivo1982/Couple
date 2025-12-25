@@ -280,43 +280,230 @@ async def get_intimacy_stats(couple_code: str):
         return {
             "total_count": 0,
             "monthly_count": 0,
+            "weekly_count": 0,
             "average_quality": 0,
             "sessometro_level": "Nuova Coppia",
-            "sessometro_score": 0
+            "sessometro_score": 0,
+            "streak": 0,
+            "best_streak": 0,
+            "favorite_day": None,
+            "hottest_week": None,
+            "passion_trend": "stable",
+            "fun_stats": {
+                "total_hours_estimated": 0,
+                "calories_burned_estimated": 0,
+                "mood_boost_score": 0,
+                "spontaneity_score": 0,
+                "romance_vs_passion": "balanced"
+            },
+            "badges": [],
+            "next_milestone": "Prima volta insieme"
         }
     
     from datetime import timedelta
+    from collections import Counter
+    
     now = datetime.utcnow()
     month_ago = now - timedelta(days=30)
+    week_ago = now - timedelta(days=7)
+    two_months_ago = now - timedelta(days=60)
     
+    # Basic counts
     monthly_entries = [e for e in entries if datetime.strptime(e["date"], "%Y-%m-%d") >= month_ago]
+    weekly_entries = [e for e in entries if datetime.strptime(e["date"], "%Y-%m-%d") >= week_ago]
+    prev_month_entries = [e for e in entries if two_months_ago <= datetime.strptime(e["date"], "%Y-%m-%d") < month_ago]
+    
     monthly_count = len(monthly_entries)
+    weekly_count = len(weekly_entries)
+    prev_month_count = len(prev_month_entries)
     
     avg_quality = sum(e["quality_rating"] for e in entries) / len(entries)
+    monthly_avg_quality = sum(e["quality_rating"] for e in monthly_entries) / len(monthly_entries) if monthly_entries else 0
     
-    # Sessometro calculation
-    # Based on frequency (0-10 scale) + quality (1-5 scale normalized to 0-10)
-    frequency_score = min(monthly_count / 12 * 10, 10)  # 12 times/month = max
+    # Calculate streak (consecutive weeks with activity)
+    sorted_entries = sorted(entries, key=lambda x: x["date"], reverse=True)
+    dates = [datetime.strptime(e["date"], "%Y-%m-%d") for e in sorted_entries]
+    
+    streak = 0
+    best_streak = 0
+    current_streak = 0
+    
+    # Weekly streak calculation
+    if dates:
+        current_week = now.isocalendar()[1]
+        current_year = now.year
+        weeks_with_activity = set()
+        for d in dates:
+            weeks_with_activity.add((d.year, d.isocalendar()[1]))
+        
+        # Check consecutive weeks
+        for i in range(52):  # Check last year
+            week_to_check = current_week - i
+            year_to_check = current_year
+            if week_to_check <= 0:
+                week_to_check += 52
+                year_to_check -= 1
+            if (year_to_check, week_to_check) in weeks_with_activity:
+                current_streak += 1
+            else:
+                if current_streak > best_streak:
+                    best_streak = current_streak
+                if i < 2:  # Allow one week gap for current streak
+                    continue
+                break
+        streak = current_streak
+        if current_streak > best_streak:
+            best_streak = current_streak
+    
+    # Favorite day of week
+    day_counts = Counter()
+    for e in entries:
+        day = datetime.strptime(e["date"], "%Y-%m-%d").strftime("%A")
+        day_counts[day] += 1
+    
+    day_names_it = {
+        "Monday": "Lunedì", "Tuesday": "Martedì", "Wednesday": "Mercoledì",
+        "Thursday": "Giovedì", "Friday": "Venerdì", "Saturday": "Sabato", "Sunday": "Domenica"
+    }
+    favorite_day = day_names_it.get(day_counts.most_common(1)[0][0]) if day_counts else None
+    
+    # Passion trend
+    if prev_month_count > 0:
+        trend_change = ((monthly_count - prev_month_count) / prev_month_count) * 100
+        if trend_change > 20:
+            passion_trend = "rising"
+        elif trend_change < -20:
+            passion_trend = "cooling"
+        else:
+            passion_trend = "stable"
+    else:
+        passion_trend = "rising" if monthly_count > 0 else "stable"
+    
+    # Fun stats calculations
+    avg_duration_minutes = 25  # Estimated average
+    total_hours = (len(entries) * avg_duration_minutes) / 60
+    calories_per_session = 150  # Average estimate
+    total_calories = len(entries) * calories_per_session
+    
+    # Mood boost (based on frequency and quality)
+    mood_boost = min(100, int((monthly_count * 5) + (avg_quality * 10)))
+    
+    # Spontaneity score (variety in days of week)
+    unique_days = len(set(datetime.strptime(e["date"], "%Y-%m-%d").weekday() for e in monthly_entries))
+    spontaneity = int((unique_days / 7) * 100) if monthly_entries else 0
+    
+    # Romance vs Passion (based on quality vs frequency)
+    if monthly_count > 8 and monthly_avg_quality < 3.5:
+        romance_vs_passion = "più passione"
+    elif monthly_count < 4 and monthly_avg_quality > 4:
+        romance_vs_passion = "più romanticismo"
+    elif monthly_count > 8 and monthly_avg_quality > 4:
+        romance_vs_passion = "fuoco totale"
+    else:
+        romance_vs_passion = "equilibrato"
+    
+    # Sessometro calculation - MORE COMPLEX NOW
+    # Components: frequency (30%), quality (25%), consistency/streak (20%), trend (15%), variety (10%)
+    frequency_score = min(monthly_count / 12 * 10, 10)  # 12/month = max
     quality_score = (avg_quality / 5) * 10
-    sessometro_score = (frequency_score * 0.6 + quality_score * 0.4)
+    streak_score = min(streak / 8 * 10, 10)  # 8 weeks streak = max
+    trend_score = 7 if passion_trend == "rising" else (5 if passion_trend == "stable" else 3)
+    variety_score = spontaneity / 10
     
-    if sessometro_score >= 8:
+    sessometro_score = (
+        frequency_score * 0.30 +
+        quality_score * 0.25 +
+        streak_score * 0.20 +
+        trend_score * 0.15 +
+        variety_score * 0.10
+    )
+    
+    # More fun levels
+    if sessometro_score >= 9:
+        level = "Vulcano in Eruzione"
+        level_emoji = "🌋"
+    elif sessometro_score >= 8:
         level = "Fuoco e Fiamme"
-    elif sessometro_score >= 6:
+        level_emoji = "🔥"
+    elif sessometro_score >= 7:
         level = "Passione Ardente"
+        level_emoji = "💋"
+    elif sessometro_score >= 5.5:
+        level = "Intesa Perfetta"
+        level_emoji = "💕"
     elif sessometro_score >= 4:
-        level = "Armonia"
-    elif sessometro_score >= 2:
+        level = "Armonia Dolce"
+        level_emoji = "🌸"
+    elif sessometro_score >= 2.5:
+        level = "Fiamma Timida"
+        level_emoji = "🕯️"
+    elif sessometro_score >= 1:
         level = "Da Riaccendere"
+        level_emoji = "💨"
     else:
         level = "Nuova Coppia"
+        level_emoji = "🌱"
+    
+    # Badges system
+    badges = []
+    if len(entries) >= 100:
+        badges.append({"name": "Centenario", "icon": "💯", "desc": "100 momenti insieme!"})
+    if len(entries) >= 50:
+        badges.append({"name": "Veterani", "icon": "🏆", "desc": "50 momenti insieme"})
+    if len(entries) >= 10:
+        badges.append({"name": "Affiatati", "icon": "⭐", "desc": "10 momenti insieme"})
+    if streak >= 4:
+        badges.append({"name": "Costanti", "icon": "📈", "desc": f"{streak} settimane consecutive"})
+    if streak >= 8:
+        badges.append({"name": "Inarrestabili", "icon": "🚀", "desc": "8+ settimane di streak"})
+    if avg_quality >= 4.5:
+        badges.append({"name": "Qualità Top", "icon": "💎", "desc": "Media qualità eccellente"})
+    if monthly_count >= 12:
+        badges.append({"name": "Maratoneti", "icon": "🏃", "desc": "12+ volte questo mese"})
+    if favorite_day == "Domenica" or favorite_day == "Sabato":
+        badges.append({"name": "Weekend Warriors", "icon": "🎉", "desc": "Amanti del weekend"})
+    if spontaneity >= 70:
+        badges.append({"name": "Imprevedibili", "icon": "🎲", "desc": "Alta spontaneità"})
+    
+    # Next milestone
+    total = len(entries)
+    if total < 10:
+        next_milestone = f"Ancora {10 - total} per il badge 'Affiatati'"
+    elif total < 50:
+        next_milestone = f"Ancora {50 - total} per il badge 'Veterani'"
+    elif total < 100:
+        next_milestone = f"Ancora {100 - total} per il badge 'Centenario'"
+    else:
+        next_milestone = "Siete leggendari! 🏆"
     
     return {
         "total_count": len(entries),
         "monthly_count": monthly_count,
+        "weekly_count": weekly_count,
         "average_quality": round(avg_quality, 1),
         "sessometro_level": level,
-        "sessometro_score": round(sessometro_score, 1)
+        "sessometro_level_emoji": level_emoji,
+        "sessometro_score": round(sessometro_score, 1),
+        "streak": streak,
+        "best_streak": best_streak,
+        "favorite_day": favorite_day,
+        "passion_trend": passion_trend,
+        "fun_stats": {
+            "total_hours_estimated": round(total_hours, 1),
+            "calories_burned_estimated": total_calories,
+            "mood_boost_score": mood_boost,
+            "spontaneity_score": spontaneity,
+            "romance_vs_passion": romance_vs_passion
+        },
+        "badges": badges,
+        "next_milestone": next_milestone,
+        "score_breakdown": {
+            "frequency": round(frequency_score, 1),
+            "quality": round(quality_score, 1),
+            "consistency": round(streak_score, 1),
+            "trend": round(trend_score, 1),
+            "variety": round(variety_score, 1)
+        }
     }
 
 # Challenges Routes
