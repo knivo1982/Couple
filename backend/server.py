@@ -166,18 +166,262 @@ LOVE_DICE_DURATION = [
 ]
 
 SPICY_CHALLENGES = [
-    {"title": "Serata Massaggio", "description": "Scambiatevi un massaggio sensuale di 20 minuti a turno", "category": "romantic"},
-    {"title": "Colazione a Letto", "description": "Preparate insieme una colazione e mangiatela a letto", "category": "romantic"},
-    {"title": "Doccia Insieme", "description": "Fate una doccia o un bagno insieme con candele profumate", "category": "spicy"},
-    {"title": "Gioco dei Dadi", "description": "Usate dei dadi per decidere zone e azioni", "category": "spicy"},
-    {"title": "Lettera d'Amore", "description": "Scrivete una lettera piccante al partner e leggetela insieme", "category": "romantic"},
-    {"title": "Cena Afrodisiaca", "description": "Preparate una cena con cibi afrodisiaci: ostriche, cioccolato, fragole", "category": "romantic"},
-    {"title": "Bendati", "description": "Uno dei due bendato mentre l'altro esplora", "category": "spicy"},
-    {"title": "Roleplay", "description": "Scegliete un scenario fantasioso e interpretatelo", "category": "adventure"},
-    {"title": "Notte Senza Telefoni", "description": "Serata dedicata solo a voi due, telefoni spenti", "category": "romantic"},
-    {"title": "Stanza Nuova", "description": "Provate una stanza diversa della casa", "category": "adventure"},
-    {"title": "Strip Quiz", "description": "Quiz a tema coppia, chi sbaglia toglie un capo", "category": "spicy"},
-    {"title": "Appuntamento al Buio", "description": "Pianificate un appuntamento sorpresa per il partner", "category": "adventure"},
+    {
+        "title": "Massaggio Sensuale",
+        "description": "Scaldate olio di cocco tra le mani. Partite dalle spalle, scendete lungo la schiena con movimenti lenti e profondi. Lasciate che le mani esplorino ogni curva, avvicinandovi alle zone più sensibili senza mai toccarle direttamente. Aumentate la pressione quando sentite i muscoli rilassarsi...",
+        "category": "romantic",
+        "duration": "30 min",
+        "intensity": 2
+    },
+    {
+        "title": "Doccia Bollente",
+        "description": "Entrate insieme sotto l'acqua calda. Insaponatevi a vicenda partendo dal collo, scendendo lentamente sul petto. Lasciate che il vapore vi avvolga mentre le vostre mani scivolano sul corpo bagnato dell'altro. Baciatevi sotto il getto d'acqua...",
+        "category": "spicy",
+        "duration": "20 min",
+        "intensity": 3
+    },
+    {
+        "title": "Bendati e Vulnerabili",
+        "description": "Uno di voi viene bendato e disteso sul letto. L'altro ha il controllo totale: usa le dita, le labbra, piume, cubetti di ghiaccio. Alternare sensazioni calde e fredde, sfioramenti leggeri e tocchi più decisi. Chi è bendato deve solo... sentire.",
+        "category": "spicy",
+        "duration": "45 min",
+        "intensity": 4
+    },
+    {
+        "title": "Striptease Privato",
+        "description": "Preparate la stanza: luci soffuse, musica sensuale. Uno dei due si spoglia lentamente per l'altro, mantenendo il contatto visivo. Ogni capo rimosso è un invito. Chi guarda non può toccare... finché non viene concesso il permesso.",
+        "category": "spicy",
+        "duration": "15 min",
+        "intensity": 3
+    },
+    {
+        "title": "Gioco del Ghiaccio",
+        "description": "Tenete un cubetto di ghiaccio in bocca e tracciate linee sul corpo del partner: dal collo al petto, sulla pancia, lungo l'interno coscia. Alternate con baci caldi. Il contrasto tra freddo e caldo farà impazzire i sensi...",
+        "category": "spicy",
+        "duration": "20 min",
+        "intensity": 4
+    },
+    {
+        "title": "Lettera Erotica",
+        "description": "Scrivete una lettera descrivendo nel dettaglio la vostra fantasia più segreta con il partner. Cosa vorreste fare, dove, come. Scambiatevi le lettere e leggetele ad alta voce, poi... realizzate almeno una delle fantasie.",
+        "category": "adventure",
+        "duration": "60 min",
+        "intensity": 4
+    },
+    {
+        "title": "Maestro e Allieva/o",
+        "description": "Uno dei due è l'insegnante esperto, l'altro il principiante curioso. Il maestro guida ogni movimento, spiega cosa fare e come, corregge la 'tecnica'. Il gioco di potere e la guida vocale aumentano l'eccitazione...",
+        "category": "adventure",
+        "duration": "45 min",
+        "intensity": 4
+    },
+    {
+        "title": "Countdown dell'Attesa",
+        "description": "Per tutto il giorno, mandatevi messaggi sempre più espliciti su cosa farete la sera. Descrizioni dettagliate, anticipazioni. Vietatevi di toccarvi fino a sera. L'attesa costruisce un desiderio esplosivo...",
+        "category": "romantic",
+        "duration": "tutto il giorno",
+        "intensity": 3
+    },
+    {
+        "title": "Esplorazione Sensoriale",
+        "description": "Raccogliete oggetti con texture diverse: seta, pelliccia sintetica, piume, corda morbida. Ad occhi chiusi, il partner traccia percorsi sul vostro corpo con ogni materiale. Indovinate cosa sta usando mentre vi abbandonate alle sensazioni.",
+        "category": "spicy",
+        "duration": "30 min",
+        "intensity": 3
+    },
+    {
+        "title": "Svegliarsi Insieme",
+        "description": "Svegliate il partner con baci leggeri sul collo, carezze sotto le coperte. Niente fretta, niente parole. Lasciate che il desiderio cresca lentamente nel dormiveglia, quando i sensi sono ancora intorpiditi e tutto è più intenso...",
+        "category": "romantic",
+        "duration": "30 min",
+        "intensity": 2
+    },
+    {
+        "title": "Solo Mani",
+        "description": "Per tutta la sessione, usate solo le mani. Niente labbra, niente altro. Esplorate ogni centimetro del corpo del partner usando solo il tatto. Scoprirete zone erogene che non sapevate di avere...",
+        "category": "spicy",
+        "duration": "40 min",
+        "intensity": 3
+    },
+    {
+        "title": "Specchio delle Brame",
+        "description": "Posizionatevi davanti a uno specchio. Guardatevi mentre vi amate. Osservate le espressioni del partner, i movimenti dei vostri corpi insieme. Guardarsi aumenta incredibilmente l'intensità...",
+        "category": "adventure",
+        "duration": "30 min",
+        "intensity": 4
+    },
+]
+
+POSITION_SUGGESTIONS = [
+    {
+        "id": "missionary",
+        "name": "Missionario Classico",
+        "emoji": "💑",
+        "difficulty": "facile",
+        "intimacy_level": 5,
+        "pleasure_her": 3,
+        "pleasure_him": 4,
+        "description": "Lui sopra, lei sotto. Faccia a faccia, perfetto per baciarsi e guardarsi negli occhi.",
+        "tips": "Lei può avvolgere le gambe intorno a lui per maggiore profondità. Cuscino sotto i fianchi di lei per angolazione migliore.",
+        "benefits": ["Massimo contatto visivo", "Facilità di baci", "Controllo del ritmo", "Intimità emotiva"],
+        "best_for": ["Romanticismo", "Prima volta", "Connessione profonda"],
+        "variation": "Lei alza le gambe sulle spalle di lui per sensazioni più intense"
+    },
+    {
+        "id": "cowgirl",
+        "name": "Amazzone (Cowgirl)",
+        "emoji": "🤠",
+        "difficulty": "facile",
+        "intimacy_level": 4,
+        "pleasure_her": 5,
+        "pleasure_him": 4,
+        "description": "Lei sopra, seduta su di lui. Ha il controllo totale del ritmo e della profondità.",
+        "tips": "Lei può appoggiarsi in avanti per stimolazione clitoridea, o indietro per sensazioni diverse. Lui può stimolarla con le mani.",
+        "benefits": ["Lei controlla l'angolazione", "Stimolazione punto G", "Vista eccitante per lui", "Meno fatica per lui"],
+        "best_for": ["Lei che vuole controllare", "Stimolazione clitoridea", "Sessioni lunghe"],
+        "variation": "Amazzone inversa: lei girata di spalle, vista diversa e sensazioni nuove"
+    },
+    {
+        "id": "doggy",
+        "name": "Pecorina",
+        "emoji": "🔥",
+        "difficulty": "facile",
+        "intimacy_level": 2,
+        "pleasure_her": 4,
+        "pleasure_him": 5,
+        "description": "Lei a quattro zampe, lui dietro. Permette penetrazione profonda e stimolazione intensa.",
+        "tips": "Lei può abbassare il petto sul letto per angolazione migliore. Lui può stimolare il clitoride con la mano.",
+        "benefits": ["Penetrazione profonda", "Stimolazione punto G", "Sensazione di dominanza", "Accesso per stimolazione manuale"],
+        "best_for": ["Passione intensa", "Varietà", "Stimolazione profonda"],
+        "variation": "Lei completamente distesa sulla pancia, più intimo e meno faticoso"
+    },
+    {
+        "id": "spoon",
+        "name": "Cucchiaio",
+        "emoji": "🥄",
+        "difficulty": "facile",
+        "intimacy_level": 5,
+        "pleasure_her": 4,
+        "pleasure_him": 4,
+        "description": "Entrambi su un fianco, lui dietro di lei. Intimo, rilassante, perfetto per la mattina.",
+        "tips": "Lei può alzare la gamba superiore per facilitare l'accesso. Lui può accarezzarla ovunque.",
+        "benefits": ["Molto intimo", "Poco faticoso", "Baci sul collo", "Mani libere per carezze"],
+        "best_for": ["Mattina pigra", "Gravidanza", "Intimità romantica", "Sessioni lente"],
+        "variation": "Lei si gira parzialmente sulla schiena per baci sul viso"
+    },
+    {
+        "id": "lotus",
+        "name": "Loto (Yab-Yum)",
+        "emoji": "🧘",
+        "difficulty": "medio",
+        "intimacy_level": 5,
+        "pleasure_her": 4,
+        "pleasure_him": 3,
+        "description": "Lui seduto a gambe incrociate, lei in braccio a lui avvolta intorno. Massima connessione.",
+        "tips": "Muovetevi insieme con un ritmo lento e ondulatorio. Respirate insieme. Guardarsi negli occhi intensifica tutto.",
+        "benefits": ["Connessione tantrica", "Intimità massima", "Respiro sincronizzato", "Contatto totale del corpo"],
+        "best_for": ["Connessione spirituale", "Intimità profonda", "Sesso tantrico"],
+        "variation": "Lui può sdraiarsi leggermente indietro appoggiandosi sulle mani"
+    },
+    {
+        "id": "69",
+        "name": "69",
+        "emoji": "🔄",
+        "difficulty": "medio",
+        "intimacy_level": 3,
+        "pleasure_her": 5,
+        "pleasure_him": 5,
+        "description": "Piacere orale simultaneo. Uno sopra l'altro, testa ai piedi dell'altro.",
+        "tips": "Comunicare cosa piace. Chi sta sopra controlla la pressione. Alternare chi sta sopra.",
+        "benefits": ["Piacere simultaneo", "Dare e ricevere insieme", "Molto eccitante", "Ottimo preliminare"],
+        "best_for": ["Preliminari intensi", "Piacere reciproco", "Varietà"],
+        "variation": "Versione laterale: entrambi su un fianco, più comodo per sessioni lunghe"
+    },
+    {
+        "id": "standing",
+        "name": "In Piedi",
+        "emoji": "🚿",
+        "difficulty": "difficile",
+        "intimacy_level": 2,
+        "pleasure_her": 3,
+        "pleasure_him": 4,
+        "description": "Entrambi in piedi, lei appoggiata al muro o lui che la solleva. Spontaneo e passionale.",
+        "tips": "Un dislivello di altezza aiuta. Lei può alzare una gamba. Un muro dà supporto.",
+        "benefits": ["Molto spontaneo", "Passionale", "Perfetto per doccia", "Sensazione di urgenza"],
+        "best_for": ["Momenti spontanei", "Doccia", "Quando non potete aspettare"],
+        "variation": "Lei di spalle al muro, avvolta intorno a lui che la sostiene"
+    },
+    {
+        "id": "reverse_cowgirl",
+        "name": "Amazzone Inversa",
+        "emoji": "🔄",
+        "difficulty": "medio",
+        "intimacy_level": 2,
+        "pleasure_her": 4,
+        "pleasure_him": 5,
+        "description": "Come l'amazzone ma lei girata di spalle. Vista eccitante e sensazioni diverse.",
+        "tips": "Lei può appoggiarsi sulle ginocchia di lui. Lui ha le mani libere per accarezzare schiena e glutei.",
+        "benefits": ["Vista eccitante per lui", "Angolazione diversa", "Lei mantiene il controllo", "Sensazioni nuove"],
+        "best_for": ["Varietà visiva", "Sperimentazione", "Stimolazione diversa"],
+        "variation": "Lei si appoggia in avanti tra le gambe di lui"
+    },
+    {
+        "id": "seated",
+        "name": "Sedia del Piacere",
+        "emoji": "🪑",
+        "difficulty": "medio",
+        "intimacy_level": 3,
+        "pleasure_her": 4,
+        "pleasure_him": 4,
+        "description": "Lui seduto su una sedia, lei sopra di lui. Può essere ovunque ci sia una sedia.",
+        "tips": "Sedia senza braccioli funziona meglio. Lei può usare i piedi per terra come leva.",
+        "benefits": ["Versatile", "Si può fare ovunque", "Buona penetrazione", "Mani libere"],
+        "best_for": ["Fuori dalla camera", "Spontaneità", "Varietà di location"],
+        "variation": "Lei di spalle per sensazioni diverse"
+    },
+    {
+        "id": "prone",
+        "name": "Distesa Prona",
+        "emoji": "😴",
+        "difficulty": "facile",
+        "intimacy_level": 3,
+        "pleasure_her": 5,
+        "pleasure_him": 4,
+        "description": "Lei distesa a pancia in giù, gambe unite. Lui sopra o dietro. Molto stretta e intensa.",
+        "tips": "Un cuscino sotto i fianchi di lei aiuta. Lui può sussurrarle all'orecchio.",
+        "benefits": ["Sensazione molto stretta", "Stimolazione intensa", "Lui può baciarle il collo", "Rilassante per lei"],
+        "best_for": ["Sensazioni intense", "Stimolazione clitoridea indiretta", "Intimità"],
+        "variation": "Lei con le gambe leggermente aperte per accesso più facile"
+    },
+    {
+        "id": "legs_up",
+        "name": "Gambe in Alto",
+        "emoji": "🦵",
+        "difficulty": "medio",
+        "intimacy_level": 4,
+        "pleasure_her": 5,
+        "pleasure_him": 4,
+        "description": "Missionario con le gambe di lei sulle spalle di lui. Penetrazione molto profonda.",
+        "tips": "Iniziare lentamente, la penetrazione è molto profonda. Cuscino sotto i fianchi aiuta.",
+        "benefits": ["Penetrazione profondissima", "Stimolazione punto G", "Contatto visivo", "Molto intenso"],
+        "best_for": ["Stimolazione profonda", "Intensità", "Orgasmo vaginale"],
+        "variation": "Una gamba sola sulla spalla per angolazione asimmetrica"
+    },
+    {
+        "id": "face_to_face",
+        "name": "Faccia a Faccia Seduti",
+        "emoji": "👫",
+        "difficulty": "medio",
+        "intimacy_level": 5,
+        "pleasure_her": 4,
+        "pleasure_him": 3,
+        "description": "Entrambi seduti uno di fronte all'altro, lei avvolta intorno a lui. Massimo contatto.",
+        "tips": "Muoversi insieme a ritmo lento. Respirare insieme. Mantere il contatto visivo.",
+        "benefits": ["Intimità massima", "Contatto totale", "Molto romantico", "Connessione profonda"],
+        "best_for": ["Romanticismo", "Connessione emotiva", "Sesso lento e intenso"],
+        "variation": "Su un divano o bordo del letto per più supporto"
+    },
+]
 ]
 
 POSITION_SUGGESTIONS = [
