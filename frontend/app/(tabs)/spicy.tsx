@@ -96,23 +96,36 @@ export default function SpicyScreen() {
     if (!user?.couple_code) return;
 
     try {
-      const [suggestionsData, wishlistData, quizData, dates, weekly] = await Promise.all([
-        challengeAPI.getSuggestions(),
-        wishlistAPI.get(user.couple_code, user.id),
-        quizAPI.getResults(user.couple_code),
-        specialDatesAPI.getAll(user.couple_code),
-        weeklyAPI.get(user.couple_code),
-      ]);
-
+      // Load suggestions first (most important)
+      const suggestionsData = await challengeAPI.getSuggestions();
       setSuggestions(suggestionsData?.challenges || []);
-      setWishlist(wishlistData || []);
-      setQuizResults(quizData);
-      setWeeklyChallenge(weekly);
-
-      if (dates?.dates) {
-        setSpecialDates(dates.dates);
-        if (dates.next_date) setNextDate(dates.next_date);
+      
+      // Load other data with individual error handling
+      try {
+        const wishlistData = await wishlistAPI.get(user.couple_code, user.id);
+        setWishlist(wishlistData || []);
+      } catch (e) {
+        console.log('Wishlist not available');
+        setWishlist([]);
       }
+      
+      try {
+        const dates = await specialDatesAPI.getAll(user.couple_code);
+        if (dates?.dates) {
+          setSpecialDates(dates.dates);
+          if (dates.next_date) setNextDate(dates.next_date);
+        }
+      } catch (e) {
+        console.log('Special dates not available');
+      }
+      
+      try {
+        const weekly = await weeklyAPI.get(user.couple_code);
+        setWeeklyChallenge(weekly);
+      } catch (e) {
+        console.log('Weekly challenge not available');
+      }
+      
     } catch (error) {
       console.error('Error loading data:', error);
     }
