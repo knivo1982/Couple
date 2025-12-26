@@ -171,6 +171,47 @@ class WeeklyChallenge(BaseModel):
     completed: bool = False
     completed_at: Optional[datetime] = None
 
+# ================= NEW MODELS =================
+
+class MoodEntry(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    couple_code: str
+    date: str  # YYYY-MM-DD
+    mood: int  # 1-5 (1=terrible, 5=amazing)
+    energy: int  # 1-5
+    stress: int  # 1-5 (1=none, 5=very stressed)
+    libido: int  # 1-5
+    notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class MoodEntryCreate(BaseModel):
+    user_id: str
+    couple_code: str
+    date: str
+    mood: int
+    energy: int
+    stress: int
+    libido: int
+    notes: Optional[str] = None
+
+class LoveNote(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    couple_code: str
+    sender_id: str
+    sender_name: str
+    message: str
+    category: str  # "sweet", "spicy", "funny", "romantic"
+    is_read: bool = False
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class LoveNoteCreate(BaseModel):
+    couple_code: str
+    sender_id: str
+    sender_name: str
+    message: str
+    category: str
+
 # ================= CHALLENGES & SUGGESTIONS DATABASE =================
 
 # Love Dice data
