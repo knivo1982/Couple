@@ -168,22 +168,22 @@ export default function SpicyScreen() {
 
   const isItemSelected = (itemId: string) => {
     if (!Array.isArray(wishlist)) return false;
-    return wishlist.some((w: any) => w.item_id === itemId && w.wants);
+    return wishlist.some((w: any) => w.item_id === itemId);
   };
 
   const isItemUnlocked = (itemId: string) => {
     if (!Array.isArray(wishlist)) return false;
-    return wishlist.some((w: any) => w.item_id === itemId && w.both_want);
+    return wishlist.some((w: any) => w.item_id === itemId && w.both_want === true);
   };
 
   const getUnlockedCount = () => {
     if (!Array.isArray(wishlist)) return 0;
-    return WISHLIST_ITEMS.filter(item => isItemUnlocked(item.id)).length;
+    return wishlist.filter((w: any) => w.both_want === true).length;
   };
 
   const getSelectedCount = () => {
     if (!Array.isArray(wishlist)) return 0;
-    return WISHLIST_ITEMS.filter(item => isItemSelected(item.id)).length;
+    return wishlist.length;
   };
 
   const addSpecialDate = async () => {
