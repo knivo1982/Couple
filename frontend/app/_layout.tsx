@@ -18,14 +18,12 @@ export default function RootLayout() {
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: '#1a1a2e' },
+          animation: 'slide_from_right',
         }}
       >
         <Stack.Screen name="index" />
-        <Stack.Screen name="home" />
-        <Stack.Screen name="calendar" />
-        <Stack.Screen name="spicy" />
-        <Stack.Screen name="stats" />
-        <Stack.Screen name="settings" />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
       </Stack>
     </SafeAreaProvider>
   );
