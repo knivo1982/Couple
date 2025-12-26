@@ -203,4 +203,63 @@ export const fertilityAPI = {
   },
 };
 
+// ================= MOOD API =================
+export const moodAPI = {
+  log: async (userId: string, coupleCode: string, date: string, mood: number, energy: number, stress: number, libido: number, notes?: string) => {
+    const response = await api.post('/mood', {
+      user_id: userId,
+      couple_code: coupleCode,
+      date,
+      mood,
+      energy,
+      stress,
+      libido,
+      notes,
+    });
+    return response.data;
+  },
+  getAll: async (coupleCode: string, days: number = 30) => {
+    const response = await api.get(`/mood/${coupleCode}?days=${days}`);
+    return response.data;
+  },
+  getToday: async (coupleCode: string) => {
+    const response = await api.get(`/mood/today/${coupleCode}`);
+    return response.data;
+  },
+  getStats: async (coupleCode: string) => {
+    const response = await api.get(`/mood/stats/${coupleCode}`);
+    return response.data;
+  },
+};
+
+// ================= LOVE NOTES API =================
+export const loveNotesAPI = {
+  send: async (coupleCode: string, senderId: string, senderName: string, message: string, category: string) => {
+    const response = await api.post('/love-notes', {
+      couple_code: coupleCode,
+      sender_id: senderId,
+      sender_name: senderName,
+      message,
+      category,
+    });
+    return response.data;
+  },
+  getReceived: async (coupleCode: string, userId: string) => {
+    const response = await api.get(`/love-notes/${coupleCode}/${userId}`);
+    return response.data;
+  },
+  getUnread: async (coupleCode: string, userId: string) => {
+    const response = await api.get(`/love-notes/unread/${coupleCode}/${userId}`);
+    return response.data;
+  },
+  markRead: async (noteId: string) => {
+    const response = await api.put(`/love-notes/${noteId}/read`);
+    return response.data;
+  },
+  getTemplates: async () => {
+    const response = await api.get('/love-notes/templates');
+    return response.data;
+  },
+};
+
 export default api;
