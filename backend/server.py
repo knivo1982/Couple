@@ -1416,6 +1416,194 @@ async def get_fertility_predictions(user_id: str):
         "is_trying_to_conceive_day": status in ["fertile", "ovulation"]
     }
 
+# ================= MOOD TRACKER =================
+
+@api_router.post("/mood", response_model=MoodEntry)
+async def log_mood(input: MoodEntryCreate):
+    # Remove existing mood for this date
+    await db.mood_entries.delete_many({
+        "user_id": input.user_id,
+        "date": input.date
+    })
+    
+    entry = MoodEntry(**input.dict())
+    await db.mood_entries.insert_one(entry.dict())
+    return entry
+
+@api_router.get("/mood/{couple_code}")
+async def get_mood_entries(couple_code: str, days: int = 30):
+    """Get mood entries for couple in last N days"""
+    from datetime import timedelta
+    cutoff_date = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
+    
+    entries = await db.mood_entries.find({
+        "couple_code": couple_code,
+        "date": {"$gte": cutoff_date}
+    }).sort("date", -1).to_list(100)
+    
+    return [MoodEntry(**e) for e in entries]
+
+@api_router.get("/mood/today/{couple_code}")
+async def get_today_mood(couple_code: str):
+    """Get today's mood for both partners"""
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    entries = await db.mood_entries.find({
+        "couple_code": couple_code,
+        "date": today
+    }).to_list(2)
+    
+    return [MoodEntry(**e) for e in entries]
+
+@api_router.get("/mood/stats/{couple_code}")
+async def get_mood_stats(couple_code: str):
+    """Get mood statistics for couple"""
+    from datetime import timedelta
+    
+    # Last 30 days
+    cutoff_date = (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%d")
+    entries = await db.mood_entries.find({
+        "couple_code": couple_code,
+        "date": {"$gte": cutoff_date}
+    }).to_list(200)
+    
+    if not entries:
+        return {
+            "avg_mood": 0,
+            "avg_energy": 0,
+            "avg_stress": 0,
+            "avg_libido": 0,
+            "sync_score": 0,
+            "best_day": None,
+            "entries_count": 0
+        }
+    
+    # Calculate averages
+    avg_mood = sum(e["mood"] for e in entries) / len(entries)
+    avg_energy = sum(e["energy"] for e in entries) / len(entries)
+    avg_stress = sum(e["stress"] for e in entries) / len(entries)
+    avg_libido = sum(e["libido"] for e in entries) / len(entries)
+    
+    # Calculate sync score (how similar partners' moods are)
+    sync_scores = []
+    dates_with_both = {}
+    for e in entries:
+        date = e["date"]
+        if date not in dates_with_both:
+            dates_with_both[date] = []
+        dates_with_both[date].append(e)
+    
+    for date, day_entries in dates_with_both.items():
+        if len(day_entries) == 2:
+            diff = abs(day_entries[0]["mood"] - day_entries[1]["mood"])
+            sync_scores.append(1 - (diff / 4))  # 0-1 score
+    
+    sync_score = sum(sync_scores) / len(sync_scores) * 100 if sync_scores else 0
+    
+    # Find best day
+    from collections import Counter
+    day_counts = Counter()
+    day_moods = {}
+    for e in entries:
+        day = datetime.strptime(e["date"], "%Y-%m-%d").strftime("%A")
+        day_counts[day] += 1
+        if day not in day_moods:
+            day_moods[day] = []
+        day_moods[day].append(e["mood"])
+    
+    best_day = None
+    best_avg = 0
+    day_names_it = {
+        "Monday": "Lunedì", "Tuesday": "Martedì", "Wednesday": "Mercoledì",
+        "Thursday": "Giovedì", "Friday": "Venerdì", "Saturday": "Sabato", "Sunday": "Domenica"
+    }
+    for day, moods in day_moods.items():
+        avg = sum(moods) / len(moods)
+        if avg > best_avg:
+            best_avg = avg
+            best_day = day_names_it.get(day, day)
+    
+    return {
+        "avg_mood": round(avg_mood, 1),
+        "avg_energy": round(avg_energy, 1),
+        "avg_stress": round(avg_stress, 1),
+        "avg_libido": round(avg_libido, 1),
+        "sync_score": round(sync_score, 0),
+        "best_day": best_day,
+        "entries_count": len(entries)
+    }
+
+# ================= LOVE NOTES =================
+
+LOVE_NOTE_TEMPLATES = {
+    "sweet": [
+        "Sei la cosa più bella della mia giornata 💕",
+        "Non vedo l'ora di tornare a casa da te",
+        "Pensavo a te... come sempre",
+        "Mi manchi già, anche se ci siamo visti stamattina",
+        "Sei il mio pensiero preferito",
+    ],
+    "spicy": [
+        "Non riesco a smettere di pensare a ieri notte... 🔥",
+        "Ho delle idee per stasera...",
+        "Mi fai impazzire, lo sai?",
+        "Conto i minuti fino a stasera",
+        "Ho bisogno di te. Adesso.",
+    ],
+    "funny": [
+        "Se fossi un vegetale, saresti un carote-ino 🥕",
+        "Ti amo più della pizza. E sai quanto amo la pizza.",
+        "Sei la mia persona preferita da infastidire",
+        "Grazie per sopportare la mia follia",
+        "Reminder: sono figo/a e tu sei fortunato/a",
+    ],
+    "romantic": [
+        "In un universo infinito, ho trovato te ✨",
+        "Ogni giorno con te è un regalo",
+        "Sei il mio per sempre",
+        "Mi hai rubato il cuore e non lo rivoglio indietro",
+        "Con te, tutto ha senso",
+    ]
+}
+
+@api_router.post("/love-notes", response_model=LoveNote)
+async def send_love_note(input: LoveNoteCreate):
+    note = LoveNote(**input.dict())
+    await db.love_notes.insert_one(note.dict())
+    return note
+
+@api_router.get("/love-notes/{couple_code}/{user_id}")
+async def get_love_notes(couple_code: str, user_id: str):
+    """Get notes received by user (not sent by them)"""
+    notes = await db.love_notes.find({
+        "couple_code": couple_code,
+        "sender_id": {"$ne": user_id}
+    }).sort("created_at", -1).to_list(50)
+    
+    return [LoveNote(**n) for n in notes]
+
+@api_router.get("/love-notes/unread/{couple_code}/{user_id}")
+async def get_unread_notes(couple_code: str, user_id: str):
+    """Get unread notes for user"""
+    notes = await db.love_notes.find({
+        "couple_code": couple_code,
+        "sender_id": {"$ne": user_id},
+        "is_read": False
+    }).sort("created_at", -1).to_list(50)
+    
+    return {"count": len(notes), "notes": [LoveNote(**n) for n in notes]}
+
+@api_router.put("/love-notes/{note_id}/read")
+async def mark_note_read(note_id: str):
+    await db.love_notes.update_one(
+        {"id": note_id},
+        {"$set": {"is_read": True}}
+    )
+    return {"message": "Note marked as read"}
+
+@api_router.get("/love-notes/templates")
+async def get_note_templates():
+    return LOVE_NOTE_TEMPLATES
+
 # Include the router in the main app
 app.include_router(api_router)
 
