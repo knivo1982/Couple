@@ -102,7 +102,12 @@ export default function SpicyScreen() {
       // Load other data with individual error handling
       try {
         const wishlistData = await wishlistAPI.get(user.couple_code, user.id);
-        setWishlist(wishlistData || []);
+        // API returns { my_wishes: [], unlocked_wishes: [], partner_secret_wishes_count: 0 }
+        const allWishes = [
+          ...(wishlistData?.my_wishes || []),
+          ...(wishlistData?.unlocked_wishes || [])
+        ];
+        setWishlist(allWishes);
       } catch (e) {
         console.log('Wishlist not available');
         setWishlist([]);
