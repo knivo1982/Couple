@@ -162,18 +162,22 @@ export default function SpicyScreen() {
   };
 
   const isItemSelected = (itemId: string) => {
+    if (!Array.isArray(wishlist)) return false;
     return wishlist.some((w: any) => w.item_id === itemId && w.wants);
   };
 
   const isItemUnlocked = (itemId: string) => {
+    if (!Array.isArray(wishlist)) return false;
     return wishlist.some((w: any) => w.item_id === itemId && w.both_want);
   };
 
   const getUnlockedCount = () => {
+    if (!Array.isArray(wishlist)) return 0;
     return WISHLIST_ITEMS.filter(item => isItemUnlocked(item.id)).length;
   };
 
   const getSelectedCount = () => {
+    if (!Array.isArray(wishlist)) return 0;
     return WISHLIST_ITEMS.filter(item => isItemSelected(item.id)).length;
   };
 
