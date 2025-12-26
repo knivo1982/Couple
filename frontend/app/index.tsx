@@ -31,7 +31,7 @@ export default function Index() {
 
   useEffect(() => {
     if (!isLoading && user) {
-      router.replace('/home');
+      router.replace('/(tabs)');
     }
   }, [isLoading, user]);
 
@@ -42,7 +42,7 @@ export default function Index() {
     try {
       const newUser = await userAPI.create(name.trim(), gender);
       await saveUser(newUser);
-      router.replace('/home');
+      router.replace('/(tabs)');
     } catch (error) {
       console.error('Error creating user:', error);
       Alert.alert('Errore', 'Impossibile creare l\'account. Riprova.');
@@ -68,7 +68,7 @@ export default function Index() {
       await userAPI.joinCouple(newUser.id, coupleCode.trim().toUpperCase());
       const updatedUser = await userAPI.get(newUser.id);
       await saveUser(updatedUser);
-      router.replace('/home');
+      router.replace('/(tabs)');
     } catch (error: any) {
       console.error('Error joining couple:', error);
       Alert.alert('Errore', error.response?.data?.detail || 'Codice non valido');
