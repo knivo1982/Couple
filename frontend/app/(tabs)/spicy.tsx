@@ -62,7 +62,6 @@ export default function SpicyScreen() {
   const [isDiceRolling, setIsDiceRolling] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [wishlist, setWishlist] = useState<any[]>([]);
-  const [quizResults, setQuizResults] = useState<any>(null);
   const [specialDates, setSpecialDates] = useState<any[]>([]);
   const [nextDate, setNextDate] = useState<any>(null);
   const [weeklyChallenge, setWeeklyChallenge] = useState<any>(null);
