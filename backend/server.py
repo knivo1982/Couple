@@ -1134,12 +1134,22 @@ async def roll_love_dice():
     action = random.choice(LOVE_DICE_ACTIONS)
     body_part = random.choice(LOVE_DICE_BODY_PARTS)
     duration = random.choice(LOVE_DICE_DURATION)
+    scenario = random.choice(LOVE_DICE_SCENARIOS)
+    
+    # 50% chance to include scenario
+    include_scenario = random.random() > 0.5
+    
+    if include_scenario:
+        full_text = f"{action} {body_part} {duration}. {scenario}!"
+    else:
+        full_text = f"{action} {body_part} {duration}"
     
     return {
         "action": action,
         "body_part": body_part,
         "duration": duration,
-        "full_text": f"{action} {body_part} {duration}"
+        "scenario": scenario if include_scenario else None,
+        "full_text": full_text
     }
 
 # ================= WISHLIST =================
