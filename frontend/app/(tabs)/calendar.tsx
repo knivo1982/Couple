@@ -206,7 +206,17 @@ export default function CalendarScreen() {
         ]}
         onPress={() => {
           setSelectedDate(dateString);
-          setIntimacyModalVisible(true);
+          // Only show intimacy modal if user is paired
+          if (user?.partner_id) {
+            setIntimacyModalVisible(true);
+          } else {
+            // For single users, just select the date
+            Alert.alert(
+              '🔒 Funzione Bloccata',
+              'Per registrare momenti intimi devi prima collegarti con il tuo partner.\n\nCondividi il tuo codice coppia dalla Home!',
+              [{ text: 'OK' }]
+            );
+          }
         }}
       >
         {showHeart && <HeartShape size={42} color={isSelected ? '#ff4757' : '#ff6b8a'} />}
