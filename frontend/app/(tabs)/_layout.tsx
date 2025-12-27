@@ -1,11 +1,22 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import { useStore } from '../../store/useStore';
 
 export default function TabLayout() {
   const { user } = useStore();
+  
+  // Check if user is paired (has a partner)
+  const isPaired = !!user?.partner_id;
+
+  const handleDisabledPress = () => {
+    Alert.alert(
+      '🔒 Funzione Bloccata',
+      'Per usare questa funzione devi prima collegarti con il tuo partner!\n\nCondividi il tuo codice coppia per iniziare.',
+      [{ text: 'OK' }]
+    );
+  };
 
   return (
     <Tabs
@@ -40,10 +51,19 @@ export default function TabLayout() {
         options={{
           title: 'Mood',
           tabBarIcon: ({ color, size }) => (
-            <View style={styles.centerTab}>
-              <Ionicons name="happy" size={28} color={color} />
+            <View style={[styles.centerTab, !isPaired && styles.disabledTab]}>
+              <Ionicons name="happy" size={28} color={isPaired ? color : '#444'} />
+              {!isPaired && <View style={styles.lockBadge}><Ionicons name="lock-closed" size={10} color="#fff" /></View>}
             </View>
           ),
+        }}
+        listeners={{
+          tabPress: (e) => {
+            if (!isPaired) {
+              e.preventDefault();
+              handleDisabledPress();
+            }
+          },
         }}
       />
       <Tabs.Screen
@@ -51,8 +71,19 @@ export default function TabLayout() {
         options={{
           title: 'Piccante',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="flame" size={size} color={color} />
+            <View>
+              <Ionicons name="flame" size={size} color={isPaired ? color : '#444'} />
+              {!isPaired && <View style={styles.lockBadgeSmall}><Ionicons name="lock-closed" size={8} color="#fff" /></View>}
+            </View>
           ),
+        }}
+        listeners={{
+          tabPress: (e) => {
+            if (!isPaired) {
+              e.preventDefault();
+              handleDisabledPress();
+            }
+          },
         }}
       />
       <Tabs.Screen
@@ -60,8 +91,19 @@ export default function TabLayout() {
         options={{
           title: 'Stats',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="stats-chart" size={size} color={color} />
+            <View>
+              <Ionicons name="stats-chart" size={size} color={isPaired ? color : '#444'} />
+              {!isPaired && <View style={styles.lockBadgeSmall}><Ionicons name="lock-closed" size={8} color="#fff" /></View>}
+            </View>
           ),
+        }}
+        listeners={{
+          tabPress: (e) => {
+            if (!isPaired) {
+              e.preventDefault();
+              handleDisabledPress();
+            }
+          },
         }}
       />
     </Tabs>
