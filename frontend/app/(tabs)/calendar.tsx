@@ -121,6 +121,7 @@ export default function CalendarScreen() {
       setFertilityData(fertility);
       setCycleConfigured(true);
       setCycleModalVisible(false);
+      setDatePickerVisible(false);
       Alert.alert('Salvato!', 'Dati del ciclo aggiornati');
     } catch (error) {
       Alert.alert('Errore', 'Impossibile salvare');
@@ -354,7 +355,7 @@ export default function CalendarScreen() {
         )}
       </ScrollView>
 
-      {/* Cycle Modal */}
+      {/* Cycle Modal with Inline Calendar */}
       <Modal visible={cycleModalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <ScrollView style={styles.cycleScroll} showsVerticalScrollIndicator={false}>
@@ -609,7 +610,7 @@ const styles = StyleSheet.create({
   label: { color: '#aaa', fontSize: 14, marginBottom: 10, marginTop: 16, fontWeight: '500' },
   input: { backgroundColor: '#2a2a4e', borderRadius: 14, padding: 16, color: '#fff', fontSize: 16, borderWidth: 1, borderColor: '#3a3a5e' },
   
-  dateBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#2a2a4e', borderRadius: 14, padding: 16, gap: 12, borderWidth: 1, borderColor: '#3a3a5e', justifyContent: 'space-between' },
+  dateBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#2a2a4e', borderRadius: 14, padding: 16, gap: 12, borderWidth: 1, borderColor: '#3a3a5e' },
   dateBtnText: { color: '#fff', fontSize: 16, flex: 1 },
   
   numberRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#2a2a4e', borderRadius: 14, padding: 8, borderWidth: 1, borderColor: '#3a3a5e' },
