@@ -51,9 +51,9 @@ export default function TabLayout() {
         options={{
           title: 'Mood',
           tabBarIcon: ({ color, size }) => (
-            <View style={[styles.centerTab, !isPaired && styles.disabledTab]}>
-              <Ionicons name="happy" size={28} color={isPaired ? color : '#444'} />
-              {!isPaired && <View style={styles.lockBadge}><Ionicons name="lock-closed" size={10} color="#fff" /></View>}
+            <View>
+              <Ionicons name="happy" size={size} color={isPaired ? color : '#444'} />
+              {!isPaired && <View style={styles.lockBadgeSmall}><Ionicons name="lock-closed" size={8} color="#fff" /></View>}
             </View>
           ),
         }}
