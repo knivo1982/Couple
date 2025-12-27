@@ -16,10 +16,21 @@ import { Ionicons } from '@expo/vector-icons';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { useStore } from '../../store/useStore';
 import { cycleAPI, intimacyAPI, challengeAPI } from '../../services/api';
-import { format, parseISO, isSameMonth } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
+import Svg, { Path } from 'react-native-svg';
 
 const { width } = Dimensions.get('window');
+
+// Componente cuore per sfondo
+const HeartShape = ({ size = 40, color = '#ff6b8a' }: { size?: number; color?: string }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" style={{ position: 'absolute' }}>
+    <Path
+      d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+      fill={color}
+    />
+  </Svg>
+);
 
 LocaleConfig.locales['it'] = {
   monthNames: ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'],
