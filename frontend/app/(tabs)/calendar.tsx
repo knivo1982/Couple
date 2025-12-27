@@ -438,14 +438,35 @@ export default function CalendarScreen() {
               <Text style={styles.label}>Note</Text>
               <TextInput style={[styles.input, { height: 80 }]} placeholder="Qualcosa di speciale?" placeholderTextColor="#666" value={notes} onChangeText={setNotes} multiline />
 
-              <TouchableOpacity style={styles.saveBtn} onPress={logIntimacy} disabled={isLoading}>
-                {isLoading ? <ActivityIndicator color="#fff" /> : (
-                  <>
-                    <Ionicons name="heart" size={20} color="#fff" />
-                    <Text style={styles.saveBtnText}>Registra</Text>
-                  </>
-                )}
-              </TouchableOpacity>
+              {/* Show delete button if entry exists for this date */}
+              {selectedDate && getEntryForDate(selectedDate) ? (
+                <View style={styles.actionButtons}>
+                  <TouchableOpacity 
+                    style={[styles.saveBtn, styles.deleteBtnStyle]} 
+                    onPress={() => deleteIntimacy(getEntryForDate(selectedDate).id)}
+                  >
+                    <Ionicons name="trash" size={20} color="#fff" />
+                    <Text style={styles.saveBtnText}>Elimina</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.saveBtn, { flex: 1 }]} onPress={logIntimacy} disabled={isLoading}>
+                    {isLoading ? <ActivityIndicator color="#fff" /> : (
+                      <>
+                        <Ionicons name="refresh" size={20} color="#fff" />
+                        <Text style={styles.saveBtnText}>Aggiorna</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity style={styles.saveBtn} onPress={logIntimacy} disabled={isLoading}>
+                  {isLoading ? <ActivityIndicator color="#fff" /> : (
+                    <>
+                      <Ionicons name="heart" size={20} color="#fff" />
+                      <Text style={styles.saveBtnText}>Registra</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              )}
             </View>
           </ScrollView>
         </View>
