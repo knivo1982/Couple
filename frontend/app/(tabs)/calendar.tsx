@@ -159,7 +159,7 @@ export default function CalendarScreen() {
 
   const getDifficultyColor = (d: string) => d === 'facile' ? '#2ed573' : d === 'medio' ? '#ffa502' : '#ff4757';
 
-  // Custom day component with heart icon
+  // Custom day component with heart shape background for intimacy
   const renderDay = (date: any, state: any) => {
     const dateString = date.dateString;
     const isToday = dateString === format(new Date(), 'yyyy-MM-dd');
@@ -172,8 +172,12 @@ export default function CalendarScreen() {
     let bgColor = 'transparent';
     let textColor = state === 'disabled' ? '#444' : '#fff';
     let borderColor = 'transparent';
+    let showHeart = false;
     
-    if (isPeriod) {
+    if (hasIntimacy) {
+      showHeart = true;
+      textColor = '#fff';
+    } else if (isPeriod) {
       bgColor = '#ff4757';
       textColor = '#fff';
     } else if (isOvulation) {
@@ -182,16 +186,13 @@ export default function CalendarScreen() {
     } else if (isFertile) {
       borderColor = '#2ed573';
       textColor = '#2ed573';
-    } else if (hasIntimacy && !isPeriod) {
-      bgColor = 'rgba(255, 107, 138, 0.3)';
+    }
+    
+    if (isToday && !hasIntimacy && !isPeriod && !isOvulation) {
       textColor = '#ff6b8a';
     }
     
-    if (isToday && !isPeriod && !isOvulation) {
-      textColor = '#ff6b8a';
-    }
-    
-    if (isSelected) {
+    if (isSelected && !hasIntimacy) {
       bgColor = '#ff6b8a';
       textColor = '#fff';
       borderColor = 'transparent';
@@ -201,18 +202,46 @@ export default function CalendarScreen() {
       <TouchableOpacity
         style={[
           styles.dayContainer,
-          { backgroundColor: bgColor, borderColor: borderColor, borderWidth: borderColor !== 'transparent' ? 2 : 0 }
+          !showHeart && { backgroundColor: bgColor, borderColor: borderColor, borderWidth: borderColor !== 'transparent' ? 2 : 0 }
         ]}
         onPress={() => {
           setSelectedDate(dateString);
           setIntimacyModalVisible(true);
         }}
       >
-        <Text style={[styles.dayText, { color: textColor }]}>{date.day}</Text>
-        {hasIntimacy && (
-          <Text style={styles.heartIcon}>❤️</Text>
-        )}
+        {showHeart && <HeartShape size={42} color={isSelected ? '#ff4757' : '#ff6b8a'} />}
+        <Text style={[styles.dayText, { color: textColor, zIndex: 1 }]}>{date.day}</Text>
       </TouchableOpacity>
+    );
+  };
+
+  // Get existing entry for selected date
+  const getEntryForDate = (dateStr: string) => {
+    return intimacyEntries?.find((e: any) => e.date === dateStr);
+  };
+
+  // Delete intimacy entry
+  const deleteIntimacy = async (entryId: string) => {
+    Alert.alert(
+      'Elimina evento',
+      'Sei sicuro di voler eliminare questo momento?',
+      [
+        { text: 'Annulla', style: 'cancel' },
+        {
+          text: 'Elimina',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await intimacyAPI.delete(entryId);
+              await loadData();
+              setIntimacyModalVisible(false);
+              Alert.alert('Eliminato', 'Evento rimosso');
+            } catch (error) {
+              Alert.alert('Errore', 'Impossibile eliminare');
+            }
+          }
+        }
+      ]
     );
   };
 
