@@ -460,7 +460,27 @@ export default function SpicyScreen() {
                       selected && styles.wishlistItemSelected,
                       unlocked && styles.wishlistItemUnlocked
                     ]}
-                    onPress={() => toggleWishlistItem(item.id)}
+                    onPress={() => {
+                      if (unlocked) {
+                        // Item sbloccato - mostra sfida/gioco
+                        Alert.alert(
+                          '🎉 ' + item.title + ' Sbloccato!',
+                          'Entrambi volete provarlo! Ecco una sfida:\n\n' + getUnlockedChallenge(item),
+                          [
+                            { text: 'Più tardi', style: 'cancel' },
+                            { 
+                              text: 'Proviamolo! 🔥', 
+                              onPress: () => {
+                                Alert.alert('Buon divertimento! 💕', 'Registra il momento nel calendario quando avete finito!');
+                                setWishlistModalVisible(false);
+                              }
+                            }
+                          ]
+                        );
+                      } else {
+                        toggleWishlistItem(item.id);
+                      }
+                    }}
                   >
                     <View style={styles.wishlistItemLeft}>
                       <Text style={styles.wishlistEmoji}>{item.emoji}</Text>
@@ -478,8 +498,9 @@ export default function SpicyScreen() {
                     
                     <View style={styles.wishlistItemRight}>
                       {unlocked ? (
-                        <View style={styles.matchBadge}>
-                          <Text style={styles.matchText}>Match!</Text>
+                        <View style={styles.playBadge}>
+                          <Ionicons name="play" size={16} color="#fff" />
+                          <Text style={styles.playText}>Gioca!</Text>
                         </View>
                       ) : selected ? (
                         <View style={styles.heartFilled}>
