@@ -1,12 +1,19 @@
 import axios from 'axios';
 
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+// Production URL for your backend server
+const PRODUCTION_API_URL = 'https://couplebliss.edercomm.it';
+
+// Use production URL for builds, fallback to env variable for development
+const API_URL = __DEV__ 
+  ? (process.env.EXPO_PUBLIC_BACKEND_URL || PRODUCTION_API_URL)
+  : PRODUCTION_API_URL;
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 15000, // 15 second timeout
 });
 
 export const userAPI = {
