@@ -265,27 +265,69 @@ export default function Home() {
 
         {/* Weekly Challenge */}
         {weeklyChallenge && !weeklyChallenge.completed && (
-          <View style={styles.weeklyCard}>
+          <TouchableOpacity 
+            style={styles.weeklyCard}
+            onPress={async () => {
+              Alert.alert(
+                '🏆 ' + weeklyChallenge.challenge.title,
+                weeklyChallenge.challenge.description + '\n\nHai completato la sfida?',
+                [
+                  { text: 'Non ancora', style: 'cancel' },
+                  { 
+                    text: 'Sì, completata! ✅', 
+                    onPress: async () => {
+                      try {
+                        await weeklyAPI.complete(user!.couple_code);
+                        Alert.alert('🎉 Complimenti!', 'Sfida completata! Nuova sfida disponibile la prossima settimana.');
+                        loadData();
+                      } catch (e) {
+                        Alert.alert('Errore', 'Impossibile completare');
+                      }
+                    }
+                  }
+                ]
+              );
+            }}
+          >
             <View style={styles.weeklyHeader}>
               <Ionicons name="trophy" size={20} color="#ffd700" />
               <Text style={styles.weeklyTitle}>Sfida della Settimana</Text>
             </View>
             <Text style={styles.weeklyName}>{weeklyChallenge.challenge.title}</Text>
             <Text style={styles.weeklyDesc}>{weeklyChallenge.challenge.description}</Text>
-          </View>
+            <View style={styles.weeklyAction}>
+              <Text style={styles.weeklyActionText}>Tocca per completare →</Text>
+            </View>
+          </TouchableOpacity>
         )}
 
         {/* Today's Suggestion */}
         {todaySuggestion && (
-          <View style={styles.suggestionCard}>
+          <TouchableOpacity 
+            style={styles.suggestionCard}
+            onPress={() => {
+              const s = todaySuggestion.data;
+              Alert.alert(
+                (s.spicy ? '🔥 ' : '💕 ') + (s.title || s.name),
+                s.description || 'Prova questo suggerimento con il tuo partner!',
+                [
+                  { text: 'Più tardi', style: 'cancel' },
+                  { text: 'Proviamolo! 💕', onPress: () => router.push('/(tabs)/spicy') }
+                ]
+              );
+            }}
+          >
             <View style={styles.suggestionHeader}>
               <Ionicons name="sparkles" size={18} color="#ffa502" />
-              <Text style={styles.suggestionTitle}>Suggerimento</Text>
+              <Text style={styles.suggestionTitle}>Suggerimento del giorno</Text>
             </View>
             <Text style={styles.suggestionName}>
               {todaySuggestion.data.title || todaySuggestion.data.name}
             </Text>
-          </View>
+            <Text style={styles.suggestionDesc} numberOfLines={2}>
+              {todaySuggestion.data.description || 'Tocca per scoprire di più...'}
+            </Text>
+          </TouchableOpacity>
         )}
 
         {/* Upcoming Date */}
