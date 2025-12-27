@@ -357,68 +357,72 @@ export default function CalendarScreen() {
       {/* Cycle Modal */}
       <Modal visible={cycleModalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Impostazioni Ciclo</Text>
-              <TouchableOpacity onPress={() => setCycleModalVisible(false)} style={styles.closeBtn}>
-                <Ionicons name="close" size={24} color="#fff" />
+          <ScrollView style={styles.cycleScroll} showsVerticalScrollIndicator={false}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Impostazioni Ciclo</Text>
+                <TouchableOpacity onPress={() => { setCycleModalVisible(false); setDatePickerVisible(false); }} style={styles.closeBtn}>
+                  <Ionicons name="close" size={24} color="#fff" />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.label}>Data ultima mestruazione</Text>
+              <TouchableOpacity style={styles.dateBtn} onPress={() => setDatePickerVisible(!datePickerVisible)}>
+                <Ionicons name="calendar" size={20} color="#ff6b8a" />
+                <Text style={styles.dateBtnText}>
+                  {lastPeriodDate ? format(parseISO(lastPeriodDate), 'd MMMM yyyy', { locale: it }) : 'Seleziona data'}
+                </Text>
+                <Ionicons name={datePickerVisible ? "chevron-up" : "chevron-down"} size={20} color="#888" />
+              </TouchableOpacity>
+
+              {/* Inline Calendar - shows when datePickerVisible is true */}
+              {datePickerVisible && (
+                <View style={styles.inlineCalendar}>
+                  <Calendar
+                    onDayPress={(day: any) => { setLastPeriodDate(day.dateString); setDatePickerVisible(false); }}
+                    markedDates={lastPeriodDate ? { [lastPeriodDate]: { selected: true, selectedColor: '#ff6b8a' } } : {}}
+                    maxDate={format(new Date(), 'yyyy-MM-dd')}
+                    theme={{ 
+                      calendarBackground: '#1a1a2e', 
+                      selectedDayBackgroundColor: '#ff6b8a', 
+                      selectedDayTextColor: '#fff', 
+                      todayTextColor: '#ff6b8a', 
+                      dayTextColor: '#fff', 
+                      textDisabledColor: '#444', 
+                      monthTextColor: '#fff', 
+                      arrowColor: '#ff6b8a' 
+                    }}
+                  />
+                </View>
+              )}
+
+              <Text style={styles.label}>Durata ciclo (giorni)</Text>
+              <View style={styles.numberRow}>
+                <TouchableOpacity style={styles.numBtn} onPress={() => setCycleLength(String(Math.max(21, parseInt(cycleLength) - 1)))}>
+                  <Ionicons name="remove" size={20} color="#fff" />
+                </TouchableOpacity>
+                <Text style={styles.numValue}>{cycleLength}</Text>
+                <TouchableOpacity style={styles.numBtn} onPress={() => setCycleLength(String(Math.min(35, parseInt(cycleLength) + 1)))}>
+                  <Ionicons name="add" size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.label}>Durata mestruazioni (giorni)</Text>
+              <View style={styles.numberRow}>
+                <TouchableOpacity style={styles.numBtn} onPress={() => setPeriodLength(String(Math.max(3, parseInt(periodLength) - 1)))}>
+                  <Ionicons name="remove" size={20} color="#fff" />
+                </TouchableOpacity>
+                <Text style={styles.numValue}>{periodLength}</Text>
+                <TouchableOpacity style={styles.numBtn} onPress={() => setPeriodLength(String(Math.min(7, parseInt(periodLength) + 1)))}>
+                  <Ionicons name="add" size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity style={[styles.saveBtn, !lastPeriodDate && styles.saveBtnDisabled]} onPress={saveCycleData} disabled={!lastPeriodDate || isLoading}>
+                {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Salva</Text>}
               </TouchableOpacity>
             </View>
-
-            <Text style={styles.label}>Data ultima mestruazione</Text>
-            <TouchableOpacity style={styles.dateBtn} onPress={() => setDatePickerVisible(true)}>
-              <Ionicons name="calendar" size={20} color="#ff6b8a" />
-              <Text style={styles.dateBtnText}>
-                {lastPeriodDate ? format(parseISO(lastPeriodDate), 'd MMMM yyyy', { locale: it }) : 'Seleziona data'}
-              </Text>
-            </TouchableOpacity>
-
-            <Text style={styles.label}>Durata ciclo (giorni)</Text>
-            <View style={styles.numberRow}>
-              <TouchableOpacity style={styles.numBtn} onPress={() => setCycleLength(String(Math.max(21, parseInt(cycleLength) - 1)))}>
-                <Ionicons name="remove" size={20} color="#fff" />
-              </TouchableOpacity>
-              <Text style={styles.numValue}>{cycleLength}</Text>
-              <TouchableOpacity style={styles.numBtn} onPress={() => setCycleLength(String(Math.min(35, parseInt(cycleLength) + 1)))}>
-                <Ionicons name="add" size={20} color="#fff" />
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styles.label}>Durata mestruazioni (giorni)</Text>
-            <View style={styles.numberRow}>
-              <TouchableOpacity style={styles.numBtn} onPress={() => setPeriodLength(String(Math.max(3, parseInt(periodLength) - 1)))}>
-                <Ionicons name="remove" size={20} color="#fff" />
-              </TouchableOpacity>
-              <Text style={styles.numValue}>{periodLength}</Text>
-              <TouchableOpacity style={styles.numBtn} onPress={() => setPeriodLength(String(Math.min(7, parseInt(periodLength) + 1)))}>
-                <Ionicons name="add" size={20} color="#fff" />
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity style={[styles.saveBtn, !lastPeriodDate && styles.saveBtnDisabled]} onPress={saveCycleData} disabled={!lastPeriodDate || isLoading}>
-              {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Salva</Text>}
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Date Picker Modal */}
-      <Modal visible={datePickerVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Seleziona Data</Text>
-              <TouchableOpacity onPress={() => setDatePickerVisible(false)} style={styles.closeBtn}>
-                <Ionicons name="close" size={24} color="#fff" />
-              </TouchableOpacity>
-            </View>
-            <Calendar
-              onDayPress={(day: any) => { setLastPeriodDate(day.dateString); setDatePickerVisible(false); }}
-              markedDates={lastPeriodDate ? { [lastPeriodDate]: { selected: true, selectedColor: '#ff6b8a' } } : {}}
-              maxDate={format(new Date(), 'yyyy-MM-dd')}
-              theme={{ calendarBackground: '#2a2a4e', selectedDayBackgroundColor: '#ff6b8a', selectedDayTextColor: '#fff', todayTextColor: '#ff6b8a', dayTextColor: '#fff', textDisabledColor: '#444', monthTextColor: '#fff', arrowColor: '#ff6b8a' }}
-            />
-          </View>
+          </ScrollView>
         </View>
       </Modal>
 
