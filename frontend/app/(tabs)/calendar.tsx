@@ -592,4 +592,6 @@ const styles = StyleSheet.create({
   saveBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ff6b8a', paddingVertical: 16, borderRadius: 16, gap: 8, marginTop: 20 },
   saveBtnDisabled: { opacity: 0.5 },
   saveBtnText: { color: '#fff', fontSize: 17, fontWeight: '600' },
+  actionButtons: { flexDirection: 'row', gap: 12, marginTop: 20 },
+  deleteBtnStyle: { backgroundColor: '#ff4757', flex: 0.6, marginTop: 0 },
 });
