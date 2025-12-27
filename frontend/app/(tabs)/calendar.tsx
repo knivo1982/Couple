@@ -145,6 +145,11 @@ export default function CalendarScreen() {
       // Reload entries and refresh calendar
       const entries = await intimacyAPI.getAll(user.couple_code);
       setIntimacyEntries(entries);
+      
+      // Update stats too
+      const newStats = await intimacyAPI.getStats(user.couple_code);
+      setStats(newStats);
+      
       setCalendarKey(prev => prev + 1);
       
       resetForm();
