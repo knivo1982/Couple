@@ -1109,15 +1109,15 @@ async def add_wishlist_item(input: WishlistItemCreate):
         partner_wish = await db.wishlist.find_one({
             "couple_code": input.couple_code,
             "user_id": user["partner_id"],
-            "title": input.title
+            "item_id": input.item_id
         })
         if partner_wish:
             # Both want it! Unlock both
             await db.wishlist.update_one(
                 {"id": partner_wish["id"]},
-                {"$set": {"partner_wants_too": True, "unlocked": True}}
+                {"$set": {"both_want": True}}
             )
-            item = WishlistItem(**input.dict(), partner_wants_too=True, unlocked=True)
+            item = WishlistItem(**input.dict(), both_want=True)
         else:
             item = WishlistItem(**input.dict())
     else:
@@ -1126,28 +1126,92 @@ async def add_wishlist_item(input: WishlistItemCreate):
     await db.wishlist.insert_one(item.dict())
     return item
 
+@api_router.post("/wishlist/toggle")
+async def toggle_wishlist_item(couple_code: str, user_id: str, item_id: str):
+    """Toggle a wishlist item - add if not exists, remove if exists"""
+    # Check if user already has this wish
+    existing = await db.wishlist.find_one({
+        "couple_code": couple_code,
+        "user_id": user_id,
+        "item_id": item_id
+    })
+    
+    if existing:
+        # Remove it
+        await db.wishlist.delete_one({"id": existing["id"]})
+        # Also unset both_want on partner's wish if exists
+        user = await db.users.find_one({"id": user_id})
+        if user and user.get("partner_id"):
+            await db.wishlist.update_one(
+                {"couple_code": couple_code, "user_id": user["partner_id"], "item_id": item_id},
+                {"$set": {"both_want": False}}
+            )
+        return {"action": "removed", "unlocked": False}
+    else:
+        # Add it
+        user = await db.users.find_one({"id": user_id})
+        both_want = False
+        
+        if user and user.get("partner_id"):
+            partner_wish = await db.wishlist.find_one({
+                "couple_code": couple_code,
+                "user_id": user["partner_id"],
+                "item_id": item_id
+            })
+            if partner_wish:
+                both_want = True
+                # Update partner's wish too
+                await db.wishlist.update_one(
+                    {"id": partner_wish["id"]},
+                    {"$set": {"both_want": True}}
+                )
+        
+        new_item = {
+            "id": str(uuid.uuid4()),
+            "couple_code": couple_code,
+            "user_id": user_id,
+            "item_id": item_id,
+            "title": item_id,  # Will be shown from frontend
+            "both_want": both_want,
+            "created_at": datetime.utcnow()
+        }
+        await db.wishlist.insert_one(new_item)
+        
+        return {"action": "added", "unlocked": both_want}
+
 @api_router.get("/wishlist/{couple_code}/{user_id}")
 async def get_wishlist(couple_code: str, user_id: str):
     # Get user's own wishes
     my_wishes = await db.wishlist.find({"couple_code": couple_code, "user_id": user_id}).to_list(100)
     
-    # Get unlocked wishes (both partners want)
-    unlocked = await db.wishlist.find({"couple_code": couple_code, "unlocked": True}).to_list(100)
-    
     # Get partner's wishes count (without revealing details)
     user = await db.users.find_one({"id": user_id})
     partner_wishes_count = 0
+    unlocked_items = []
+    
     if user and user.get("partner_id"):
         partner_wishes = await db.wishlist.find({
             "couple_code": couple_code, 
             "user_id": user["partner_id"],
-            "unlocked": False
+            "both_want": {"$ne": True}
         }).to_list(100)
         partner_wishes_count = len(partner_wishes)
+        
+        # Get unlocked (both want)
+        unlocked = await db.wishlist.find({
+            "couple_code": couple_code,
+            "both_want": True
+        }).to_list(100)
+        # Deduplicate by item_id
+        seen = set()
+        for w in unlocked:
+            if w.get("item_id") not in seen:
+                unlocked_items.append(w)
+                seen.add(w.get("item_id"))
     
     return {
-        "my_wishes": [WishlistItem(**w) for w in my_wishes],
-        "unlocked_wishes": [WishlistItem(**w) for w in unlocked],
+        "my_wishes": my_wishes,
+        "unlocked_wishes": unlocked_items,
         "partner_secret_wishes_count": partner_wishes_count
     }
 
