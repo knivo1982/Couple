@@ -26,7 +26,10 @@ export const userAPI = {
     return response.data;
   },
   joinCouple: async (userId: string, coupleCode: string) => {
-    const response = await api.post(`/users/join-couple?user_id=${userId}&couple_code=${coupleCode}`);
+    const response = await api.post('/users/join-couple', {
+      user_id: userId,
+      partner_code: coupleCode
+    });
     return response.data;
   },
 };
