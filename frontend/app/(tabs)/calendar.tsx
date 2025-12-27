@@ -70,6 +70,7 @@ export default function CalendarScreen() {
   const [cycleConfigured, setCycleConfigured] = useState(false);
   const [positions, setPositions] = useState<any[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [calendarKey, setCalendarKey] = useState(0);
 
   // Create sets for faster lookup
   const intimacyDates = new Set(intimacyEntries?.map((e: any) => e.date) || []);
