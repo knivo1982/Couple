@@ -689,10 +689,11 @@ const styles = StyleSheet.create({
   
   sectionTitle: { fontSize: 20, fontWeight: '600', color: '#fff', marginBottom: 14 },
   suggestionsScroll: { marginBottom: 24, marginHorizontal: -20, paddingHorizontal: 20 },
-  suggestionCard: { width: 170, backgroundColor: '#2a2a4e', borderRadius: 18, padding: 18, marginRight: 12 },
+  suggestionCard: { width: 180, backgroundColor: '#2a2a4e', borderRadius: 18, padding: 18, marginRight: 12 },
   suggestionEmoji: { fontSize: 28, marginBottom: 10 },
   suggestionTitle: { fontSize: 15, fontWeight: '600', color: '#fff', marginBottom: 6 },
-  suggestionDesc: { fontSize: 12, color: '#888', lineHeight: 16 },
+  suggestionDesc: { fontSize: 12, color: '#888', lineHeight: 18, marginBottom: 8 },
+  suggestionTap: { fontSize: 11, color: '#ff6b8a', fontWeight: '500' },
   
   countdownCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#2a2a4e', padding: 18, borderRadius: 18, gap: 14 },
   countdownIcon: { width: 56, height: 56, borderRadius: 16, backgroundColor: 'rgba(255, 107, 138, 0.2)', justifyContent: 'center', alignItems: 'center' },
