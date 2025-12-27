@@ -199,7 +199,7 @@ export default function SpicyScreen() {
     }
 
     try {
-      await specialDatesAPI.add(user.couple_code, newDateTitle.trim(), newDateDate);
+      await specialDatesAPI.create(user.couple_code, newDateTitle.trim(), newDateDate, user.id);
       setNewDateTitle('');
       setNewDateDate('');
       setDateModalVisible(false);
