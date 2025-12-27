@@ -350,7 +350,30 @@ export default function Home() {
 
         {/* Upcoming Date */}
         {specialDates?.next_date && (
-          <View style={styles.countdownCard}>
+          <TouchableOpacity 
+            style={styles.countdownCard}
+            onPress={() => {
+              Alert.alert(
+                '📅 ' + specialDates.next_date.title,
+                `Data: ${specialDates.next_date.date}\nTra ${specialDates.days_until_next} giorni`,
+                [
+                  { text: 'Chiudi', style: 'cancel' },
+                  { 
+                    text: '🗑️ Elimina', 
+                    style: 'destructive',
+                    onPress: async () => {
+                      try {
+                        await specialDatesAPI.delete(specialDates.next_date.id);
+                        loadData();
+                      } catch (e) {
+                        console.error('Delete error:', e);
+                      }
+                    }
+                  }
+                ]
+              );
+            }}
+          >
             <Ionicons name="calendar-outline" size={24} color="#ff6b8a" />
             <View style={styles.countdownContent}>
               <Text style={styles.countdownTitle}>{specialDates.next_date.title}</Text>
@@ -358,7 +381,8 @@ export default function Home() {
                 Tra {specialDates.days_until_next} giorni
               </Text>
             </View>
-          </View>
+            <Ionicons name="chevron-forward" size={20} color="#666" />
+          </TouchableOpacity>
         )}
       </ScrollView>
     </SafeAreaView>
