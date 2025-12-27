@@ -209,6 +209,17 @@ export default function CalendarScreen() {
           setSelectedDate(dateString);
           // Only show intimacy modal if user is paired
           if (user?.partner_id) {
+            // Load existing data if entry exists
+            const existingEntry = intimacyEntries?.find((e: any) => e.date === dateString);
+            if (existingEntry) {
+              setQualityRating(existingEntry.quality_rating || 3);
+              setSelectedPositions(existingEntry.positions_used || []);
+              setSelectedLocation(existingEntry.location || null);
+              setDuration(existingEntry.duration_minutes ? String(existingEntry.duration_minutes) : '');
+              setNotes(existingEntry.notes || '');
+            } else {
+              resetForm();
+            }
             setIntimacyModalVisible(true);
           } else {
             // For single users, just select the date
