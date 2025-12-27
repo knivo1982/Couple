@@ -601,6 +601,8 @@ const styles = StyleSheet.create({
   closeBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#2a2a4e', justifyContent: 'center', alignItems: 'center' },
   
   intimacyScroll: { maxHeight: '92%' },
+  cycleScroll: { maxHeight: '92%' },
+  inlineCalendar: { marginTop: 8, marginBottom: 8, borderRadius: 14, overflow: 'hidden', backgroundColor: '#1a1a2e' },
   dateBadge: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: 'rgba(255, 107, 138, 0.15)', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12, marginBottom: 20 },
   dateBadgeText: { fontSize: 16, color: '#ff6b8a', fontWeight: '600' },
   
