@@ -269,6 +269,10 @@ export default function CalendarScreen() {
       if (user?.couple_code) {
         const entries = await intimacyAPI.getAll(user.couple_code);
         setIntimacyEntries(entries);
+        
+        // Update stats too
+        const newStats = await intimacyAPI.getStats(user.couple_code);
+        setStats(newStats);
       }
       
       // Force calendar refresh
