@@ -26,10 +26,13 @@ export const userAPI = {
     const response = await api.get(`/users/${userId}`);
     return response.data;
   },
-  joinCouple: async (userId: string, coupleCode: string) => {
-    const response = await api.post(`/users/join-couple?user_id=${userId}&couple_code=${coupleCode}`);
-    return response.data;
-  },
+    joinCouple: async (userId: string, coupleCode: string) => {
+      const response = await api.post('/users/join-couple', {
+        user_id: userId,
+        partner_code: coupleCode
+      });
+      return response.data;
+    },
 };
 
 export const cycleAPI = {
