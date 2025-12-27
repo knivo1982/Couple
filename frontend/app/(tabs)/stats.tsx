@@ -240,27 +240,48 @@ export default function StatsScreen() {
           <View style={styles.recentSection}>
             <Text style={styles.sectionTitle}>📝 Attività Recente</Text>
             {entries.slice(0, 5).map((entry: any, index: number) => (
-              <View key={index} style={styles.activityItem}>
-                <View style={styles.activityDot} />
-                <View style={styles.activityContent}>
-                  <Text style={styles.activityDate}>
-                    {format(new Date(entry.date), 'd MMM yyyy', { locale: it })}
-                  </Text>
-                  <View style={styles.activityDetails}>
-                    <View style={styles.activityRating}>
-                      {[1, 2, 3, 4, 5].map((num) => (
-                        <Ionicons
-                          key={num}
-                          name={num <= entry.quality_rating ? 'heart' : 'heart-outline'}
-                          size={12}
-                          color={num <= entry.quality_rating ? '#ff6b8a' : '#444'}
-                        />
-                      ))}
-                    </View>
+              <View key={index} style={styles.activityCard}>
+                <View style={styles.activityLeft}>
+                  <View style={styles.activityDateBadge}>
+                    <Text style={styles.activityDay}>
+                      {format(new Date(entry.date), 'd', { locale: it })}
+                    </Text>
+                    <Text style={styles.activityMonth}>
+                      {format(new Date(entry.date), 'MMM', { locale: it })}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.activityRight}>
+                  <View style={styles.activityRatingRow}>
+                    {[1, 2, 3, 4, 5].map((num) => (
+                      <Ionicons
+                        key={num}
+                        name={num <= entry.quality_rating ? 'heart' : 'heart-outline'}
+                        size={16}
+                        color={num <= entry.quality_rating ? '#ff6b8a' : '#444'}
+                      />
+                    ))}
+                    <Text style={styles.activityQuality}>
+                      {entry.quality_rating === 5 ? 'Esplosivo!' : entry.quality_rating >= 4 ? 'Fantastico' : entry.quality_rating >= 3 ? 'Bello' : 'Ok'}
+                    </Text>
+                  </View>
+                  <View style={styles.activityMeta}>
                     {entry.location && (
-                      <Text style={styles.activityLocation}>
-                        <Ionicons name="location" size={10} color="#666" /> {entry.location}
-                      </Text>
+                      <View style={styles.activityTag}>
+                        <Ionicons name="location" size={12} color="#888" />
+                        <Text style={styles.activityTagText}>{entry.location}</Text>
+                      </View>
+                    )}
+                    {entry.duration && (
+                      <View style={styles.activityTag}>
+                        <Ionicons name="time" size={12} color="#888" />
+                        <Text style={styles.activityTagText}>{entry.duration} min</Text>
+                      </View>
+                    )}
+                    {entry.positions_used?.length > 0 && (
+                      <View style={styles.activityTag}>
+                        <Text style={styles.activityTagText}>🔥 {entry.positions_used.length} posizioni</Text>
+                      </View>
                     )}
                   </View>
                 </View>
