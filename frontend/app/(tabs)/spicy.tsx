@@ -414,11 +414,25 @@ export default function SpicyScreen() {
         <Text style={styles.sectionTitle}>💡 Suggerimenti</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.suggestionsScroll}>
           {suggestions.slice(0, 6).map((suggestion, index) => (
-            <View key={index} style={styles.suggestionCard}>
+            <TouchableOpacity 
+              key={index} 
+              style={styles.suggestionCard}
+              onPress={() => {
+                Alert.alert(
+                  (suggestion.spicy ? '🔥 ' : '💕 ') + suggestion.title,
+                  suggestion.description + '\n\n' + (suggestion.tip || 'Prova questo con il tuo partner!'),
+                  [
+                    { text: 'Chiudi', style: 'cancel' },
+                    { text: 'Proviamo! 💕', onPress: () => {} }
+                  ]
+                );
+              }}
+            >
               <Text style={styles.suggestionEmoji}>{suggestion.spicy ? '🔥' : '🌸'}</Text>
-              <Text style={styles.suggestionTitle}>{suggestion.title}</Text>
-              <Text style={styles.suggestionDesc} numberOfLines={2}>{suggestion.description}</Text>
-            </View>
+              <Text style={styles.suggestionTitle} numberOfLines={2}>{suggestion.title}</Text>
+              <Text style={styles.suggestionDesc} numberOfLines={3}>{suggestion.description}</Text>
+              <Text style={styles.suggestionTap}>Tocca per info →</Text>
+            </TouchableOpacity>
           ))}
         </ScrollView>
 
