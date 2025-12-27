@@ -1182,7 +1182,15 @@ async def toggle_wishlist_item(couple_code: str, user_id: str, item_id: str):
 @api_router.get("/wishlist/{couple_code}/{user_id}")
 async def get_wishlist(couple_code: str, user_id: str):
     # Get user's own wishes
-    my_wishes = await db.wishlist.find({"couple_code": couple_code, "user_id": user_id}).to_list(100)
+    my_wishes_cursor = await db.wishlist.find({"couple_code": couple_code, "user_id": user_id}).to_list(100)
+    my_wishes = []
+    for w in my_wishes_cursor:
+        my_wishes.append({
+            "id": w.get("id"),
+            "item_id": w.get("item_id"),
+            "title": w.get("title"),
+            "both_want": w.get("both_want", False)
+        })
     
     # Get partner's wishes count (without revealing details)
     user = await db.users.find_one({"id": user_id})
@@ -1206,7 +1214,12 @@ async def get_wishlist(couple_code: str, user_id: str):
         seen = set()
         for w in unlocked:
             if w.get("item_id") not in seen:
-                unlocked_items.append(w)
+                unlocked_items.append({
+                    "id": w.get("id"),
+                    "item_id": w.get("item_id"),
+                    "title": w.get("title"),
+                    "both_want": True
+                })
                 seen.add(w.get("item_id"))
     
     return {
