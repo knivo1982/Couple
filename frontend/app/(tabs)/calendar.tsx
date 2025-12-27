@@ -134,13 +134,24 @@ export default function CalendarScreen() {
     
     setIsLoading(true);
     try {
+      // Check if entry exists - if so, delete first then create new
+      const existingEntry = getEntryForDate(selectedDate);
+      if (existingEntry) {
+        await intimacyAPI.delete(existingEntry.id);
+      }
+      
       await intimacyAPI.log(user.couple_code, selectedDate, qualityRating, user.id, selectedPositions, duration ? parseInt(duration) : undefined, selectedLocation || undefined, notes || undefined);
-      await loadData();
+      
+      // Reload entries and refresh calendar
+      const entries = await intimacyAPI.getAll(user.couple_code);
+      setIntimacyEntries(entries);
+      setCalendarKey(prev => prev + 1);
+      
       resetForm();
       setIntimacyModalVisible(false);
-      Alert.alert('Registrato! 💕', 'Momento salvato');
+      setSelectedDate(null);
     } catch (error) {
-      Alert.alert('Errore', 'Impossibile salvare');
+      console.error('Save error:', error);
     } finally {
       setIsLoading(false);
     }
