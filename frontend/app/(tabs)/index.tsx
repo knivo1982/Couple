@@ -395,11 +395,14 @@ const styles = StyleSheet.create({
   weeklyTitle: { fontSize: 13, color: '#ffd700', fontWeight: '600' },
   weeklyName: { fontSize: 17, fontWeight: '600', color: '#fff' },
   weeklyDesc: { fontSize: 14, color: '#aaa', marginTop: 6, lineHeight: 20 },
+  weeklyAction: { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(255, 215, 0, 0.2)' },
+  weeklyActionText: { color: '#ffd700', fontSize: 13, fontWeight: '500' },
   
   suggestionCard: { backgroundColor: '#2a2a4e', borderRadius: 18, padding: 18, marginBottom: 20 },
   suggestionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
   suggestionTitle: { fontSize: 13, color: '#ffa502', fontWeight: '500' },
-  suggestionName: { fontSize: 16, color: '#fff' },
+  suggestionName: { fontSize: 16, color: '#fff', fontWeight: '600' },
+  suggestionDesc: { fontSize: 13, color: '#888', marginTop: 6, lineHeight: 18 },
   
   countdownCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#2a2a4e', padding: 18, borderRadius: 18, gap: 16 },
   countdownContent: { flex: 1 },
