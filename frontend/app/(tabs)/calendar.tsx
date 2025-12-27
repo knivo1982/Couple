@@ -294,6 +294,7 @@ export default function CalendarScreen() {
 
         <View style={styles.calendarContainer}>
           <Calendar
+            key={calendarKey}
             dayComponent={({ date, state }: any) => renderDay(date, state)}
             onMonthChange={(month: any) => setCurrentMonth(new Date(month.dateString))}
             theme={{
