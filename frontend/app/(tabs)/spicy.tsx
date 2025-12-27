@@ -220,8 +220,14 @@ export default function SpicyScreen() {
         if (prev <= 1) {
           clearInterval(timerInterval.current);
           setTimerActive(false);
-          Alert.alert('⏰ Tempo scaduto!', 'Il vostro momento speciale è finito');
+          // Vibra per 3 secondi con pattern
+          Vibration.vibrate([500, 500, 500, 500, 500, 500]);
+          Alert.alert('⏰ Tempo scaduto!', 'Il vostro momento speciale è finito! 💕');
           return 0;
+        }
+        // Vibra ogni minuto come promemoria
+        if (prev % 60 === 0 && prev !== timerMinutes * 60) {
+          Vibration.vibrate(200);
         }
         return prev - 1;
       });
