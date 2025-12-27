@@ -257,6 +257,64 @@ export default function SpicyScreen() {
     }
   };
 
+  const getUnlockedChallenge = (item: any) => {
+    const challenges: { [key: string]: string[] } = {
+      'roleplay': [
+        '🎭 Sfida: Uno di voi fa il/la sconosciuto/a al bar. L\'altro deve "rimorchiarlo/a"!',
+        '🎭 Sfida: Fate finta di essere due personaggi di un film romantico.',
+        '🎭 Sfida: Uno è il/la boss, l\'altro il/la nuovo/a dipendente...'
+      ],
+      'bondage_light': [
+        '🎀 Sfida: Usa solo una sciarpa o una cravatta. Niente di più!',
+        '🎀 Sfida: Il partner bendato deve indovinare dove verrà toccato.',
+        '🎀 Sfida: 5 minuti con le mani legate - poi scambiatevi!'
+      ],
+      'massage_sensual': [
+        '💆 Sfida: Massaggio di 15 minuti senza parlare, solo musica.',
+        '💆 Sfida: Ogni tocco deve essere lentissimo...',
+        '💆 Sfida: Usate un olio profumato e candele.'
+      ],
+      'mirror': [
+        '🪞 Sfida: Guardatevi negli occhi attraverso lo specchio per tutto il tempo.',
+        '🪞 Sfida: Descrivete a voce alta cosa vedete.',
+        '🪞 Sfida: Luci soffuse + specchio = magia!'
+      ],
+      'outdoor': [
+        '🌳 Sfida: Trovate un posto dove nessuno può vedervi!',
+        '🌳 Sfida: In macchina in un posto panoramico.',
+        '🌳 Sfida: Iniziate con un picnic romantico...'
+      ],
+      'food_play': [
+        '🍓 Sfida: Solo frutta e panna, niente posate!',
+        '🍓 Sfida: Uno è bendato e deve indovinare cosa sta assaggiando.',
+        '🍓 Sfida: Cioccolato fuso (attenzione alla temperatura!)'
+      ],
+      'strip_tease': [
+        '💃 Sfida: Prepara una playlist di 3 canzoni. Spogliati lentamente.',
+        '💃 Sfida: Il partner non può toccarti finché non hai finito.',
+        '💃 Sfida: Inizia vestito/a in modo elegante!'
+      ],
+      'blindfold': [
+        '🙈 Sfida: 10 minuti completamente al buio. Usa tutti gli altri sensi.',
+        '🙈 Sfida: Il partner bendato deve seguire solo la tua voce.',
+        '🙈 Sfida: Sorprendilo/a con temperature diverse (ghiaccio e calore).'
+      ],
+      'dirty_talk': [
+        '🔥 Sfida: Sussurra all\'orecchio cosa vuoi fare...',
+        '🔥 Sfida: Descrivi la tua fantasia preferita nei dettagli.',
+        '🔥 Sfida: Solo messaggi vocali piccanti per un giorno intero, poi incontratevi!'
+      ]
+    };
+    
+    const itemChallenges = challenges[item.id] || [
+      '💕 Sfida: Prendetevi il vostro tempo e godetevi il momento!',
+      '💕 Sfida: Createvi la vostra atmosfera perfetta.',
+      '💕 Sfida: Fatelo come se fosse la prima volta!'
+    ];
+    
+    return itemChallenges[Math.floor(Math.random() * itemChallenges.length)];
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
