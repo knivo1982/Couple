@@ -10,6 +10,7 @@ import {
   Alert,
   Animated,
   Dimensions,
+  Vibration,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,6 +19,7 @@ import { challengeAPI, wishlistAPI, specialDatesAPI, weeklyAPI } from '../../ser
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Calendar } from 'react-native-calendars';
+import { Audio } from 'expo-av';
 
 const { width } = Dimensions.get('window');
 
