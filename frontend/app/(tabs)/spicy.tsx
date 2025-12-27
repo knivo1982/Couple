@@ -160,8 +160,10 @@ export default function SpicyScreen() {
       if (result.unlocked) {
         Alert.alert('🎉 Match!', 'Entrambi volete la stessa cosa! È il momento di provare!');
       }
+      // Reload data to update UI
       loadData();
     } catch (error) {
+      console.error('Toggle error:', error);
       Alert.alert('Errore', 'Impossibile aggiornare');
     }
   };
