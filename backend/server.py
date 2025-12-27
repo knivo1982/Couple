@@ -1049,7 +1049,7 @@ async def get_intimacy_stats(couple_code: str):
         badges.append("explorer")
     
     # Marathon - any session 60+ minutes
-    has_marathon = any(e.get("duration_minutes", 0) >= 60 for e in entries)
+    has_marathon = any((e.get("duration_minutes") or 0) >= 60 for e in entries)
     if has_marathon:
         badges.append("marathon")
     
