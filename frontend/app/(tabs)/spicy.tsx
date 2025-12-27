@@ -11,6 +11,9 @@ import {
   Animated,
   Dimensions,
   Vibration,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,7 +22,6 @@ import { challengeAPI, wishlistAPI, specialDatesAPI, weeklyAPI } from '../../ser
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Calendar } from 'react-native-calendars';
-import { Audio } from 'expo-av';
 
 const { width } = Dimensions.get('window');
 
@@ -67,6 +69,7 @@ export default function SpicyScreen() {
   const [specialDates, setSpecialDates] = useState<any[]>([]);
   const [nextDate, setNextDate] = useState<any>(null);
   const [weeklyChallenge, setWeeklyChallenge] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Modals
   const [wishlistModalVisible, setWishlistModalVisible] = useState(false);
@@ -105,12 +108,10 @@ export default function SpicyScreen() {
       try {
         const wishlistData = await wishlistAPI.get(user.couple_code, user.id);
         // API returns { my_wishes: [], unlocked_wishes: [], partner_secret_wishes_count: 0 }
-        console.log('Wishlist data:', JSON.stringify(wishlistData));
         const allWishes = [
           ...(wishlistData?.my_wishes || []),
           ...(wishlistData?.unlocked_wishes || [])
         ];
-        console.log('All wishes:', JSON.stringify(allWishes));
         setWishlist(allWishes);
       } catch (e) {
         console.log('Wishlist not available', e);
@@ -157,18 +158,21 @@ export default function SpicyScreen() {
   };
 
   const toggleWishlistItem = async (itemId: string) => {
-    if (!user?.couple_code) return;
+    if (!user?.couple_code || isLoading) return;
     
+    setIsLoading(true);
     try {
       const result = await wishlistAPI.toggle(user.couple_code, user.id, itemId);
       if (result.unlocked) {
         Alert.alert('🎉 Match!', 'Entrambi volete la stessa cosa! È il momento di provare!');
       }
       // Reload data to update UI
-      loadData();
-    } catch (error) {
+      await loadData();
+    } catch (error: any) {
       console.error('Toggle error:', error);
-      Alert.alert('Errore', 'Impossibile aggiornare');
+      // Don't show error for toggle - it might just be toggling off
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -202,6 +206,7 @@ export default function SpicyScreen() {
       await specialDatesAPI.create(user.couple_code, newDateTitle.trim(), newDateDate, user.id);
       setNewDateTitle('');
       setNewDateDate('');
+      setDatePickerVisible(false);
       setDateModalVisible(false);
       loadData();
       Alert.alert('Aggiunto!', 'Data speciale salvata');
@@ -220,12 +225,10 @@ export default function SpicyScreen() {
         if (prev <= 1) {
           clearInterval(timerInterval.current);
           setTimerActive(false);
-          // Vibra per 3 secondi con pattern
           Vibration.vibrate([500, 500, 500, 500, 500, 500]);
           Alert.alert('⏰ Tempo scaduto!', 'Il vostro momento speciale è finito! 💕');
           return 0;
         }
-        // Vibra ogni minuto come promemoria
         if (prev % 60 === 0 && prev !== timerMinutes * 60) {
           Vibration.vibrate(200);
         }
@@ -500,7 +503,7 @@ export default function SpicyScreen() {
         </View>
       </Modal>
 
-      {/* Wishlist Modal - FIXED */}
+      {/* Wishlist Modal */}
       <Modal visible={wishlistModalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.wishlistModalContent}>
@@ -542,7 +545,6 @@ export default function SpicyScreen() {
                     ]}
                     onPress={() => {
                       if (unlocked) {
-                        // Item sbloccato - mostra sfida/gioco
                         Alert.alert(
                           '🎉 ' + item.title + ' Sbloccato!',
                           'Entrambi volete provarlo! Ecco una sfida:\n\n' + getUnlockedChallenge(item),
@@ -561,6 +563,7 @@ export default function SpicyScreen() {
                         toggleWishlistItem(item.id);
                       }
                     }}
+                    disabled={isLoading}
                   >
                     <View style={styles.wishlistItemLeft}>
                       <Text style={styles.wishlistEmoji}>{item.emoji}</Text>
@@ -600,61 +603,84 @@ export default function SpicyScreen() {
         </View>
       </Modal>
 
-      {/* Add Date Modal */}
+      {/* Add Date Modal - FIXED with KeyboardAvoidingView and inline calendar */}
       <Modal visible={dateModalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>📅 Nuova Data Speciale</Text>
-              <TouchableOpacity onPress={() => setDateModalVisible(false)} style={styles.closeButton}>
-                <Ionicons name="close" size={24} color="#fff" />
-              </TouchableOpacity>
-            </View>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Titolo (es. Anniversario)"
-              placeholderTextColor="#666"
-              value={newDateTitle}
-              onChangeText={setNewDateTitle}
-            />
-
-            <TouchableOpacity style={styles.datePickerButton} onPress={() => setDatePickerVisible(true)}>
-              <Ionicons name="calendar" size={20} color="#ff6b8a" />
-              <Text style={styles.datePickerText}>
-                {newDateDate ? format(parseISO(newDateDate), 'd MMMM yyyy', { locale: it }) : 'Seleziona data'}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.saveButton, (!newDateTitle.trim() || !newDateDate) && styles.saveButtonDisabled]}
-              onPress={addSpecialDate}
-              disabled={!newDateTitle.trim() || !newDateDate}
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
+          <TouchableOpacity 
+            style={styles.modalOverlayTouch} 
+            activeOpacity={1} 
+            onPress={() => Keyboard.dismiss()}
+          >
+            <ScrollView 
+              style={styles.dateModalScroll}
+              contentContainerStyle={styles.dateModalScrollContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
             >
-              <Text style={styles.saveButtonText}>Salva</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>📅 Nuova Data Speciale</Text>
+                  <TouchableOpacity onPress={() => { setDateModalVisible(false); setDatePickerVisible(false); }} style={styles.closeButton}>
+                    <Ionicons name="close" size={24} color="#fff" />
+                  </TouchableOpacity>
+                </View>
 
-      {/* Date Picker Modal */}
-      <Modal visible={datePickerVisible} animationType="fade" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.datePickerModal}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Seleziona Data</Text>
-              <TouchableOpacity onPress={() => setDatePickerVisible(false)} style={styles.closeButton}>
-                <Ionicons name="close" size={24} color="#fff" />
-              </TouchableOpacity>
-            </View>
-            <Calendar
-              onDayPress={(day: any) => { setNewDateDate(day.dateString); setDatePickerVisible(false); }}
-              markedDates={newDateDate ? { [newDateDate]: { selected: true, selectedColor: '#ff6b8a' } } : {}}
-              theme={{ calendarBackground: '#2a2a4e', selectedDayBackgroundColor: '#ff6b8a', selectedDayTextColor: '#fff', todayTextColor: '#ff6b8a', dayTextColor: '#fff', textDisabledColor: '#444', monthTextColor: '#fff', arrowColor: '#ff6b8a' }}
-              style={styles.calendar}
-            />
-          </View>
-        </View>
+                <Text style={styles.inputLabel}>Titolo</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Es. Anniversario, Compleanno..."
+                  placeholderTextColor="#666"
+                  value={newDateTitle}
+                  onChangeText={setNewDateTitle}
+                  returnKeyType="done"
+                  onSubmitEditing={() => Keyboard.dismiss()}
+                />
+
+                <Text style={styles.inputLabel}>Data</Text>
+                <TouchableOpacity style={styles.datePickerButton} onPress={() => setDatePickerVisible(!datePickerVisible)}>
+                  <Ionicons name="calendar" size={20} color="#ff6b8a" />
+                  <Text style={styles.datePickerText}>
+                    {newDateDate ? format(parseISO(newDateDate), 'd MMMM yyyy', { locale: it }) : 'Seleziona data'}
+                  </Text>
+                  <Ionicons name={datePickerVisible ? "chevron-up" : "chevron-down"} size={20} color="#888" />
+                </TouchableOpacity>
+
+                {/* Inline Calendar */}
+                {datePickerVisible && (
+                  <View style={styles.inlineCalendar}>
+                    <Calendar
+                      onDayPress={(day: any) => { setNewDateDate(day.dateString); setDatePickerVisible(false); }}
+                      markedDates={newDateDate ? { [newDateDate]: { selected: true, selectedColor: '#ff6b8a' } } : {}}
+                      minDate={format(new Date(), 'yyyy-MM-dd')}
+                      theme={{ 
+                        calendarBackground: '#1a1a2e', 
+                        selectedDayBackgroundColor: '#ff6b8a', 
+                        selectedDayTextColor: '#fff', 
+                        todayTextColor: '#ff6b8a', 
+                        dayTextColor: '#fff', 
+                        textDisabledColor: '#444', 
+                        monthTextColor: '#fff', 
+                        arrowColor: '#ff6b8a' 
+                      }}
+                    />
+                  </View>
+                )}
+
+                <TouchableOpacity
+                  style={[styles.saveButton, (!newDateTitle.trim() || !newDateDate) && styles.saveButtonDisabled]}
+                  onPress={addSpecialDate}
+                  disabled={!newDateTitle.trim() || !newDateDate}
+                >
+                  <Ionicons name="checkmark-circle" size={20} color="#fff" />
+                  <Text style={styles.saveButtonText}>Salva</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </TouchableOpacity>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );
@@ -713,9 +739,11 @@ const styles = StyleSheet.create({
   countdownDaysLabel: { fontSize: 11, color: '#888' },
   
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
+  modalOverlayTouch: { flex: 1, justifyContent: 'flex-end' },
   modalContent: { backgroundColor: '#1e1e38', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, paddingBottom: 40 },
   wishlistModalContent: { backgroundColor: '#1e1e38', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, paddingBottom: 30, maxHeight: '85%' },
-  datePickerModal: { backgroundColor: '#1e1e38', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24 },
+  dateModalScroll: { maxHeight: '95%' },
+  dateModalScrollContent: { flexGrow: 1, justifyContent: 'flex-end' },
   
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   modalTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
@@ -752,16 +780,15 @@ const styles = StyleSheet.create({
   wishlistItemRight: {},
   heartFilled: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255, 107, 138, 0.2)', justifyContent: 'center', alignItems: 'center' },
   heartOutline: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#3a3a5e', justifyContent: 'center', alignItems: 'center' },
-  matchBadge: { backgroundColor: '#2ed573', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
-  matchText: { color: '#fff', fontSize: 12, fontWeight: '600' },
   playBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#ff6b8a', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14, gap: 4 },
   playText: { color: '#fff', fontSize: 13, fontWeight: '600' },
   
+  inputLabel: { color: '#aaa', fontSize: 14, marginBottom: 8, marginTop: 8 },
   input: { backgroundColor: '#2a2a4e', borderRadius: 14, padding: 16, color: '#fff', fontSize: 16, marginBottom: 16, borderWidth: 1, borderColor: '#3a3a5e' },
-  datePickerButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#2a2a4e', borderRadius: 14, padding: 16, marginBottom: 24, borderWidth: 1, borderColor: '#3a3a5e', gap: 12 },
-  datePickerText: { color: '#fff', fontSize: 16 },
-  calendar: { borderRadius: 16, overflow: 'hidden' },
-  saveButton: { alignItems: 'center', justifyContent: 'center', backgroundColor: '#ff6b8a', padding: 18, borderRadius: 16 },
+  datePickerButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#2a2a4e', borderRadius: 14, padding: 16, marginBottom: 8, borderWidth: 1, borderColor: '#3a3a5e', gap: 12 },
+  datePickerText: { color: '#fff', fontSize: 16, flex: 1 },
+  inlineCalendar: { marginBottom: 16, borderRadius: 14, overflow: 'hidden', backgroundColor: '#1a1a2e' },
+  saveButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ff6b8a', padding: 18, borderRadius: 16, gap: 8, marginTop: 8 },
   saveButtonDisabled: { opacity: 0.5 },
   saveButtonText: { color: '#fff', fontSize: 17, fontWeight: '600' },
 });
