@@ -731,6 +731,8 @@ const styles = StyleSheet.create({
   heartOutline: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#3a3a5e', justifyContent: 'center', alignItems: 'center' },
   matchBadge: { backgroundColor: '#2ed573', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
   matchText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+  playBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#ff6b8a', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14, gap: 4 },
+  playText: { color: '#fff', fontSize: 13, fontWeight: '600' },
   
   input: { backgroundColor: '#2a2a4e', borderRadius: 14, padding: 16, color: '#fff', fontSize: 16, marginBottom: 16, borderWidth: 1, borderColor: '#3a3a5e' },
   datePickerButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#2a2a4e', borderRadius: 14, padding: 16, marginBottom: 24, borderWidth: 1, borderColor: '#3a3a5e', gap: 12 },
