@@ -223,18 +223,53 @@ class LoveNoteCreate(BaseModel):
 
 # Love Dice data
 LOVE_DICE_ACTIONS = [
-    "Bacia", "Accarezza", "Massaggia", "Sussurra a", "Lecca", "Soffia su", 
-    "Mordicchia", "Abbraccia", "Strofina", "Tocca dolcemente"
+    # Dolci
+    "Bacia", "Accarezza", "Massaggia", "Sussurra a", "Abbraccia", 
+    "Tocca dolcemente", "Sfiora", "Coccola", "Stringi",
+    # Sensuali
+    "Lecca", "Soffia su", "Mordicchia", "Strofina", "Esplora con le dita",
+    "Succhia delicatamente", "Graffia leggermente", "Pizzica dolcemente",
+    # Piccanti
+    "Morsica", "Lecca lentamente", "Bacia appassionatamente", 
+    "Accarezza sensualmente", "Premi il corpo contro", "Strusciati su",
+    "Respira caldo su", "Passa la lingua su", "Bacia umido",
+    # Audaci
+    "Lecce a spirale", "Mordi e tira", "Succhia forte", 
+    "Afferra con decisione", "Spingi contro"
 ]
 
 LOVE_DICE_BODY_PARTS = [
-    "collo", "labbra", "orecchio", "schiena", "pancia", "interno coscia",
-    "piedi", "mani", "spalle", "petto"
+    # Classici
+    "collo", "labbra", "orecchio", "schiena", "pancia",
+    # Sensuali  
+    "interno coscia", "fianchi", "glutei", "petto", "capezzoli",
+    # Intimi
+    "inguine", "basso ventre", "osso del bacino", "incavo del collo",
+    "dietro il ginocchio", "caviglia", "polso", "dita",
+    # Piccanti
+    "lato del seno", "zona lombare", "sotto l'ombelico", 
+    "attaccatura dei capelli", "lobo dell'orecchio",
+    # Audaci
+    "parte alta dell'interno coscia", "curva della schiena",
+    "zona bikini", "solco del sedere"
 ]
 
 LOVE_DICE_DURATION = [
-    "per 10 secondi", "per 30 secondi", "per 1 minuto", "finché non ride",
-    "finché non sospira", "a occhi chiusi", "lentamente", "intensamente"
+    "per 10 secondi", "per 30 secondi", "per 1 minuto", "per 2 minuti",
+    "finché non geme", "finché non sospira", "finché non trema",
+    "a occhi chiusi", "lentamente", "intensamente", "con passione",
+    "mentre ti guarda negli occhi", "da dietro", "bendato/a",
+    "sussurrando cose sporche", "mentre ti tocchi", "senza fermarti",
+    "alternando velocità", "usando solo la punta della lingua",
+    "con ghiaccio in bocca", "dopo aver bevuto qualcosa di caldo"
+]
+
+LOVE_DICE_SCENARIOS = [
+    "Al buio completo", "Con musica sensuale", "Sotto la doccia",
+    "Sul divano", "Contro il muro", "Sul tavolo", "A letto",
+    "In cucina", "Con candele accese", "Allo specchio",
+    "Con una benda sugli occhi", "Legati le mani", "In ginocchio",
+    "Sdraiato/a a pancia in giù", "Seduto/a sulle gambe"
 ]
 
 SPICY_CHALLENGES = [
