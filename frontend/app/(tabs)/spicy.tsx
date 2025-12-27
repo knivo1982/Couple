@@ -103,13 +103,15 @@ export default function SpicyScreen() {
       try {
         const wishlistData = await wishlistAPI.get(user.couple_code, user.id);
         // API returns { my_wishes: [], unlocked_wishes: [], partner_secret_wishes_count: 0 }
+        console.log('Wishlist data:', JSON.stringify(wishlistData));
         const allWishes = [
           ...(wishlistData?.my_wishes || []),
           ...(wishlistData?.unlocked_wishes || [])
         ];
+        console.log('All wishes:', JSON.stringify(allWishes));
         setWishlist(allWishes);
       } catch (e) {
-        console.log('Wishlist not available');
+        console.log('Wishlist not available', e);
         setWishlist([]);
       }
       
