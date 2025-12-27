@@ -453,7 +453,10 @@ export default function CalendarScreen() {
                 <View style={styles.actionButtons}>
                   <TouchableOpacity 
                     style={[styles.saveBtn, styles.deleteBtnStyle]} 
-                    onPress={() => deleteIntimacy(getEntryForDate(selectedDate).id)}
+                    onPress={() => {
+                      const entry = getEntryForDate(selectedDate);
+                      if (entry) deleteIntimacy(entry.id);
+                    }}
                   >
                     <Ionicons name="trash" size={20} color="#fff" />
                     <Text style={styles.saveBtnText}>Elimina</Text>
