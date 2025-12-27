@@ -242,7 +242,15 @@ export default function CalendarScreen() {
     try {
       console.log('Deleting entry:', entryId);
       await intimacyAPI.delete(entryId);
-      await loadData();
+      
+      // Reload data from server
+      if (user?.couple_code) {
+        const entries = await intimacyAPI.getAll(user.couple_code);
+        setIntimacyEntries(entries);
+      }
+      
+      // Force calendar refresh
+      setCalendarKey(prev => prev + 1);
       setIntimacyModalVisible(false);
       setSelectedDate(null);
     } catch (error) {
