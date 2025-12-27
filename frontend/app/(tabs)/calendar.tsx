@@ -609,8 +609,8 @@ const styles = StyleSheet.create({
   label: { color: '#aaa', fontSize: 14, marginBottom: 10, marginTop: 16, fontWeight: '500' },
   input: { backgroundColor: '#2a2a4e', borderRadius: 14, padding: 16, color: '#fff', fontSize: 16, borderWidth: 1, borderColor: '#3a3a5e' },
   
-  dateBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#2a2a4e', borderRadius: 14, padding: 16, gap: 12, borderWidth: 1, borderColor: '#3a3a5e' },
-  dateBtnText: { color: '#fff', fontSize: 16 },
+  dateBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#2a2a4e', borderRadius: 14, padding: 16, gap: 12, borderWidth: 1, borderColor: '#3a3a5e', justifyContent: 'space-between' },
+  dateBtnText: { color: '#fff', fontSize: 16, flex: 1 },
   
   numberRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#2a2a4e', borderRadius: 14, padding: 8, borderWidth: 1, borderColor: '#3a3a5e' },
   numBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#ff6b8a', justifyContent: 'center', alignItems: 'center' },
