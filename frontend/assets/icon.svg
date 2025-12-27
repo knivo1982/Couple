@@ -1,0 +1,49 @@
+<svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="50%" style="stop-color:#2a2a4e"/>
+      <stop offset="100%" style="stop-color:#1a1a2e"/>
+    </linearGradient>
+    <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b8a"/>
+      <stop offset="100%" style="stop-color:#ff4757"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="220" fill="url(#bgGradient)"/>
+  
+  <!-- Decorative circles -->
+  <circle cx="200" cy="200" r="80" fill="#ff6b8a" opacity="0.1"/>
+  <circle cx="824" cy="824" r="100" fill="#ff6b8a" opacity="0.1"/>
+  <circle cx="850" cy="200" r="60" fill="#ff6b8a" opacity="0.08"/>
+  
+  <!-- Heart shape in center -->
+  <path d="M512 750 
+           C512 750 280 580 280 420 
+           C280 320 360 260 440 260 
+           C480 260 512 290 512 290 
+           C512 290 544 260 584 260 
+           C664 260 744 320 744 420 
+           C744 580 512 750 512 750Z" 
+        fill="url(#heartGradient)"/>
+  
+  <!-- Male symbol ♂ -->
+  <g transform="translate(380, 380)">
+    <circle cx="60" cy="80" r="45" stroke="#fff" stroke-width="12" fill="none"/>
+    <line x1="95" y1="45" x2="140" y2="0" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
+    <line x1="140" y1="0" x2="110" y2="0" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
+    <line x1="140" y1="0" x2="140" y2="30" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Female symbol ♀ -->
+  <g transform="translate(520, 400)">
+    <circle cx="60" cy="50" r="45" stroke="#fff" stroke-width="12" fill="none"/>
+    <line x1="60" y1="95" x2="60" y2="160" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
+    <line x1="30" y1="130" x2="90" y2="130" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
+  </g>
+  
+  <!-- App name -->
+  <text x="512" y="880" text-anchor="middle" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#fff">COUPLE BLISS</text>
+</svg>
