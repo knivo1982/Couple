@@ -52,7 +52,7 @@ const LOCATIONS = [
 ];
 
 export default function CalendarScreen() {
-  const { user, fertilityData, setFertilityData, intimacyEntries, setIntimacyEntries } = useStore();
+  const { user, fertilityData, setFertilityData, intimacyEntries, setIntimacyEntries, setStats } = useStore();
   const [cycleModalVisible, setCycleModalVisible] = useState(false);
   const [intimacyModalVisible, setIntimacyModalVisible] = useState(false);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
