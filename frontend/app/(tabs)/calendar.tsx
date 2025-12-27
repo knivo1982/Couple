@@ -232,34 +232,23 @@ export default function CalendarScreen() {
 
   // Delete intimacy entry
   const deleteIntimacy = async (entryId: string) => {
-    console.log('Deleting entry:', entryId);
-    Alert.alert(
-      'Elimina evento',
-      'Sei sicuro di voler eliminare questo momento?',
-      [
-        { text: 'Annulla', style: 'cancel' },
-        {
-          text: 'Elimina',
-          style: 'destructive',
-          onPress: async () => {
-            setIsLoading(true);
-            try {
-              console.log('Calling delete API for:', entryId);
-              await intimacyAPI.delete(entryId);
-              console.log('Delete successful');
-              await loadData();
-              setIntimacyModalVisible(false);
-              Alert.alert('Eliminato', 'Evento rimosso');
-            } catch (error) {
-              console.error('Delete error:', error);
-              Alert.alert('Errore', 'Impossibile eliminare');
-            } finally {
-              setIsLoading(false);
-            }
-          }
-        }
-      ]
-    );
+    if (!entryId) {
+      console.log('No entry ID provided');
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      console.log('Deleting entry:', entryId);
+      await intimacyAPI.delete(entryId);
+      await loadData();
+      setIntimacyModalVisible(false);
+      setSelectedDate(null);
+    } catch (error) {
+      console.error('Delete error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
