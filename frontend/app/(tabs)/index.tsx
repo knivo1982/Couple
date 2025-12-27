@@ -32,8 +32,25 @@ export default function Home() {
   const [todayMoods, setTodayMoods] = useState<any[]>([]);
   const [unreadNotes, setUnreadNotes] = useState(0);
 
+  // Check if user was linked by partner (refresh user data)
+  const checkUserUpdates = async () => {
+    if (!user?.id) return;
+    try {
+      const updatedUser = await userAPI.get(user.id);
+      // If partner_id changed, update local user
+      if (updatedUser.partner_id !== user.partner_id) {
+        await saveUser(updatedUser);
+      }
+    } catch (error) {
+      console.log('Error checking user updates:', error);
+    }
+  };
+
   const loadData = async () => {
     if (!user?.couple_code) return;
+    
+    // First check if user was linked
+    await checkUserUpdates();
     
     try {
       const [statsData, suggestion, weekly, dates] = await Promise.all([
@@ -91,6 +108,7 @@ export default function Home() {
 
   const onRefresh = async () => {
     setRefreshing(true);
+    await checkUserUpdates();
     await loadData();
     setRefreshing(false);
   };
