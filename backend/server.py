@@ -1028,26 +1028,43 @@ async def get_intimacy_stats(couple_code: str):
         level = "Nuova Coppia"
         level_emoji = "🌱"
     
-    # Badges system
+    # Badges system - return IDs that match frontend
     badges = []
-    if len(entries) >= 100:
-        badges.append({"name": "Centenario", "icon": "💯", "desc": "100 momenti insieme!"})
-    if len(entries) >= 50:
-        badges.append({"name": "Veterani", "icon": "🏆", "desc": "50 momenti insieme"})
-    if len(entries) >= 10:
-        badges.append({"name": "Affiatati", "icon": "⭐", "desc": "10 momenti insieme"})
-    if streak >= 4:
-        badges.append({"name": "Costanti", "icon": "📈", "desc": f"{streak} settimane consecutive"})
-    if streak >= 8:
-        badges.append({"name": "Inarrestabili", "icon": "🚀", "desc": "8+ settimane di streak"})
-    if avg_quality >= 4.5:
-        badges.append({"name": "Qualità Top", "icon": "💎", "desc": "Media qualità eccellente"})
-    if monthly_count >= 12:
-        badges.append({"name": "Maratoneti", "icon": "🏃", "desc": "12+ volte questo mese"})
-    if favorite_day == "Domenica" or favorite_day == "Sabato":
-        badges.append({"name": "Weekend Warriors", "icon": "🎉", "desc": "Amanti del weekend"})
-    if spontaneity >= 70:
-        badges.append({"name": "Imprevedibili", "icon": "🎲", "desc": "Alta spontaneità"})
+    
+    # First time badge - if at least 1 entry
+    if len(entries) >= 1:
+        badges.append("first_time")
+    
+    # Week streak - 7+ days consecutive (simplified: check if streak >= 1)
+    if streak >= 1:
+        badges.append("week_streak")
+    
+    # Quality king - average quality > 4
+    if avg_quality > 4:
+        badges.append("quality_king")
+    
+    # Explorer - 5+ different locations (check unique locations)
+    unique_locations = set(e.get("location") for e in entries if e.get("location"))
+    if len(unique_locations) >= 5:
+        badges.append("explorer")
+    
+    # Marathon - any session 60+ minutes
+    has_marathon = any(e.get("duration_minutes", 0) >= 60 for e in entries)
+    if has_marathon:
+        badges.append("marathon")
+    
+    # Morning person - any entry with morning time
+    # For simplicity, check if entries exist in early dates (we don't have time data)
+    if len(entries) >= 5:  # Simplified: unlock after 5 entries
+        badges.append("morning")
+    
+    # Night owl - simplified: unlock after 8 entries
+    if len(entries) >= 8:
+        badges.append("night_owl")
+    
+    # Perfect month - 20+ in a month
+    if monthly_count >= 20:
+        badges.append("perfect_month")
     
     # Next milestone
     total = len(entries)
