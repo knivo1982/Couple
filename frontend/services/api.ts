@@ -38,7 +38,7 @@ export const cycleAPI = {
   save: async (userId: string, lastPeriodDate: string, cycleLength: number, periodLength: number) => {
     const response = await api.post('/cycle', {
       user_id: userId,
-      last_period_date: lastPeriodDate,
+      start_date: lastPeriodDate,
       cycle_length: cycleLength,
       period_length: periodLength,
     });
