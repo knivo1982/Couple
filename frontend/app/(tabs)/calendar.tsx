@@ -67,27 +67,47 @@ export default function CalendarScreen() {
   const [duration, setDuration] = useState('');
   const [notes, setNotes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isPolling, setIsPolling] = useState(false);
   const [cycleConfigured, setCycleConfigured] = useState(false);
   const [positions, setPositions] = useState<any[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarKey, setCalendarKey] = useState(0);
 
-  // Create sets for faster lookup
+  // Create sets for faster lookup - memoize to prevent re-renders
   const intimacyDates = new Set(intimacyEntries?.map((e: any) => e.date) || []);
   const periodDates = new Set(fertilityData?.periods || []);
   const ovulationDates = new Set(fertilityData?.ovulation_days || []);
   const fertileDates = new Set(fertilityData?.fertile_days || []);
 
-    useEffect(() => {
-        loadData();
-        
-        // Auto-refresh every 30 seconds for real-time sync
-        const pollInterval = setInterval(() => {
-          loadData();
-        }, 30000);
-        
-        return () => clearInterval(pollInterval);
-      }, [user]);
+  useEffect(() => {
+    loadData();
+    
+    // Auto-refresh every 30 seconds for real-time sync
+    const pollInterval = setInterval(() => {
+      if (!isPolling && !intimacyModalVisible && !cycleModalVisible) {
+        loadDataSilent();
+      }
+    }, 30000);
+    
+    return () => clearInterval(pollInterval);
+  }, [user]);
+
+  // Silent load for polling (no loading state changes)
+  const loadDataSilent = async () => {
+    if (!user || isPolling) return;
+    setIsPolling(true);
+    
+    try {
+      if (user.couple_code) {
+        const entries = await intimacyAPI.getAll(user.couple_code);
+        setIntimacyEntries(entries);
+      }
+    } catch (error) {
+      console.error('Polling error:', error);
+    } finally {
+      setIsPolling(false);
+    }
+  };
 
   const loadData = async () => {
     if (!user) return;
@@ -390,15 +410,15 @@ export default function CalendarScreen() {
                     onDayPress={(day: any) => { setLastPeriodDate(day.dateString); setDatePickerVisible(false); }}
                     markedDates={lastPeriodDate ? { [lastPeriodDate]: { selected: true, selectedColor: '#ff6b8a' } } : {}}
                     maxDate={format(new Date(), 'yyyy-MM-dd')}
-                    theme={{
-                      calendarBackground: '#1a1a2e',
-                      selectedDayBackgroundColor: '#ff6b8a',
-                      selectedDayTextColor: '#fff',
-                      todayTextColor: '#ff6b8a',
-                      dayTextColor: '#fff',
-                      textDisabledColor: '#444',
-                      monthTextColor: '#fff',
-                      arrowColor: '#ff6b8a'
+                    theme={{ 
+                      calendarBackground: '#1a1a2e', 
+                      selectedDayBackgroundColor: '#ff6b8a', 
+                      selectedDayTextColor: '#fff', 
+                      todayTextColor: '#ff6b8a', 
+                      dayTextColor: '#fff', 
+                      textDisabledColor: '#444', 
+                      monthTextColor: '#fff', 
+                      arrowColor: '#ff6b8a' 
                     }}
                   />
                 </View>
@@ -500,8 +520,8 @@ export default function CalendarScreen() {
               {/* Show delete button if entry exists for this date */}
               {selectedDate && getEntryForDate(selectedDate) ? (
                 <View style={styles.actionButtons}>
-                  <TouchableOpacity
-                    style={[styles.saveBtn, styles.deleteBtnStyle]}
+                  <TouchableOpacity 
+                    style={[styles.saveBtn, styles.deleteBtnStyle]} 
                     onPress={() => {
                       const entry = getEntryForDate(selectedDate);
                       if (entry) deleteIntimacy(entry.id);
