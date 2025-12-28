@@ -67,12 +67,13 @@ export default function CalendarScreen() {
   const [duration, setDuration] = useState('');
   const [notes, setNotes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isPolling, setIsPolling] = useState(false);
   const [cycleConfigured, setCycleConfigured] = useState(false);
   const [positions, setPositions] = useState<any[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarKey, setCalendarKey] = useState(0);
 
-  // Create sets for faster lookup
+  // Create sets for faster lookup - memoize to prevent re-renders
   const intimacyDates = new Set(intimacyEntries?.map((e: any) => e.date) || []);
   const periodDates = new Set(fertilityData?.periods || []);
   const ovulationDates = new Set(fertilityData?.ovulation_days || []);
@@ -83,11 +84,30 @@ export default function CalendarScreen() {
     
     // Auto-refresh every 30 seconds for real-time sync
     const pollInterval = setInterval(() => {
-      loadData();
+      if (!isPolling && !intimacyModalVisible && !cycleModalVisible) {
+        loadDataSilent();
+      }
     }, 30000);
     
     return () => clearInterval(pollInterval);
   }, [user]);
+
+  // Silent load for polling (no loading state changes)
+  const loadDataSilent = async () => {
+    if (!user || isPolling) return;
+    setIsPolling(true);
+    
+    try {
+      if (user.couple_code) {
+        const entries = await intimacyAPI.getAll(user.couple_code);
+        setIntimacyEntries(entries);
+      }
+    } catch (error) {
+      console.error('Polling error:', error);
+    } finally {
+      setIsPolling(false);
+    }
+  };
 
   const loadData = async () => {
     if (!user) return;
