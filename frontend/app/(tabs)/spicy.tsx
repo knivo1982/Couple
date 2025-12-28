@@ -88,11 +88,19 @@ export default function SpicyScreen() {
   
   const diceAnimation = useRef(new Animated.Value(0)).current;
   const timerInterval = useRef<any>(null);
+  const pollInterval = useRef<any>(null);
 
   useEffect(() => {
     loadData();
+    
+    // Auto-refresh every 30 seconds for real-time sync
+    pollInterval.current = setInterval(() => {
+      loadData();
+    }, 30000);
+    
     return () => {
       if (timerInterval.current) clearInterval(timerInterval.current);
+      if (pollInterval.current) clearInterval(pollInterval.current);
     };
   }, [user]);
 
