@@ -13,7 +13,8 @@
       "bundleIdentifier": "com.couplebliss.app",
       "infoPlist": {
         "NSCameraUsageDescription": "Per scattare foto da condividere con il tuo partner",
-        "NSPhotoLibraryUsageDescription": "Per scegliere foto da condividere"
+        "NSPhotoLibraryUsageDescription": "Per scegliere foto da condividere",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -56,8 +57,10 @@
     },
     "extra": {
       "eas": {
-        "projectId": "1ad61103-74eb-460d-99ab-e1bb56462148"
-      }
-    }
+        "projectId": "bc459fd4-465a-4e71-b7f4-fcb2638b3123"
+      },
+      "router": {}
+    },
+    "owner": "knivo"
   }
 }
