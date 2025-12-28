@@ -9,6 +9,9 @@ import {
   TextInput,
   Alert,
   Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,7 +19,6 @@ import { useStore } from '../../store/useStore';
 import { moodAPI, loveNotesAPI } from '../../services/api';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
 
@@ -24,6 +26,38 @@ const MOOD_EMOJIS = ['😢', '😔', '😐', '😊', '🥰'];
 const ENERGY_EMOJIS = ['😴', '🥱', '😌', '💪', '⚡'];
 const STRESS_EMOJIS = ['😌', '🙂', '😬', '😰', '🤯'];
 const LIBIDO_EMOJIS = ['❄️', '🌸', '🌺', '🔥', '💋'];
+
+// Template di note precompilate
+const NOTE_TEMPLATES: { [key: string]: string[] } = {
+  sweet: [
+    'Grazie di esistere nella mia vita 🌹',
+    'Sei il mio pensiero fisso 💭',
+    'Mi manchi tantissimo 💕',
+    'Sei la persona più speciale che conosca ✨',
+    'Non vedo l\'ora di abbracciarti 🤗',
+  ],
+  spicy: [
+    'Stasera ho voglia di te... 🔥',
+    'Non riesco a smettere di pensare a ieri notte 😏',
+    'Mi fai impazzire... in senso buono 😈',
+    'Ho delle idee per stasera... 💋',
+    'Sei irresistibile 🥵',
+  ],
+  funny: [
+    'Sei il mio preferito tra tutti i miei partner 😂',
+    'Ti amo più del wifi ❤️📶',
+    'Sei la mia persona strana preferita 🤪',
+    'Senza di te sarei single 🤷‍♂️',
+    'Sei il formaggio dei miei maccheroni 🧀',
+  ],
+  romantic: [
+    'Sei la cosa più bella che mi sia mai capitata 💕',
+    'Non vedo l\'ora di rivederti ❤️',
+    'Con te ogni giorno è speciale 🌟',
+    'Sei il mio per sempre 💍',
+    'Ti amo più di ieri, meno di domani ❤️',
+  ],
+};
 
 export default function MoodScreen() {
   const { user } = useStore();
@@ -34,7 +68,6 @@ export default function MoodScreen() {
   const [noteModalVisible, setNoteModalVisible] = useState(false);
   const [receivedNotes, setReceivedNotes] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [noteTemplates, setNoteTemplates] = useState<any>(null);
   
   // Mood form state
   const [mood, setMood] = useState(3);
@@ -55,10 +88,9 @@ export default function MoodScreen() {
     if (!user?.couple_code) return;
 
     try {
-      const [todayEntries, stats, templates, unread, notes] = await Promise.all([
+      const [todayEntries, stats, unread, notes] = await Promise.all([
         moodAPI.getToday(user.couple_code),
         moodAPI.getStats(user.couple_code),
-        loveNotesAPI.getTemplates(),
         loveNotesAPI.getUnread(user.couple_code, user.id),
         loveNotesAPI.getReceived(user.couple_code, user.id),
       ]);
@@ -70,7 +102,6 @@ export default function MoodScreen() {
       setTodayMood(myMood);
       setPartnerMood(partnerMoodEntry);
       setMoodStats(stats);
-      setNoteTemplates(templates);
       setUnreadCount(unread.count);
       setReceivedNotes(notes);
     } catch (error) {
@@ -136,6 +167,16 @@ export default function MoodScreen() {
       case 'funny': return '#ffa502';
       case 'romantic': return '#ff6b8a';
       default: return '#888';
+    }
+  };
+
+  const getCategoryEmoji = (category: string) => {
+    switch (category) {
+      case 'sweet': return '💕';
+      case 'spicy': return '🔥';
+      case 'funny': return '😄';
+      case 'romantic': return '💋';
+      default: return '💬';
     }
   };
 
@@ -298,102 +339,140 @@ export default function MoodScreen() {
 
       {/* Mood Entry Modal */}
       <Modal visible={moodModalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <ScrollView style={styles.modalScroll}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Come stai oggi?</Text>
-                <TouchableOpacity onPress={() => setMoodModalVisible(false)}>
-                  <Ionicons name="close" size={28} color="#fff" />
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
+          <TouchableOpacity 
+            style={styles.modalOverlayTouch} 
+            activeOpacity={1} 
+            onPress={() => Keyboard.dismiss()}
+          >
+            <ScrollView 
+              style={styles.modalScroll}
+              contentContainerStyle={styles.modalScrollContent}
+              keyboardShouldPersistTaps="handled"
+            >
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Come stai oggi?</Text>
+                  <TouchableOpacity onPress={() => setMoodModalVisible(false)}>
+                    <Ionicons name="close" size={28} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+
+                {renderMoodSlider('Umore', mood, setMood, MOOD_EMOJIS)}
+                {renderMoodSlider('Energia', energy, setEnergy, ENERGY_EMOJIS)}
+                {renderMoodSlider('Stress', stress, setStress, STRESS_EMOJIS)}
+                {renderMoodSlider('Desiderio', libido, setLibido, LIBIDO_EMOJIS)}
+
+                <Text style={styles.inputLabel}>Note (opzionale)</Text>
+                <TextInput
+                  style={styles.notesInput}
+                  placeholder="Come ti senti?"
+                  placeholderTextColor="#888"
+                  value={moodNotes}
+                  onChangeText={setMoodNotes}
+                  multiline
+                  returnKeyType="done"
+                  blurOnSubmit={true}
+                />
+
+                <TouchableOpacity style={styles.saveButton} onPress={saveMood}>
+                  <Text style={styles.saveButtonText}>Salva Mood</Text>
                 </TouchableOpacity>
               </View>
-
-              {renderMoodSlider('Umore', mood, setMood, MOOD_EMOJIS)}
-              {renderMoodSlider('Energia', energy, setEnergy, ENERGY_EMOJIS)}
-              {renderMoodSlider('Stress', stress, setStress, STRESS_EMOJIS)}
-              {renderMoodSlider('Desiderio', libido, setLibido, LIBIDO_EMOJIS)}
-
-              <Text style={styles.inputLabel}>Note (opzionale)</Text>
-              <TextInput
-                style={styles.notesInput}
-                placeholder="Come ti senti?"
-                placeholderTextColor="#888"
-                value={moodNotes}
-                onChangeText={setMoodNotes}
-                multiline
-              />
-
-              <TouchableOpacity style={styles.saveButton} onPress={saveMood}>
-                <Text style={styles.saveButtonText}>Salva Mood</Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </View>
+            </ScrollView>
+          </TouchableOpacity>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Send Note Modal */}
       <Modal visible={noteModalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Nota d'Amore 💌</Text>
-              <TouchableOpacity onPress={() => setNoteModalVisible(false)}>
-                <Ionicons name="close" size={28} color="#fff" />
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styles.inputLabel}>Categoria</Text>
-            <View style={styles.categoryPicker}>
-              {['sweet', 'spicy', 'funny', 'romantic'].map((cat) => (
-                <TouchableOpacity
-                  key={cat}
-                  style={[
-                    styles.categoryOption,
-                    noteCategory === cat && { backgroundColor: getCategoryColor(cat) },
-                  ]}
-                  onPress={() => setNoteCategory(cat)}
-                >
-                  <Text style={styles.categoryText}>
-                    {cat === 'sweet' ? '💕 Dolce' : cat === 'spicy' ? '🔥 Piccante' : cat === 'funny' ? '😄 Divertente' : '💋 Romantico'}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* Templates */}
-            {noteTemplates && noteTemplates[noteCategory] && (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.templatesScroll}>
-                {noteTemplates[noteCategory].map((template: string, index: number) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.templateChip}
-                    onPress={() => setNoteMessage(template)}
-                  >
-                    <Text style={styles.templateText}>{template}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            )}
-
-            <TextInput
-              style={styles.messageInput}
-              placeholder="Scrivi il tuo messaggio..."
-              placeholderTextColor="#888"
-              value={noteMessage}
-              onChangeText={setNoteMessage}
-              multiline
-            />
-
-            <TouchableOpacity
-              style={[styles.saveButton, !noteMessage.trim() && styles.buttonDisabled]}
-              onPress={sendNote}
-              disabled={!noteMessage.trim()}
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
+          <TouchableOpacity 
+            style={styles.modalOverlayTouch} 
+            activeOpacity={1} 
+            onPress={() => Keyboard.dismiss()}
+          >
+            <ScrollView 
+              style={styles.modalScroll}
+              contentContainerStyle={styles.modalScrollContent}
+              keyboardShouldPersistTaps="handled"
             >
-              <Ionicons name="send" size={20} color="#fff" />
-              <Text style={styles.saveButtonText}>Invia</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Nota d'Amore 💌</Text>
+                  <TouchableOpacity onPress={() => setNoteModalVisible(false)}>
+                    <Ionicons name="close" size={28} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+
+                <Text style={styles.inputLabel}>Categoria</Text>
+                <View style={styles.categoryPicker}>
+                  {['sweet', 'spicy', 'funny', 'romantic'].map((cat) => (
+                    <TouchableOpacity
+                      key={cat}
+                      style={[
+                        styles.categoryOption,
+                        noteCategory === cat && { backgroundColor: getCategoryColor(cat) },
+                      ]}
+                      onPress={() => setNoteCategory(cat)}
+                    >
+                      <Text style={styles.categoryText}>
+                        {getCategoryEmoji(cat)} {cat === 'sweet' ? 'Dolce' : cat === 'spicy' ? 'Piccante' : cat === 'funny' ? 'Divertente' : 'Romantico'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {/* Templates - now using local templates */}
+                <Text style={styles.inputLabel}>Scegli un messaggio precompilato</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.templatesScroll}>
+                  {NOTE_TEMPLATES[noteCategory]?.map((template: string, index: number) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={[
+                        styles.templateChip,
+                        noteMessage === template && styles.templateChipActive
+                      ]}
+                      onPress={() => setNoteMessage(template)}
+                    >
+                      <Text style={[
+                        styles.templateText,
+                        noteMessage === template && styles.templateTextActive
+                      ]}>{template}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+
+                <Text style={styles.inputLabel}>Oppure scrivi il tuo messaggio</Text>
+                <TextInput
+                  style={styles.messageInput}
+                  placeholder="Scrivi il tuo messaggio..."
+                  placeholderTextColor="#888"
+                  value={noteMessage}
+                  onChangeText={setNoteMessage}
+                  multiline
+                  returnKeyType="done"
+                  blurOnSubmit={true}
+                />
+
+                <TouchableOpacity
+                  style={[styles.saveButton, !noteMessage.trim() && styles.buttonDisabled]}
+                  onPress={sendNote}
+                  disabled={!noteMessage.trim()}
+                >
+                  <Ionicons name="send" size={20} color="#fff" />
+                  <Text style={styles.saveButtonText}>Invia</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </TouchableOpacity>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );
@@ -401,7 +480,7 @@ export default function MoodScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#1a1a2e' },
-  scrollContent: { padding: 20 },
+  scrollContent: { padding: 20, paddingBottom: 100 },
   header: { marginBottom: 24 },
   title: { fontSize: 28, fontWeight: 'bold', color: '#fff' },
   subtitle: { fontSize: 14, color: '#888', marginTop: 4, textTransform: 'capitalize' },
@@ -449,8 +528,10 @@ const styles = StyleSheet.create({
   noteTime: { fontSize: 11, color: '#666', marginTop: 8 },
   newDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#ff4757' },
   
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'flex-end' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
+  modalOverlayTouch: { flex: 1, justifyContent: 'flex-end' },
   modalScroll: { maxHeight: '90%' },
+  modalScrollContent: { flexGrow: 1, justifyContent: 'flex-end' },
   modalContent: { backgroundColor: '#2a2a4e', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
   modalTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
@@ -464,15 +545,17 @@ const styles = StyleSheet.create({
   
   inputLabel: { fontSize: 14, color: '#888', marginBottom: 8, marginTop: 8 },
   notesInput: { backgroundColor: '#1a1a2e', borderRadius: 12, padding: 16, color: '#fff', fontSize: 16, height: 80, textAlignVertical: 'top', borderWidth: 1, borderColor: '#3a3a5e' },
-  messageInput: { backgroundColor: '#1a1a2e', borderRadius: 12, padding: 16, color: '#fff', fontSize: 16, height: 100, textAlignVertical: 'top', borderWidth: 1, borderColor: '#3a3a5e', marginTop: 16 },
+  messageInput: { backgroundColor: '#1a1a2e', borderRadius: 12, padding: 16, color: '#fff', fontSize: 16, height: 100, textAlignVertical: 'top', borderWidth: 1, borderColor: '#3a3a5e' },
   
   categoryPicker: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   categoryOption: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: '#3a3a5e' },
   categoryText: { color: '#fff', fontSize: 12 },
   
-  templatesScroll: { marginTop: 16, marginBottom: 8 },
-  templateChip: { backgroundColor: '#1a1a2e', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 16, marginRight: 8, maxWidth: 200, borderWidth: 1, borderColor: '#3a3a5e' },
+  templatesScroll: { marginTop: 8, marginBottom: 8 },
+  templateChip: { backgroundColor: '#1a1a2e', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 16, marginRight: 8, maxWidth: 220, borderWidth: 1, borderColor: '#3a3a5e' },
+  templateChipActive: { borderColor: '#ff6b8a', backgroundColor: 'rgba(255, 107, 138, 0.15)' },
   templateText: { color: '#aaa', fontSize: 12 },
+  templateTextActive: { color: '#ff6b8a' },
   
   saveButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ff6b8a', padding: 16, borderRadius: 12, gap: 8, marginTop: 20 },
   buttonDisabled: { opacity: 0.5 },
