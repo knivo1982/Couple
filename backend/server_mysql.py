@@ -224,14 +224,18 @@ SPICY_CHALLENGES = [
 ]
 
 POSITION_SUGGESTIONS = [
-    {"id": "missionary", "name": "Missionario Classico", "description": "Faccia a faccia, intimo e romantico", "difficulty": 1, "category": "classic"},
-    {"id": "cowgirl", "name": "Cowgirl", "description": "Lei sopra, lui sdraiato", "difficulty": 1, "category": "classic"},
-    {"id": "doggy", "name": "Pecorina", "description": "Da dietro, profonda penetrazione", "difficulty": 1, "category": "classic"},
-    {"id": "spoon", "name": "Cucchiaio", "description": "Entrambi su un fianco, intimo e rilassato", "difficulty": 1, "category": "intimate"},
-    {"id": "lotus", "name": "Fiore di Loto", "description": "Lui seduto, lei sopra abbracciati", "difficulty": 2, "category": "intimate"},
-    {"id": "reverse_cowgirl", "name": "Cowgirl Inversa", "description": "Lei sopra girata di spalle", "difficulty": 2, "category": "adventurous"},
-    {"id": "standing", "name": "In Piedi", "description": "Faccia a faccia in piedi", "difficulty": 3, "category": "adventurous"},
-    {"id": "69", "name": "69", "description": "Piacere orale simultaneo", "difficulty": 2, "category": "oral"}
+    {"id": "missionary", "name": "Missionario Classico", "emoji": "💑", "description": "Faccia a faccia, intimo e romantico", "difficulty": "facile", "category": "classic"},
+    {"id": "cowgirl", "name": "Cowgirl", "emoji": "🤠", "description": "Lei sopra, lui sdraiato", "difficulty": "facile", "category": "classic"},
+    {"id": "doggy", "name": "Pecorina", "emoji": "🐕", "description": "Da dietro, profonda penetrazione", "difficulty": "facile", "category": "classic"},
+    {"id": "spoon", "name": "Cucchiaio", "emoji": "🥄", "description": "Entrambi su un fianco, intimo e rilassato", "difficulty": "facile", "category": "intimate"},
+    {"id": "lotus", "name": "Fiore di Loto", "emoji": "🪷", "description": "Lui seduto, lei sopra abbracciati", "difficulty": "medio", "category": "intimate"},
+    {"id": "reverse_cowgirl", "name": "Cowgirl Inversa", "emoji": "🔄", "description": "Lei sopra girata di spalle", "difficulty": "medio", "category": "adventurous"},
+    {"id": "standing", "name": "In Piedi", "emoji": "🧍", "description": "Faccia a faccia in piedi", "difficulty": "difficile", "category": "adventurous"},
+    {"id": "69", "name": "69", "emoji": "🔢", "description": "Piacere orale simultaneo", "difficulty": "medio", "category": "oral"},
+    {"id": "sideways", "name": "Di Lato", "emoji": "↔️", "description": "Entrambi di lato, faccia a faccia", "difficulty": "facile", "category": "intimate"},
+    {"id": "butterfly", "name": "Farfalla", "emoji": "🦋", "description": "Lei sul bordo del letto, lui in piedi", "difficulty": "medio", "category": "adventurous"},
+    {"id": "seated", "name": "Seduti", "emoji": "🪑", "description": "Lui seduto su una sedia, lei sopra", "difficulty": "medio", "category": "adventurous"},
+    {"id": "lazy_dog", "name": "Pecorina Pigra", "emoji": "😴", "description": "Lei sdraiata a pancia in giù, lui sopra", "difficulty": "facile", "category": "classic"}
 ]
 
 WISHLIST_ITEMS = [
