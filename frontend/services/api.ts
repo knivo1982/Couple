@@ -152,7 +152,11 @@ export const wishlistAPI = {
     return response.data;
   },
   toggle: async (coupleCode: string, userId: string, itemId: string) => {
-    const response = await api.post(`/wishlist/toggle?couple_code=${coupleCode}&user_id=${userId}&item_id=${itemId}`);
+    const response = await api.post('/wishlist/toggle', {
+      couple_code: coupleCode,
+      user_id: userId,
+      item_id: itemId
+    });
     return response.data;
   },
   delete: async (itemId: string) => {
