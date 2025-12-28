@@ -78,9 +78,16 @@ export default function CalendarScreen() {
   const ovulationDates = new Set(fertilityData?.ovulation_days || []);
   const fertileDates = new Set(fertilityData?.fertile_days || []);
 
-  useEffect(() => {
-    loadData();
-  }, [user]);
+    useEffect(() => {
+        loadData();
+        
+        // Auto-refresh every 30 seconds for real-time sync
+        const pollInterval = setInterval(() => {
+          loadData();
+        }, 30000);
+        
+        return () => clearInterval(pollInterval);
+      }, [user]);
 
   const loadData = async () => {
     if (!user) return;

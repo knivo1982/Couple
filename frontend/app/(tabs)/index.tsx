@@ -102,9 +102,16 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, [user]);
+    useEffect(() => {
+        loadData();
+        
+        // Auto-refresh every 30 seconds for real-time sync
+        const pollInterval = setInterval(() => {
+          loadData();
+        }, 30000);
+        
+        return () => clearInterval(pollInterval);
+      }, [user]);
 
   const onRefresh = async () => {
     setRefreshing(true);

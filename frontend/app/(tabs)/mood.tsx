@@ -80,9 +80,16 @@ export default function MoodScreen() {
   const [noteMessage, setNoteMessage] = useState('');
   const [noteCategory, setNoteCategory] = useState('sweet');
 
-  useEffect(() => {
-    loadData();
-  }, [user]);
+    useEffect(() => {
+       loadData();
+       
+       // Auto-refresh every 30 seconds for real-time sync
+       const pollInterval = setInterval(() => {
+         loadData();
+       }, 30000);
+       
+       return () => clearInterval(pollInterval);
+     }, [user]);
 
   const loadData = async () => {
     if (!user?.couple_code) return;
