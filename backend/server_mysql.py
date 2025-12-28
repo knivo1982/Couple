@@ -1050,6 +1050,178 @@ app.include_router(api_router)
 async def root():
     return {"message": "Couple Bliss API v1.0", "status": "running"}
 
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy_policy():
+    return """<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Couple Bliss</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #2a2a4e 100%); color: #fff; min-height: 100vh; line-height: 1.7; }
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+        header { text-align: center; margin-bottom: 40px; padding-bottom: 30px; border-bottom: 1px solid rgba(255, 107, 138, 0.3); }
+        .logo { font-size: 48px; margin-bottom: 10px; }
+        h1 { font-size: 32px; color: #ff6b8a; margin-bottom: 10px; }
+        .subtitle { color: #888; font-size: 14px; }
+        h2 { color: #ff6b8a; font-size: 20px; margin-top: 35px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid rgba(255, 107, 138, 0.2); }
+        h3 { color: #fff; font-size: 16px; margin-top: 20px; margin-bottom: 10px; }
+        p { color: #ccc; margin-bottom: 15px; }
+        ul { color: #ccc; margin-left: 25px; margin-bottom: 15px; }
+        li { margin-bottom: 8px; }
+        .highlight-box { background: rgba(255, 107, 138, 0.1); border: 1px solid rgba(255, 107, 138, 0.3); border-radius: 12px; padding: 20px; margin: 20px 0; }
+        .highlight-box.green { background: rgba(46, 213, 115, 0.1); border-color: rgba(46, 213, 115, 0.3); }
+        .contact-box { background: #2a2a4e; border-radius: 12px; padding: 25px; margin-top: 30px; text-align: center; }
+        .contact-box a { color: #ff6b8a; text-decoration: none; font-weight: 600; }
+        footer { text-align: center; margin-top: 50px; padding-top: 30px; border-top: 1px solid rgba(255, 107, 138, 0.2); color: #666; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">💕</div>
+            <h1>Privacy Policy</h1>
+            <p class="subtitle">Couple Bliss - Ultimo aggiornamento: 28 Gennaio 2025</p>
+        </header>
+
+        <section>
+            <h2>1. Introduzione</h2>
+            <p>Couple Bliss ("noi", "nostro" o "App") rispetta la tua privacy. Questa Privacy Policy spiega come raccogliamo, utilizziamo e proteggiamo i tuoi dati personali.</p>
+        </section>
+
+        <section>
+            <h2>2. Dati che Raccogliamo</h2>
+            <h3>a) Dati dell'account</h3>
+            <ul><li>Nome e genere</li><li>Codice coppia</li></ul>
+            <h3>b) Dati sulla salute (opzionali)</h3>
+            <ul><li>Date del ciclo mestruale</li><li>Giorni fertili calcolati</li></ul>
+            <h3>c) Dati sull'intimità (opzionali)</h3>
+            <ul><li>Date dei momenti intimi</li><li>Valutazioni e note personali</li></ul>
+            <h3>d) Dati sul benessere (opzionali)</h3>
+            <ul><li>Umore, energia, stress, desiderio</li></ul>
+            <h3>e) Altri dati</h3>
+            <ul><li>Wishlist, note d'amore, date speciali</li></ul>
+        </section>
+
+        <section>
+            <h2>3. Come Utilizziamo i Tuoi Dati</h2>
+            <div class="highlight-box green">
+                <p><strong>✅ Utilizziamo i tuoi dati per:</strong></p>
+                <ul><li>Fornire le funzionalità dell'App</li><li>Sincronizzare con il partner</li><li>Calcolare statistiche</li></ul>
+            </div>
+            <div class="highlight-box">
+                <p><strong>❌ NON utilizziamo i tuoi dati per:</strong></p>
+                <ul><li>Pubblicità di terze parti</li><li>Vendita a terzi</li><li>Profilazione commerciale</li></ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Condivisione dei Dati</h2>
+            <p>I tuoi dati sono condivisi <strong>SOLO</strong> con il partner collegato e i nostri server sicuri.</p>
+        </section>
+
+        <section>
+            <h2>5. Sicurezza dei Dati</h2>
+            <ul><li>Connessioni crittografate (HTTPS)</li><li>Server protetti</li><li>Accesso limitato</li></ul>
+        </section>
+
+        <section>
+            <h2>6. Conservazione dei Dati</h2>
+            <p>Conserviamo i tuoi dati finché mantieni un account attivo. Puoi richiedere la cancellazione contattandoci.</p>
+        </section>
+
+        <section>
+            <h2>7. I Tuoi Diritti (GDPR)</h2>
+            <ul><li>Accesso ai tuoi dati</li><li>Rettifica dati inesatti</li><li>Cancellazione dei dati</li><li>Portabilità dei dati</li><li>Revoca del consenso</li></ul>
+        </section>
+
+        <section>
+            <h2>8. Dati Sensibili</h2>
+            <p>I dati sulla salute sono forniti volontariamente, protetti e mai condivisi con terze parti.</p>
+        </section>
+
+        <section>
+            <h2>9. Età Minima</h2>
+            <p>L'App è destinata a utenti maggiorenni (18+). Non raccogliamo dati di minori.</p>
+        </section>
+
+        <section>
+            <h2>10. Contatti</h2>
+            <div class="contact-box">
+                <p>Per domande sulla privacy:</p>
+                <p><strong>Email:</strong> <a href="mailto:privacy@edercomm.it">privacy@edercomm.it</a></p>
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2025 Couple Bliss. Tutti i diritti riservati.</p>
+        </footer>
+    </div>
+</body>
+</html>"""
+
+@app.get("/support", response_class=HTMLResponse)
+async def support_page():
+    return """<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supporto - Couple Bliss</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #2a2a4e 100%); color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .container { max-width: 600px; padding: 40px 20px; text-align: center; }
+        .logo { font-size: 64px; margin-bottom: 20px; }
+        h1 { font-size: 32px; color: #ff6b8a; margin-bottom: 15px; }
+        p { color: #ccc; margin-bottom: 20px; line-height: 1.6; }
+        .contact-box { background: #2a2a4e; border-radius: 16px; padding: 30px; margin-top: 30px; }
+        .contact-box h2 { color: #fff; font-size: 20px; margin-bottom: 20px; }
+        .contact-item { margin-bottom: 15px; }
+        .contact-item a { color: #ff6b8a; text-decoration: none; font-size: 18px; font-weight: 600; }
+        .contact-item a:hover { text-decoration: underline; }
+        .faq { text-align: left; margin-top: 40px; }
+        .faq h2 { color: #ff6b8a; margin-bottom: 20px; }
+        .faq-item { background: #2a2a4e; border-radius: 12px; padding: 20px; margin-bottom: 12px; }
+        .faq-item h3 { color: #fff; font-size: 16px; margin-bottom: 10px; }
+        .faq-item p { color: #aaa; font-size: 14px; margin: 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">💕</div>
+        <h1>Supporto Couple Bliss</h1>
+        <p>Hai bisogno di aiuto? Siamo qui per te!</p>
+        
+        <div class="contact-box">
+            <h2>Contattaci</h2>
+            <div class="contact-item">
+                <p>📧 Email</p>
+                <a href="mailto:support@edercomm.it">support@edercomm.it</a>
+            </div>
+        </div>
+
+        <div class="faq">
+            <h2>Domande Frequenti</h2>
+            <div class="faq-item">
+                <h3>Come collego il mio partner?</h3>
+                <p>Vai nella Home e condividi il tuo codice coppia. Il partner deve inserirlo nella sua app.</p>
+            </div>
+            <div class="faq-item">
+                <h3>I miei dati sono sicuri?</h3>
+                <p>Sì! Usiamo connessioni crittografate e non condividiamo mai i tuoi dati con terze parti.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Come cancello il mio account?</h3>
+                <p>Contattaci via email e provvederemo alla cancellazione entro 48 ore.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>"""
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
