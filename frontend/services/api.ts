@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-
 // Production URL for your backend server
 const PRODUCTION_API_URL = 'https://couplebliss.edercomm.it';
 
@@ -26,13 +25,13 @@ export const userAPI = {
     const response = await api.get(`/users/${userId}`);
     return response.data;
   },
-    joinCouple: async (userId: string, coupleCode: string) => {
-      const response = await api.post('/users/join-couple', {
-        user_id: userId,
-        partner_code: coupleCode
-      });
-      return response.data;
-    },
+  joinCouple: async (userId: string, coupleCode: string) => {
+    const response = await api.post('/users/join-couple', {
+      user_id: userId,
+      partner_code: coupleCode
+    });
+    return response.data;
+  },
 };
 
 export const cycleAPI = {
@@ -153,7 +152,11 @@ export const wishlistAPI = {
     return response.data;
   },
   toggle: async (coupleCode: string, userId: string, itemId: string) => {
-    const response = await api.post(`/wishlist/toggle?couple_code=${coupleCode}&user_id=${userId}&item_id=${itemId}`);
+    const response = await api.post('/wishlist/toggle', {
+      couple_code: coupleCode,
+      user_id: userId,
+      item_id: itemId
+    });
     return response.data;
   },
   delete: async (itemId: string) => {
