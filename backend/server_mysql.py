@@ -1034,7 +1034,10 @@ async def get_positions():
 
 @api_router.get("/challenges/suggestions")
 async def get_challenge_suggestions():
-    return random.sample(SPICY_CHALLENGES, min(3, len(SPICY_CHALLENGES)))
+    return {
+        "challenges": random.sample(SPICY_CHALLENGES, min(3, len(SPICY_CHALLENGES))),
+        "positions": POSITION_SUGGESTIONS
+    }
 
 # ================= INCLUDE ROUTER =================
 app.include_router(api_router)
