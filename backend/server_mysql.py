@@ -774,6 +774,7 @@ async def toggle_wishlist(data: WishlistToggle):
         if existing:
             db.delete(existing)
             action = "removed"
+            unlocked = False
         else:
             wish = Wishlist(
                 id=str(uuid.uuid4()),
@@ -783,9 +784,17 @@ async def toggle_wishlist(data: WishlistToggle):
             )
             db.add(wish)
             action = "added"
+            
+            # Check if partner also wants this item
+            partner_wants = db.query(Wishlist).filter(
+                Wishlist.couple_code == data.couple_code,
+                Wishlist.user_id != data.user_id,
+                Wishlist.item_id == data.item_id
+            ).first()
+            unlocked = partner_wants is not None
         
         db.commit()
-        return {"action": action, "item_id": data.item_id}
+        return {"action": action, "item_id": data.item_id, "unlocked": unlocked}
     finally:
         db.close()
 
