@@ -280,4 +280,21 @@ export const loveNotesAPI = {
   },
 };
 
+// ================= AI COACH API =================
+export const aiCoachAPI = {
+  analyze: async (coupleCode: string, userId: string, userName: string, partnerName?: string) => {
+    const response = await api.post('/ai-coach/analyze', {
+      couple_code: coupleCode,
+      user_id: userId,
+      user_name: userName,
+      partner_name: partnerName,
+    });
+    return response.data;
+  },
+  askQuestion: async (question: string, coupleCode: string) => {
+    const response = await api.post(`/ai-coach/question?question=${encodeURIComponent(question)}&couple_code=${coupleCode}`);
+    return response.data;
+  },
+};
+
 export default api;
