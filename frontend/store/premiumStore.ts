@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface PremiumState {
@@ -18,50 +17,89 @@ interface PremiumState {
   setPurchaseInfo: (type: 'monthly' | 'yearly', date: string) => void;
   resetPremium: () => void;
   shouldShowPaywall: () => boolean;
+  loadPremiumState: () => Promise<void>;
 }
 
-export const usePremiumStore = create<PremiumState>()(
-  persist(
-    (set, get) => ({
+export const usePremiumStore = create<PremiumState>((set, get) => ({
+  isPremium: false,
+  usageCount: 0,
+  hasSeenOnboarding: false,
+  hasSeenPaywall: false,
+  purchaseDate: null,
+  subscriptionType: null,
+
+  setPremium: (value: boolean) => {
+    set({ isPremium: value });
+    AsyncStorage.setItem('premium_isPremium', JSON.stringify(value));
+  },
+  
+  incrementUsage: () => {
+    const newCount = get().usageCount + 1;
+    set({ usageCount: newCount });
+    AsyncStorage.setItem('premium_usageCount', JSON.stringify(newCount));
+  },
+  
+  setHasSeenOnboarding: (value: boolean) => {
+    set({ hasSeenOnboarding: value });
+    AsyncStorage.setItem('premium_hasSeenOnboarding', JSON.stringify(value));
+  },
+  
+  setHasSeenPaywall: (value: boolean) => {
+    set({ hasSeenPaywall: value });
+    AsyncStorage.setItem('premium_hasSeenPaywall', JSON.stringify(value));
+  },
+  
+  setPurchaseInfo: (type: 'monthly' | 'yearly', date: string) => {
+    set({
+      isPremium: true,
+      subscriptionType: type,
+      purchaseDate: date,
+    });
+    AsyncStorage.setItem('premium_isPremium', JSON.stringify(true));
+    AsyncStorage.setItem('premium_subscriptionType', JSON.stringify(type));
+    AsyncStorage.setItem('premium_purchaseDate', JSON.stringify(date));
+  },
+  
+  resetPremium: () => {
+    set({
       isPremium: false,
-      usageCount: 0,
-      hasSeenOnboarding: false,
-      hasSeenPaywall: false,
       purchaseDate: null,
       subscriptionType: null,
-
-      setPremium: (value: boolean) => set({ isPremium: value }),
+    });
+    AsyncStorage.removeItem('premium_isPremium');
+    AsyncStorage.removeItem('premium_subscriptionType');
+    AsyncStorage.removeItem('premium_purchaseDate');
+  },
+  
+  shouldShowPaywall: () => {
+    const state = get();
+    return !state.isPremium && state.usageCount >= 3 && !state.hasSeenPaywall;
+  },
+  
+  loadPremiumState: async () => {
+    try {
+      const [isPremium, usageCount, hasSeenOnboarding, hasSeenPaywall, subscriptionType, purchaseDate] = await Promise.all([
+        AsyncStorage.getItem('premium_isPremium'),
+        AsyncStorage.getItem('premium_usageCount'),
+        AsyncStorage.getItem('premium_hasSeenOnboarding'),
+        AsyncStorage.getItem('premium_hasSeenPaywall'),
+        AsyncStorage.getItem('premium_subscriptionType'),
+        AsyncStorage.getItem('premium_purchaseDate'),
+      ]);
       
-      incrementUsage: () => set((state) => ({ usageCount: state.usageCount + 1 })),
-      
-      setHasSeenOnboarding: (value: boolean) => set({ hasSeenOnboarding: value }),
-      
-      setHasSeenPaywall: (value: boolean) => set({ hasSeenPaywall: value }),
-      
-      setPurchaseInfo: (type: 'monthly' | 'yearly', date: string) => set({
-        isPremium: true,
-        subscriptionType: type,
-        purchaseDate: date,
-      }),
-      
-      resetPremium: () => set({
-        isPremium: false,
-        purchaseDate: null,
-        subscriptionType: null,
-      }),
-      
-      shouldShowPaywall: () => {
-        const state = get();
-        // Show paywall after 3 uses if not premium and hasn't seen it recently
-        return !state.isPremium && state.usageCount >= 3 && !state.hasSeenPaywall;
-      },
-    }),
-    {
-      name: 'premium-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+      set({
+        isPremium: isPremium ? JSON.parse(isPremium) : false,
+        usageCount: usageCount ? JSON.parse(usageCount) : 0,
+        hasSeenOnboarding: hasSeenOnboarding ? JSON.parse(hasSeenOnboarding) : false,
+        hasSeenPaywall: hasSeenPaywall ? JSON.parse(hasSeenPaywall) : false,
+        subscriptionType: subscriptionType ? JSON.parse(subscriptionType) : null,
+        purchaseDate: purchaseDate ? JSON.parse(purchaseDate) : null,
+      });
+    } catch (error) {
+      console.error('Error loading premium state:', error);
     }
-  )
-);
+  },
+}));
 
 // Premium feature limits
 export const PREMIUM_LIMITS = {
