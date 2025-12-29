@@ -436,6 +436,59 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  premiumCard: {
+    backgroundColor: 'rgba(243, 156, 18, 0.1)',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(243, 156, 18, 0.3)',
+  },
+  premiumHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  premiumInfo: {
+    flex: 1,
+  },
+  premiumTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#f39c12',
+  },
+  premiumType: {
+    fontSize: 14,
+    color: '#888',
+    marginTop: 2,
+  },
+  upgradeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2a2a4e',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(243, 156, 18, 0.3)',
+  },
+  upgradeContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 14,
+  },
+  upgradeInfo: {
+    flex: 1,
+  },
+  upgradeTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  upgradeDesc: {
+    fontSize: 14,
+    color: '#888',
+    marginTop: 2,
+  },
   version: {
     textAlign: 'center',
     color: '#666',
