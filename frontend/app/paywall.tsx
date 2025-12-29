@@ -56,7 +56,8 @@ export default function PaywallScreen() {
 
   const handleClose = () => {
     setHasSeenPaywall(true);
-    router.back();
+    // Use replace to go to main app, as back() might not work from onboarding
+    router.replace('/');
   };
 
   const handlePurchase = async () => {
