@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { useStore } from '../../store/useStore';
 import { challengeAPI, wishlistAPI, specialDatesAPI, weeklyAPI } from '../../services/api';
 import { format, parseISO, differenceInDays } from 'date-fns';
