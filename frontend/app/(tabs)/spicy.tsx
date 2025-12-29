@@ -815,5 +815,27 @@ export default function SpicyScreen() {
                saveButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ff6b8a', padding: 18, borderRadius: 16, gap: 8, marginTop: 8 },
                saveButtonDisabled: { opacity: 0.5 },
                saveButtonText: { color: '#fff', fontSize: 17, fontWeight: '600' },
+               
+               aiCoachCard: { 
+                 flexDirection: 'row', 
+                 alignItems: 'center', 
+                 backgroundColor: 'rgba(155, 89, 182, 0.15)', 
+                 padding: 16, 
+                 borderRadius: 16, 
+                 marginBottom: 20,
+                 borderWidth: 1,
+                 borderColor: 'rgba(155, 89, 182, 0.3)',
+               },
+               aiCoachIcon: { 
+                 width: 50, 
+                 height: 50, 
+                 borderRadius: 14, 
+                 backgroundColor: 'rgba(155, 89, 182, 0.2)', 
+                 justifyContent: 'center', 
+                 alignItems: 'center' 
+               },
+               aiCoachContent: { flex: 1, marginLeft: 14 },
+               aiCoachTitle: { fontSize: 16, fontWeight: '600', color: '#fff' },
+               aiCoachDesc: { fontSize: 12, color: '#aaa', marginTop: 3 },
              });
 
