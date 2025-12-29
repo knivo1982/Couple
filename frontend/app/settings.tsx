@@ -13,10 +13,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../store/useStore';
+import { usePremiumStore } from '../store/premiumStore';
 import { userAPI } from '../services/api';
 
 export default function SettingsScreen() {
   const { user, saveUser, logout } = useStore();
+  const { isPremium, subscriptionType, purchaseDate } = usePremiumStore();
   const [partnerName, setPartnerName] = useState<string | null>(null);
   const [joinModalVisible, setJoinModalVisible] = useState(false);
   const [coupleCode, setCoupleCode] = useState('');
