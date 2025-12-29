@@ -472,4 +472,26 @@ const styles = StyleSheet.create({
   countdownContent: { flex: 1 },
   countdownTitle: { fontSize: 16, fontWeight: '500', color: '#fff' },
   countdownDays: { fontSize: 13, color: '#ff6b8a', marginTop: 4 },
+  
+  aiCoachCard: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: 'rgba(155, 89, 182, 0.15)', 
+    padding: 18, 
+    borderRadius: 18, 
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(155, 89, 182, 0.3)',
+  },
+  aiCoachIcon: { 
+    width: 56, 
+    height: 56, 
+    borderRadius: 16, 
+    backgroundColor: 'rgba(155, 89, 182, 0.2)', 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  aiCoachContent: { flex: 1, marginLeft: 14 },
+  aiCoachTitle: { fontSize: 17, fontWeight: '600', color: '#fff' },
+  aiCoachDesc: { fontSize: 13, color: '#aaa', marginTop: 4 },
 });
