@@ -147,6 +147,39 @@ export default function SettingsScreen() {
           </View>
         </View>
 
+        {/* Premium Features Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Funzioni Premium</Text>
+          
+          <TouchableOpacity 
+            style={styles.featureCard}
+            onPress={() => router.push('/ai-coach')}
+          >
+            <View style={styles.featureIcon}>
+              <Text style={{ fontSize: 24 }}>🧠</Text>
+            </View>
+            <View style={styles.featureContent}>
+              <Text style={styles.featureTitle}>AI Coach</Text>
+              <Text style={styles.featureDesc}>Consigli personalizzati per la tua relazione</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#888" />
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.featureCard}
+            onPress={() => router.push('/paywall')}
+          >
+            <View style={styles.featureIcon}>
+              <Ionicons name="diamond" size={24} color="#f39c12" />
+            </View>
+            <View style={styles.featureContent}>
+              <Text style={styles.featureTitle}>Sblocca Premium</Text>
+              <Text style={styles.featureDesc}>Accedi a tutte le funzioni esclusive</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#888" />
+          </TouchableOpacity>
+        </View>
+
         {/* Info Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Come Funziona</Text>
