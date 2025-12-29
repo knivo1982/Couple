@@ -14,6 +14,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../store/useStore';
 import { userAPI } from '../services/api';
+import { usePremiumStore } from '../store/premiumStore';
 
 export default function SettingsScreen() {
   const { user, saveUser, logout } = useStore();
