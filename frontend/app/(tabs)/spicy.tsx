@@ -339,6 +339,21 @@ export default function SpicyScreen() {
            <ScrollView contentContainerStyle={styles.scrollContent}>
              <Text style={styles.title}>Zona Piccante 🔥</Text>
 
+             {/* AI Coach Card */}
+             <TouchableOpacity 
+               style={styles.aiCoachCard} 
+               onPress={() => router.push('/ai-coach')}
+             >
+               <View style={styles.aiCoachIcon}>
+                 <Text style={{ fontSize: 28 }}>🧠</Text>
+               </View>
+               <View style={styles.aiCoachContent}>
+                 <Text style={styles.aiCoachTitle}>AI Coach</Text>
+                 <Text style={styles.aiCoachDesc}>Consigli personalizzati per la vostra intimità</Text>
+               </View>
+               <Ionicons name="chevron-forward" size={22} color="#9b59b6" />
+             </TouchableOpacity>
+
              {/* Active Timer Banner */}
              {timerActive && (
                <TouchableOpacity style={styles.timerBanner} onPress={stopTimer}>
