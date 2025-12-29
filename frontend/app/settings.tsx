@@ -493,4 +493,34 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
+  featureCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2a2a4e',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+  },
+  featureIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 107, 138, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  featureContent: {
+    flex: 1,
+    marginLeft: 14,
+  },
+  featureTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  featureDesc: {
+    fontSize: 13,
+    color: '#888',
+    marginTop: 2,
+  },
 });
