@@ -90,6 +90,39 @@ export default function SettingsScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
+        {/* Premium Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Abbonamento</Text>
+          
+          {isPremium ? (
+            <View style={styles.premiumCard}>
+              <View style={styles.premiumHeader}>
+                <Ionicons name="diamond" size={28} color="#f39c12" />
+                <View style={styles.premiumInfo}>
+                  <Text style={styles.premiumTitle}>Premium Attivo</Text>
+                  <Text style={styles.premiumType}>
+                    Piano {subscriptionType === 'yearly' ? 'Annuale' : 'Mensile'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          ) : (
+            <TouchableOpacity 
+              style={styles.upgradeCard}
+              onPress={() => router.push('/paywall')}
+            >
+              <View style={styles.upgradeContent}>
+                <Ionicons name="diamond" size={32} color="#f39c12" />
+                <View style={styles.upgradeInfo}>
+                  <Text style={styles.upgradeTitle}>Passa a Premium</Text>
+                  <Text style={styles.upgradeDesc}>Sblocca tutte le funzionalità</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color="#f39c12" />
+            </TouchableOpacity>
+          )}
+        </View>
+
         {/* Profile Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Profilo</Text>
