@@ -242,6 +242,21 @@ export default function Home() {
           </TouchableOpacity>
         )}
 
+        {/* AI Coach Card */}
+        <TouchableOpacity 
+          style={styles.aiCoachCard} 
+          onPress={() => router.push('/ai-coach')}
+        >
+          <View style={styles.aiCoachIcon}>
+            <Text style={{ fontSize: 32 }}>🧠</Text>
+          </View>
+          <View style={styles.aiCoachContent}>
+            <Text style={styles.aiCoachTitle}>AI Coach di Coppia</Text>
+            <Text style={styles.aiCoachDesc}>Consigli personalizzati per voi</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={24} color="#ff6b8a" />
+        </TouchableOpacity>
+
         {/* Sessometro Card */}
         <TouchableOpacity style={styles.sessometroCard} onPress={() => router.push('/(tabs)/stats')}>
           <View style={styles.sessometroHeader}>
