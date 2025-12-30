@@ -159,19 +159,23 @@ export default function AICoachScreen() {
   const handleAskQuestion = async () => {
     if (!question.trim() || !user?.couple_code) return;
     
+    const userMessage = question.trim();
+    setQuestion('');
     Keyboard.dismiss();
+    
+    // Add user message to chat
+    setChatMessages(prev => [...prev, {role: 'user', message: userMessage}]);
     setIsAskingQuestion(true);
-    setAiAnswer(null);
     
     try {
-      const response = await aiCoachAPI.askQuestion(question.trim(), user.couple_code);
+      const response = await aiCoachAPI.askQuestion(userMessage, user.couple_code);
       if (response.success) {
-        setAiAnswer(response.answer);
+        setChatMessages(prev => [...prev, {role: 'coach', message: response.answer}]);
       } else {
-        setAiAnswer(response.answer || 'Mi dispiace, non riesco a rispondere in questo momento.');
+        setChatMessages(prev => [...prev, {role: 'coach', message: 'Mi dispiace, non riesco a rispondere ora. Riprova! 💕'}]);
       }
     } catch (error) {
-      setAiAnswer('Si è verificato un errore. Riprova più tardi! 💕');
+      setChatMessages(prev => [...prev, {role: 'coach', message: 'Errore di connessione. Riprova più tardi! 💕'}]);
     } finally {
       setIsAskingQuestion(false);
     }
