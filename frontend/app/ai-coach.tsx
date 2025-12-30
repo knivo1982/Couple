@@ -903,4 +903,22 @@ const styles = StyleSheet.create({
   sendButtonDisabled: {
     backgroundColor: '#555',
   },
+  // Chat wrapper styles for fixed input
+  chatWrapper: {
+    flex: 1,
+  },
+  chatScrollView: {
+    flex: 1,
+  },
+  chatScrollContent: {
+    padding: 20,
+    paddingBottom: 20,
+  },
+  chatInputWrapper: {
+    padding: 12,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 12,
+    backgroundColor: '#1a1a2e',
+    borderTopWidth: 1,
+    borderTopColor: '#2a2a4e',
+  },
 });
