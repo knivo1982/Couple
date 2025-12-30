@@ -107,7 +107,9 @@ export default function AICoachScreen() {
   const [encouragement, setEncouragement] = useState<string>('');
   const [question, setQuestion] = useState('');
   const [isAskingQuestion, setIsAskingQuestion] = useState(false);
-  const [aiAnswer, setAiAnswer] = useState<string | null>(null);
+  const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'coach', message: string}>>([
+    {role: 'coach', message: 'Ciao! Sono la tua coach di coppia 💕 Sono qui per aiutarti con qualsiasi domanda su relazione, intimità, comunicazione... Chiedimi pure!'}
+  ]);
 
   useEffect(() => {
     loadCoachData();
