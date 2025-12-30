@@ -766,4 +766,112 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
+  // Chat styles
+  chatHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2a2a4e',
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 16,
+    gap: 12,
+  },
+  coachAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255, 107, 138, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  coachName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  coachStatus: {
+    fontSize: 12,
+    color: '#2ed573',
+    marginTop: 2,
+  },
+  chatContainer: {
+    flex: 1,
+    marginBottom: 16,
+  },
+  chatBubble: {
+    maxWidth: '85%',
+    padding: 14,
+    borderRadius: 18,
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  userBubble: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#ff6b8a',
+    borderBottomRightRadius: 4,
+  },
+  coachBubble: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#2a2a4e',
+    borderBottomLeftRadius: 4,
+  },
+  bubbleAvatar: {
+    fontSize: 20,
+  },
+  chatText: {
+    fontSize: 15,
+    lineHeight: 22,
+    flex: 1,
+  },
+  userText: {
+    color: '#fff',
+  },
+  coachText: {
+    color: '#eee',
+  },
+  quickQuestions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  quickQuestion: {
+    backgroundColor: '#3a3a5e',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  quickQuestionText: {
+    color: '#fff',
+    fontSize: 13,
+  },
+  chatInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 10,
+    backgroundColor: '#2a2a4e',
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  chatInput: {
+    flex: 1,
+    color: '#fff',
+    fontSize: 15,
+    maxHeight: 100,
+    paddingVertical: 8,
+  },
+  sendButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#ff6b8a',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sendButtonDisabled: {
+    backgroundColor: '#555',
+  },
 });
