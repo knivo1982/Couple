@@ -291,6 +291,10 @@ export const aiCoachAPI = {
     });
     return response.data;
   },
+  getInsights: async (coupleCode: string) => {
+    const response = await api.get(`/ai-coach/insights/${coupleCode}`);
+    return response.data;
+  },
   askQuestion: async (question: string, coupleCode: string) => {
     const response = await api.post(`/ai-coach/question?question=${encodeURIComponent(question)}&couple_code=${coupleCode}`);
     return response.data;
