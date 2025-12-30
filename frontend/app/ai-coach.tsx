@@ -221,11 +221,23 @@ export default function AICoachScreen() {
     );
   }
 
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  // Scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (activeTab === 'ask' && chatMessages.length > 1) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  }, [chatMessages, activeTab]);
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <KeyboardAvoidingView 
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -264,7 +276,109 @@ export default function AICoachScreen() {
             <ActivityIndicator size="large" color="#ff6b8a" />
             <Text style={styles.loadingText}>L'AI sta analizzando i vostri dati...</Text>
           </View>
+        ) : activeTab === 'ask' ? (
+          /* CHAT TAB - Special layout with input outside ScrollView */
+          <View style={styles.chatWrapper}>
+            <ScrollView 
+              ref={scrollViewRef}
+              style={styles.chatScrollView}
+              contentContainerStyle={styles.chatScrollContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              {/* Chat Header */}
+              <View style={styles.chatHeader}>
+                <View style={styles.coachAvatar}>
+                  <Text style={{ fontSize: 28 }}>👩‍⚕️</Text>
+                </View>
+                <View>
+                  <Text style={styles.coachName}>Dr. Sofia - Coach di Coppia</Text>
+                  <Text style={styles.coachStatus}>🟢 Online</Text>
+                </View>
+              </View>
+              
+              {/* Chat Messages */}
+              <View style={styles.chatContainer}>
+                {chatMessages.map((msg, index) => (
+                  <View 
+                    key={index} 
+                    style={[
+                      styles.chatBubble, 
+                      msg.role === 'user' ? styles.userBubble : styles.coachBubble
+                    ]}
+                  >
+                    {msg.role === 'coach' && (
+                      <Text style={styles.bubbleAvatar}>👩‍⚕️</Text>
+                    )}
+                    <Text style={[
+                      styles.chatText,
+                      msg.role === 'user' ? styles.userText : styles.coachText
+                    ]}>{msg.message}</Text>
+                  </View>
+                ))}
+                {isAskingQuestion && (
+                  <View style={[styles.chatBubble, styles.coachBubble]}>
+                    <Text style={styles.bubbleAvatar}>👩‍⚕️</Text>
+                    <ActivityIndicator color="#ff6b8a" size="small" />
+                  </View>
+                )}
+              </View>
+              
+              {/* Quick Questions */}
+              {chatMessages.length <= 2 && (
+                <View style={styles.quickQuestions}>
+                  {[
+                    '💬 Comunicazione',
+                    '🔥 Passione',
+                    '😰 Stress',
+                    '💕 Romanticismo'
+                  ].map((q, i) => (
+                    <TouchableOpacity 
+                      key={i} 
+                      style={styles.quickQuestion}
+                      onPress={() => setQuestion(
+                        i === 0 ? 'Come migliorare la comunicazione?' :
+                        i === 1 ? 'Come riaccendere la passione?' :
+                        i === 2 ? 'Come gestire lo stress nella coppia?' :
+                        'Come essere più romantici?'
+                      )}
+                    >
+                      <Text style={styles.quickQuestionText}>{q}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </ScrollView>
+            
+            {/* Input - FIXED at bottom, outside ScrollView */}
+            <View style={styles.chatInputWrapper}>
+              <View style={styles.chatInputContainer}>
+                <TextInput
+                  style={styles.chatInput}
+                  placeholder="Scrivi la tua domanda..."
+                  placeholderTextColor="#666"
+                  value={question}
+                  onChangeText={setQuestion}
+                  multiline
+                  maxLength={500}
+                  onFocus={() => {
+                    setTimeout(() => {
+                      scrollViewRef.current?.scrollToEnd({ animated: true });
+                    }, 300);
+                  }}
+                />
+                <TouchableOpacity 
+                  style={[styles.sendButton, (!question.trim() || isAskingQuestion) && styles.sendButtonDisabled]}
+                  onPress={handleAskQuestion}
+                  disabled={!question.trim() || isAskingQuestion}
+                >
+                  <Ionicons name="send" size={22} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
         ) : (
+          /* OTHER TABS - Standard ScrollView */
           <ScrollView 
             contentContainerStyle={styles.content}
             keyboardShouldPersistTaps="handled"
@@ -317,7 +431,7 @@ export default function AICoachScreen() {
                   </TouchableOpacity>
                 </View>
               </>
-            ) : activeTab === 'insights' ? (
+            ) : (
               <>
                 <Text style={styles.sectionIntro}>
                   Le statistiche intelligenti della vostra coppia ❤️
@@ -345,91 +459,6 @@ export default function AICoachScreen() {
                     </Text>
                   </View>
                 )}
-              </>
-            ) : (
-              <>
-                {/* Chat Header */}
-                <View style={styles.chatHeader}>
-                  <View style={styles.coachAvatar}>
-                    <Text style={{ fontSize: 28 }}>👩‍⚕️</Text>
-                  </View>
-                  <View>
-                    <Text style={styles.coachName}>Dr. Sofia - Coach di Coppia</Text>
-                    <Text style={styles.coachStatus}>🟢 Online</Text>
-                  </View>
-                </View>
-                
-                {/* Chat Messages */}
-                <View style={styles.chatContainer}>
-                  {chatMessages.map((msg, index) => (
-                    <View 
-                      key={index} 
-                      style={[
-                        styles.chatBubble, 
-                        msg.role === 'user' ? styles.userBubble : styles.coachBubble
-                      ]}
-                    >
-                      {msg.role === 'coach' && (
-                        <Text style={styles.bubbleAvatar}>👩‍⚕️</Text>
-                      )}
-                      <Text style={[
-                        styles.chatText,
-                        msg.role === 'user' ? styles.userText : styles.coachText
-                      ]}>{msg.message}</Text>
-                    </View>
-                  ))}
-                  {isAskingQuestion && (
-                    <View style={[styles.chatBubble, styles.coachBubble]}>
-                      <Text style={styles.bubbleAvatar}>👩‍⚕️</Text>
-                      <ActivityIndicator color="#ff6b8a" size="small" />
-                    </View>
-                  )}
-                </View>
-                
-                {/* Quick Questions */}
-                {chatMessages.length <= 2 && (
-                  <View style={styles.quickQuestions}>
-                    {[
-                      '💬 Comunicazione',
-                      '🔥 Passione',
-                      '😰 Stress',
-                      '💕 Romanticismo'
-                    ].map((q, i) => (
-                      <TouchableOpacity 
-                        key={i} 
-                        style={styles.quickQuestion}
-                        onPress={() => setQuestion(
-                          i === 0 ? 'Come migliorare la comunicazione?' :
-                          i === 1 ? 'Come riaccendere la passione?' :
-                          i === 2 ? 'Come gestire lo stress nella coppia?' :
-                          'Come essere più romantici?'
-                        )}
-                      >
-                        <Text style={styles.quickQuestionText}>{q}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-                
-                {/* Input */}
-                <View style={styles.chatInputContainer}>
-                  <TextInput
-                    style={styles.chatInput}
-                    placeholder="Scrivi la tua domanda..."
-                    placeholderTextColor="#666"
-                    value={question}
-                    onChangeText={setQuestion}
-                    multiline
-                    maxLength={500}
-                  />
-                  <TouchableOpacity 
-                    style={[styles.sendButton, (!question.trim() || isAskingQuestion) && styles.sendButtonDisabled]}
-                    onPress={handleAskQuestion}
-                    disabled={!question.trim() || isAskingQuestion}
-                  >
-                    <Ionicons name="send" size={22} color="#fff" />
-                  </TouchableOpacity>
-                </View>
               </>
             )}
           </ScrollView>
