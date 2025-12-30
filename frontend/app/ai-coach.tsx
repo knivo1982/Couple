@@ -117,6 +117,7 @@ export default function AICoachScreen() {
     setIsLoading(true);
     try {
       if (user?.couple_code && user?.id) {
+        // Load AI suggestions
         const response = await aiCoachAPI.analyze(
           user.couple_code,
           user.id,
@@ -129,15 +130,13 @@ export default function AICoachScreen() {
           setWeeklyTip(response.data.weekly_tip || '');
           setEncouragement(response.data.encouragement || '');
         }
+        
+        // Load insights from server
+        const insightsResponse = await aiCoachAPI.getInsights(user.couple_code);
+        if (insightsResponse.success && insightsResponse.insights) {
+          setInsights(insightsResponse.insights);
+        }
       }
-      
-      const data = {
-        intimacyEntries: intimacyEntries || [],
-        stats: stats || {},
-      };
-      const loveInsights = generateLoveInsights(data);
-      setInsights(loveInsights);
-      
     } catch (error) {
       console.error('Error loading coach data:', error);
       setSuggestions([
