@@ -348,63 +348,87 @@ export default function AICoachScreen() {
               </>
             ) : (
               <>
-                <Text style={styles.sectionIntro}>
-                  Fai una domanda al tuo coach personale 💬
-                </Text>
+                {/* Chat Header */}
+                <View style={styles.chatHeader}>
+                  <View style={styles.coachAvatar}>
+                    <Text style={{ fontSize: 28 }}>👩‍⚕️</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.coachName}>Dr. Sofia - Coach di Coppia</Text>
+                    <Text style={styles.coachStatus}>🟢 Online</Text>
+                  </View>
+                </View>
                 
-                <View style={styles.askContainer}>
+                {/* Chat Messages */}
+                <View style={styles.chatContainer}>
+                  {chatMessages.map((msg, index) => (
+                    <View 
+                      key={index} 
+                      style={[
+                        styles.chatBubble, 
+                        msg.role === 'user' ? styles.userBubble : styles.coachBubble
+                      ]}
+                    >
+                      {msg.role === 'coach' && (
+                        <Text style={styles.bubbleAvatar}>👩‍⚕️</Text>
+                      )}
+                      <Text style={[
+                        styles.chatText,
+                        msg.role === 'user' ? styles.userText : styles.coachText
+                      ]}>{msg.message}</Text>
+                    </View>
+                  ))}
+                  {isAskingQuestion && (
+                    <View style={[styles.chatBubble, styles.coachBubble]}>
+                      <Text style={styles.bubbleAvatar}>👩‍⚕️</Text>
+                      <ActivityIndicator color="#ff6b8a" size="small" />
+                    </View>
+                  )}
+                </View>
+                
+                {/* Quick Questions */}
+                {chatMessages.length <= 2 && (
+                  <View style={styles.quickQuestions}>
+                    {[
+                      '💬 Comunicazione',
+                      '🔥 Passione',
+                      '😰 Stress',
+                      '💕 Romanticismo'
+                    ].map((q, i) => (
+                      <TouchableOpacity 
+                        key={i} 
+                        style={styles.quickQuestion}
+                        onPress={() => setQuestion(
+                          i === 0 ? 'Come migliorare la comunicazione?' :
+                          i === 1 ? 'Come riaccendere la passione?' :
+                          i === 2 ? 'Come gestire lo stress nella coppia?' :
+                          'Come essere più romantici?'
+                        )}
+                      >
+                        <Text style={styles.quickQuestionText}>{q}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+                
+                {/* Input */}
+                <View style={styles.chatInputContainer}>
                   <TextInput
-                    style={styles.questionInput}
-                    placeholder="Es: Come posso sorprendere il mio partner?"
+                    style={styles.chatInput}
+                    placeholder="Scrivi la tua domanda..."
                     placeholderTextColor="#666"
                     value={question}
                     onChangeText={setQuestion}
                     multiline
-                    maxLength={300}
+                    maxLength={500}
                   />
-                  
                   <TouchableOpacity 
-                    style={[styles.askButton, (!question.trim() || isAskingQuestion) && styles.askButtonDisabled]}
+                    style={[styles.sendButton, (!question.trim() || isAskingQuestion) && styles.sendButtonDisabled]}
                     onPress={handleAskQuestion}
                     disabled={!question.trim() || isAskingQuestion}
                   >
-                    {isAskingQuestion ? (
-                      <ActivityIndicator color="#fff" size="small" />
-                    ) : (
-                      <>
-                        <Ionicons name="send" size={20} color="#fff" />
-                        <Text style={styles.askButtonText}>Chiedi</Text>
-                      </>
-                    )}
+                    <Ionicons name="send" size={22} color="#fff" />
                   </TouchableOpacity>
-                </View>
-                
-                {aiAnswer && (
-                  <View style={styles.answerCard}>
-                    <View style={styles.answerHeader}>
-                      <Ionicons name="chatbubble" size={20} color="#ff6b8a" />
-                      <Text style={styles.answerTitle}>Risposta del Coach</Text>
-                    </View>
-                    <Text style={styles.answerText}>{aiAnswer}</Text>
-                  </View>
-                )}
-                
-                <View style={styles.suggestedQuestions}>
-                  <Text style={styles.suggestedTitle}>Domande suggerite:</Text>
-                  {[
-                    'Come posso migliorare la comunicazione con il mio partner?',
-                    'Idee per una serata romantica a casa?',
-                    'Come mantenere viva la passione dopo anni insieme?',
-                  ].map((q, i) => (
-                    <TouchableOpacity 
-                      key={i} 
-                      style={styles.suggestedQuestion}
-                      onPress={() => setQuestion(q)}
-                    >
-                      <Ionicons name="help-circle-outline" size={16} color="#888" />
-                      <Text style={styles.suggestedQuestionText}>{q}</Text>
-                    </TouchableOpacity>
-                  ))}
                 </View>
               </>
             )}
