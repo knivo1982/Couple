@@ -413,49 +413,135 @@ export default function AICoachScreen() {
           >
             {activeTab === 'coach' ? (
               <>
-                {encouragement && (
-                  <View style={styles.encouragementCard}>
-                    <Text style={styles.encouragementText}>{encouragement}</Text>
-                  </View>
-                )}
-                
-                <Text style={styles.sectionIntro}>
-                  Ecco cosa l'AI ha notato dalla vostra relazione 💕
-                </Text>
-                
-                {suggestions.map((suggestion, index) => (
-                  <View 
-                    key={index} 
-                    style={[styles.suggestionCard, { borderLeftColor: getPriorityColor(suggestion.priority) }]}
-                  >
-                    <View style={styles.suggestionHeader}>
-                      <Text style={styles.suggestionIcon}>{suggestion.icon}</Text>
-                      <Text style={styles.suggestionTitle}>{suggestion.title}</Text>
+                {/* 🎯 MISSIONE DEL GIORNO */}
+                <View style={styles.missionCard}>
+                  <View style={styles.missionHeader}>
+                    <Text style={styles.missionEmoji}>🎯</Text>
+                    <View style={styles.missionTitleContainer}>
+                      <Text style={styles.missionTitle}>Missione del Giorno</Text>
+                      {dailyMission?.difficulty && (
+                        <View style={[styles.difficultyBadge, 
+                          dailyMission.difficulty === 'facile' ? styles.difficultyEasy :
+                          dailyMission.difficulty === 'medio' ? styles.difficultyMedium : styles.difficultyHard
+                        ]}>
+                          <Text style={styles.difficultyText}>{dailyMission.difficulty}</Text>
+                        </View>
+                      )}
                     </View>
-                    <Text style={styles.suggestionMessage}>{suggestion.message}</Text>
-                    {suggestion.action && (
-                      <TouchableOpacity style={styles.suggestionAction}>
-                        <Text style={styles.suggestionActionText}>{suggestion.action}</Text>
-                        <Ionicons name="arrow-forward" size={16} color="#ff6b8a" />
-                      </TouchableOpacity>
+                    {dailyMission?.points && (
+                      <View style={styles.pointsBadge}>
+                        <Text style={styles.pointsText}>+{dailyMission.points} pt</Text>
+                      </View>
                     )}
                   </View>
-                ))}
-                
-                {weeklyTip && (
-                  <View style={styles.weeklyTipCard}>
-                    <View style={styles.weeklyTipHeader}>
-                      <Ionicons name="sparkles" size={20} color="#f39c12" />
-                      <Text style={styles.weeklyTipTitle}>Consiglio della Settimana</Text>
-                    </View>
-                    <Text style={styles.weeklyTipText}>{weeklyTip}</Text>
+                  <Text style={styles.missionDescription}>
+                    {dailyMission?.description || 'Scrivi 3 cose che ami del tuo partner e condividile con lui/lei'}
+                  </Text>
+                  <TouchableOpacity 
+                    style={[styles.missionButton, missionCompleted && styles.missionButtonCompleted]}
+                    onPress={handleCompleteMission}
+                    disabled={missionCompleted}
+                  >
+                    <Ionicons 
+                      name={missionCompleted ? "checkmark-circle" : "flag"} 
+                      size={20} 
+                      color="#fff" 
+                    />
+                    <Text style={styles.missionButtonText}>
+                      {missionCompleted ? 'Completata!' : 'Segna come completata'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* 💑 IDEE DATE NIGHT */}
+                <View style={styles.sectionContainer}>
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionEmoji}>💑</Text>
+                    <Text style={styles.sectionTitle}>Idee Date Night</Text>
                   </View>
-                )}
-                
+                  <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.dateNightScroll}
+                  >
+                    {(dateNightIdeas.length > 0 ? dateNightIdeas : [
+                      { icon: '🍿', title: 'Serata Film', description: 'Film + popcorn + coccole', time: '2-3 ore', budget: '€' },
+                      { icon: '🍳', title: 'Chef a Casa', description: 'Cucinate insieme un piatto nuovo', time: '1-2 ore', budget: '€€' },
+                      { icon: '🌙', title: 'Sotto le Stelle', description: 'Picnic notturno romantico', time: '2 ore', budget: '€' },
+                      { icon: '💆', title: 'Spa Casalinga', description: 'Massaggi e coccole reciproche', time: '1-2 ore', budget: '€' },
+                    ]).map((idea, index) => (
+                      <View key={index} style={styles.dateNightCard}>
+                        <Text style={styles.dateNightIcon}>{idea.icon}</Text>
+                        <Text style={styles.dateNightTitle}>{idea.title}</Text>
+                        <Text style={styles.dateNightDesc}>{idea.description}</Text>
+                        <View style={styles.dateNightMeta}>
+                          <View style={styles.dateNightTag}>
+                            <Ionicons name="time-outline" size={12} color="#888" />
+                            <Text style={styles.dateNightTagText}>{idea.time}</Text>
+                          </View>
+                          <View style={styles.dateNightTag}>
+                            <Text style={styles.dateNightTagText}>{idea.budget}</Text>
+                          </View>
+                        </View>
+                      </View>
+                    ))}
+                  </ScrollView>
+                </View>
+
+                {/* 🏆 TRAGUARDI & BADGE */}
+                <View style={styles.sectionContainer}>
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionEmoji}>🏆</Text>
+                    <Text style={styles.sectionTitle}>Traguardi</Text>
+                  </View>
+                  <View style={styles.badgesGrid}>
+                    {(badges.length > 0 ? badges : [
+                      { icon: '🔥', title: 'Prima Scintilla', description: 'Primo momento registrato', unlocked: true },
+                      { icon: '📅', title: '7 Giorni', description: '7 giorni consecutivi', unlocked: false, progress: 3, total: 7 },
+                      { icon: '💯', title: 'Perfezionisti', description: '5 momenti qualità 5/5', unlocked: false, progress: 2, total: 5 },
+                      { icon: '🌍', title: 'Esploratori', description: '5 location diverse', unlocked: false, progress: 1, total: 5 },
+                      { icon: '💕', title: 'Innamorati', description: '10 momenti totali', unlocked: false, progress: 4, total: 10 },
+                      { icon: '🎉', title: 'Festaioli', description: 'Momento in data speciale', unlocked: false },
+                    ]).map((badge, index) => (
+                      <View 
+                        key={index} 
+                        style={[styles.badgeCard, !badge.unlocked && styles.badgeLocked]}
+                      >
+                        <Text style={[styles.badgeIcon, !badge.unlocked && styles.badgeIconLocked]}>
+                          {badge.icon}
+                        </Text>
+                        <Text style={[styles.badgeTitle, !badge.unlocked && styles.badgeTitleLocked]}>
+                          {badge.title}
+                        </Text>
+                        <Text style={styles.badgeDesc}>{badge.description}</Text>
+                        {!badge.unlocked && badge.progress !== undefined && (
+                          <View style={styles.badgeProgress}>
+                            <View style={styles.badgeProgressBar}>
+                              <View 
+                                style={[
+                                  styles.badgeProgressFill, 
+                                  { width: `${(badge.progress / badge.total) * 100}%` }
+                                ]} 
+                              />
+                            </View>
+                            <Text style={styles.badgeProgressText}>{badge.progress}/{badge.total}</Text>
+                          </View>
+                        )}
+                        {badge.unlocked && (
+                          <View style={styles.unlockedBadge}>
+                            <Ionicons name="checkmark-circle" size={16} color="#2ed573" />
+                          </View>
+                        )}
+                      </View>
+                    ))}
+                  </View>
+                </View>
+
+                {/* Refresh Button */}
                 <View style={styles.refreshCard}>
                   <TouchableOpacity style={styles.refreshButton} onPress={loadCoachData}>
                     <Ionicons name="refresh" size={20} color="#ff6b8a" />
-                    <Text style={styles.refreshText}>Aggiorna suggerimenti</Text>
+                    <Text style={styles.refreshText}>Aggiorna</Text>
                   </TouchableOpacity>
                 </View>
               </>
