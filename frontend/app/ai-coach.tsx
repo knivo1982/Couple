@@ -110,6 +110,12 @@ export default function AICoachScreen() {
   const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'coach', message: string}>>([
     {role: 'coach', message: 'Ciao! Sono la tua coach di coppia 💕 Sono qui per aiutarti con qualsiasi domanda su relazione, intimità, comunicazione... Chiedimi pure!'}
   ]);
+  
+  // New state for enhanced features
+  const [dailyMission, setDailyMission] = useState<any>(null);
+  const [dateNightIdeas, setDateNightIdeas] = useState<any[]>([]);
+  const [badges, setBadges] = useState<any[]>([]);
+  const [missionCompleted, setMissionCompleted] = useState(false);
 
   useEffect(() => {
     loadCoachData();
@@ -131,6 +137,17 @@ export default function AICoachScreen() {
           setSuggestions(response.data.suggestions || []);
           setWeeklyTip(response.data.weekly_tip || '');
           setEncouragement(response.data.encouragement || '');
+          
+          // New enhanced data
+          if (response.data.daily_mission) {
+            setDailyMission(response.data.daily_mission);
+          }
+          if (response.data.date_night_ideas) {
+            setDateNightIdeas(response.data.date_night_ideas);
+          }
+          if (response.data.badges) {
+            setBadges(response.data.badges);
+          }
         }
         
         // Load insights from server
@@ -141,19 +158,30 @@ export default function AICoachScreen() {
       }
     } catch (error) {
       console.error('Error loading coach data:', error);
-      setSuggestions([
-        {
-          type: 'general',
-          icon: '💕',
-          title: 'Momento di connessione',
-          message: 'Dedicate del tempo di qualità solo a voi due oggi.',
-          action: 'Pianifica una serata insieme',
-          priority: 'medium',
-        }
+      // Fallback data
+      setDailyMission({
+        icon: '💕',
+        title: 'Missione del Giorno',
+        description: 'Scrivi 3 cose che ami del tuo partner e condividile con lui/lei',
+        points: 50,
+        difficulty: 'facile'
+      });
+      setDateNightIdeas([
+        { icon: '🍿', title: 'Serata Film', description: 'Film + popcorn + coccole sul divano', time: '2-3 ore', budget: '€' },
+        { icon: '🍳', title: 'Chef a Casa', description: 'Cucinate insieme un piatto nuovo', time: '1-2 ore', budget: '€€' },
+      ]);
+      setBadges([
+        { icon: '🔥', title: 'Prima Scintilla', description: 'Primo momento registrato', unlocked: true },
+        { icon: '📅', title: '7 Giorni', description: '7 giorni consecutivi', unlocked: false, progress: 3, total: 7 },
       ]);
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  const handleCompleteMission = () => {
+    setMissionCompleted(true);
+    // Could send to backend to track points
   };
 
   const handleAskQuestion = async () => {
