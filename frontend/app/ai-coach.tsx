@@ -116,10 +116,22 @@ export default function AICoachScreen() {
   const [dateNightIdeas, setDateNightIdeas] = useState<any[]>([]);
   const [badges, setBadges] = useState<any[]>([]);
   const [missionCompleted, setMissionCompleted] = useState(false);
+  
+  // Ref for scroll view
+  const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     loadCoachData();
   }, []);
+  
+  // Scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (activeTab === 'ask' && chatMessages.length > 1) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  }, [chatMessages, activeTab]);
 
   const loadCoachData = async () => {
     setIsLoading(true);
