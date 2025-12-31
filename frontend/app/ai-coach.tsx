@@ -1035,4 +1035,215 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#2a2a4e',
   },
+  // Mission Card Styles
+  missionCard: {
+    backgroundColor: 'linear-gradient(135deg, #ff6b8a 0%, #ff8e53 100%)',
+    backgroundColor: '#2a2a4e',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 24,
+    borderWidth: 2,
+    borderColor: '#ff6b8a',
+  },
+  missionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  missionEmoji: {
+    fontSize: 32,
+    marginRight: 12,
+  },
+  missionTitleContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  missionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  difficultyBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  difficultyEasy: {
+    backgroundColor: 'rgba(46, 213, 115, 0.2)',
+  },
+  difficultyMedium: {
+    backgroundColor: 'rgba(243, 156, 18, 0.2)',
+  },
+  difficultyHard: {
+    backgroundColor: 'rgba(255, 107, 138, 0.2)',
+  },
+  difficultyText: {
+    fontSize: 10,
+    color: '#fff',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  pointsBadge: {
+    backgroundColor: 'rgba(243, 156, 18, 0.3)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  pointsText: {
+    fontSize: 12,
+    color: '#f39c12',
+    fontWeight: 'bold',
+  },
+  missionDescription: {
+    fontSize: 15,
+    color: '#ddd',
+    lineHeight: 22,
+    marginBottom: 16,
+  },
+  missionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ff6b8a',
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
+  },
+  missionButtonCompleted: {
+    backgroundColor: '#2ed573',
+  },
+  missionButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  // Section Styles
+  sectionContainer: {
+    marginBottom: 24,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  sectionEmoji: {
+    fontSize: 24,
+    marginRight: 10,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  // Date Night Styles
+  dateNightScroll: {
+    paddingRight: 20,
+  },
+  dateNightCard: {
+    width: 160,
+    backgroundColor: '#2a2a4e',
+    borderRadius: 16,
+    padding: 16,
+    marginRight: 12,
+  },
+  dateNightIcon: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  dateNightTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  dateNightDesc: {
+    fontSize: 12,
+    color: '#aaa',
+    marginBottom: 12,
+    lineHeight: 16,
+  },
+  dateNightMeta: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  dateNightTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    gap: 4,
+  },
+  dateNightTagText: {
+    fontSize: 10,
+    color: '#888',
+  },
+  // Badges Styles
+  badgesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  badgeCard: {
+    width: (width - 52) / 2,
+    backgroundColor: '#2a2a4e',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    position: 'relative',
+  },
+  badgeLocked: {
+    opacity: 0.6,
+  },
+  badgeIcon: {
+    fontSize: 36,
+    marginBottom: 8,
+  },
+  badgeIconLocked: {
+    opacity: 0.5,
+  },
+  badgeTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  badgeTitleLocked: {
+    color: '#888',
+  },
+  badgeDesc: {
+    fontSize: 10,
+    color: '#888',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  badgeProgress: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  badgeProgressBar: {
+    width: '100%',
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 2,
+    marginBottom: 4,
+  },
+  badgeProgressFill: {
+    height: '100%',
+    backgroundColor: '#ff6b8a',
+    borderRadius: 2,
+  },
+  badgeProgressText: {
+    fontSize: 10,
+    color: '#666',
+  },
+  unlockedBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+  },
 });
