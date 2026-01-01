@@ -834,4 +834,51 @@ const styles = StyleSheet.create({
     color: '#ccc',
     fontSize: 14,
   },
+  // Stili Premium Banner
+  premiumBanner: {
+    backgroundColor: 'rgba(243, 156, 18, 0.15)',
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(243, 156, 18, 0.4)',
+  },
+  premiumBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  premiumIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(243, 156, 18, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  premiumTextContainer: {
+    flex: 1,
+  },
+  premiumBannerTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#f39c12',
+    marginBottom: 4,
+  },
+  premiumBannerText: {
+    fontSize: 13,
+    color: '#ccc',
+    lineHeight: 18,
+  },
+  premiumBadge: {
+    backgroundColor: '#f39c12',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  premiumBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
 });
