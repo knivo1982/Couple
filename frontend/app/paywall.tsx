@@ -17,12 +17,15 @@ import { usePremiumStore } from '../store/premiumStore';
 const { width } = Dimensions.get('window');
 
 const PREMIUM_FEATURES = [
-  { icon: 'heart', text: 'Registro intimità illimitato' },
-  { icon: 'game-controller', text: 'Sfide e giochi esclusivi' },
-  { icon: 'analytics', text: 'Mood tracker avanzato' },
-  { icon: 'heart-half', text: 'Wishlist segreta completa' },
-  { icon: 'infinite', text: 'Esperienza senza limiti' },
-  { icon: 'stats-chart', text: 'Statistiche di coppia complete' },
+  { icon: 'eye', text: 'Calendario Fertilità', desc: 'Vedi giorni sicuri e pericolosi', highlight: true },
+  { icon: 'chatbubbles', text: 'Desideri Segreti', desc: 'Scopri le fantasie in comune', highlight: true },
+  { icon: 'time', text: 'Statistiche Storiche', desc: 'Naviga tra tutti i mesi passati', highlight: true },
+  { icon: 'flame', text: 'Calorie Bruciate', desc: 'Traccia il consumo calorico', highlight: false },
+  { icon: 'trophy', text: 'Traguardi & Badge', desc: 'Sblocca achievement esclusivi', highlight: false },
+  { icon: 'bulb', text: 'AI Coach Completo', desc: 'Consigli personalizzati avanzati', highlight: false },
+  { icon: 'calendar', text: 'Missioni Giornaliere', desc: 'Sfide quotidiane per la coppia', highlight: false },
+  { icon: 'heart', text: 'Date Night Ideas', desc: 'Idee romantiche personalizzate', highlight: false },
+  { icon: 'infinite', text: 'Zero Limiti', desc: 'Tutte le funzionalità sbloccate', highlight: false },
 ];
 
 const PLANS = [
