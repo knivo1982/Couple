@@ -159,6 +159,77 @@ export default function StatsScreen() {
       >
         <Text style={styles.title}>Statistiche 📊</Text>
 
+        {/* Month/Year Selector */}
+        <View style={styles.monthSelector}>
+          <TouchableOpacity 
+            style={styles.monthArrow} 
+            onPress={() => changeMonth('prev')}
+          >
+            <Ionicons name="chevron-back" size={24} color="#ff6b8a" />
+          </TouchableOpacity>
+          
+          <View style={styles.monthDisplay}>
+            <Text style={styles.monthText}>
+              {format(selectedDate, 'MMMM yyyy', { locale: it })}
+            </Text>
+            {!isSameMonth(selectedDate, new Date()) && (
+              <View style={styles.historicBadge}>
+                <Text style={styles.historicBadgeText}>Storico</Text>
+              </View>
+            )}
+          </View>
+          
+          <TouchableOpacity 
+            style={[styles.monthArrow, isSameMonth(selectedDate, new Date()) && styles.monthArrowDisabled]} 
+            onPress={() => changeMonth('next')}
+            disabled={isSameMonth(selectedDate, new Date())}
+          >
+            <Ionicons name="chevron-forward" size={24} color={isSameMonth(selectedDate, new Date()) ? '#444' : '#ff6b8a'} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Premium Banner for historical stats */}
+        {!isPremium && (
+          <TouchableOpacity 
+            style={styles.premiumStatsBanner}
+            onPress={() => router.push('/paywall')}
+          >
+            <Ionicons name="time" size={24} color="#f39c12" />
+            <View style={styles.premiumStatsText}>
+              <Text style={styles.premiumStatsTitle}>📈 Sblocca Storico Completo</Text>
+              <Text style={styles.premiumStatsDesc}>Visualizza le statistiche dei mesi precedenti</Text>
+            </View>
+            <View style={styles.proBadge}>
+              <Text style={styles.proBadgeText}>PRO</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+
+        {/* Monthly Stats Card - Shows filtered data */}
+        <View style={styles.monthlyStatsCard}>
+          <Text style={styles.monthlyStatsTitle}>
+            📅 {format(selectedDate, 'MMMM', { locale: it })}
+          </Text>
+          <View style={styles.monthlyStatsGrid}>
+            <View style={styles.monthlyStatItem}>
+              <Text style={styles.monthlyStatValue}>{filteredStats?.monthly_count || 0}</Text>
+              <Text style={styles.monthlyStatLabel}>Momenti</Text>
+            </View>
+            <View style={styles.monthlyStatItem}>
+              <Text style={styles.monthlyStatValue}>{filteredStats?.average_quality?.toFixed(1) || '0'}</Text>
+              <Text style={styles.monthlyStatLabel}>Qualità media</Text>
+            </View>
+            <View style={styles.monthlyStatItem}>
+              <Text style={styles.monthlyStatValue}>{filteredStats?.avg_duration || 0}</Text>
+              <Text style={styles.monthlyStatLabel}>Durata media</Text>
+            </View>
+            <View style={styles.monthlyStatItem}>
+              <Text style={styles.monthlyStatValue}>{filteredStats?.unique_locations || 0}</Text>
+              <Text style={styles.monthlyStatLabel}>Location</Text>
+            </View>
+          </View>
+        </View>
+
         {/* Sessometro Main Card */}
         <View style={styles.sessometroCard}>
           <View style={styles.sessometroHeader}>
