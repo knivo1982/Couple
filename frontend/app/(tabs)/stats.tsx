@@ -19,6 +19,35 @@ import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
+// Calorie per posizione (cal/min)
+const POSITION_CALORIES: { [key: string]: number } = {
+  missionary: 3.5,
+  cowgirl: 4.5,
+  reverse_cowgirl: 4.5,
+  doggy: 4.0,
+  standing: 5.0,
+  spooning: 2.5,
+  '69': 3.0,
+  lotus: 3.5,
+  prone: 3.0,
+};
+
+// Calcola calorie bruciate
+const calculateCalories = (duration: number, positions: string[], quality: number): number => {
+  if (!duration) duration = 15;
+  
+  let calPerMin = 3.5; // default
+  if (positions && positions.length > 0) {
+    const total = positions.reduce((sum, p) => sum + (POSITION_CALORIES[p] || 3.5), 0);
+    calPerMin = total / positions.length;
+  }
+  
+  // Bonus intensità
+  const multiplier = 0.8 + (quality * 0.1);
+  
+  return Math.round(duration * calPerMin * multiplier);
+};
+
 const LEVEL_EMOJIS: { [key: string]: string } = {
   'Nuova Coppia': '🌱',
   'In Riscaldamento': '🔥',
