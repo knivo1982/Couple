@@ -54,7 +54,9 @@ const LOCATIONS = [
 ];
 
 export default function CalendarScreen() {
+  const router = useRouter();
   const { user, fertilityData, setFertilityData, intimacyEntries, setIntimacyEntries, setStats } = useStore();
+  const { isPremium } = usePremiumStore();
   const [cycleModalVisible, setCycleModalVisible] = useState(false);
   const [intimacyModalVisible, setIntimacyModalVisible] = useState(false);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
@@ -74,10 +76,15 @@ export default function CalendarScreen() {
   const [positions, setPositions] = useState<any[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarKey, setCalendarKey] = useState(0);
+  
+  // Check if male user can see fertility (Premium only)
+  const isMale = user?.gender === 'male';
+  const canSeeFertility = !isMale || isPremium; // Women always see, men need Premium
 
   // Create sets for faster lookup - memoize to prevent re-renders
   const intimacyDates = new Set(intimacyEntries?.map((e: any) => e.date) || []);
   const periodDates = new Set(fertilityData?.periods || []);
+
   const ovulationDates = new Set(fertilityData?.ovulation_days || []);
   const fertileDates = new Set(fertilityData?.fertile_days || []);
 
