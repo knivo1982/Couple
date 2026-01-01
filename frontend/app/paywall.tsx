@@ -285,6 +285,41 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 24,
   },
+  featuresTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 16,
+  },
+  featuresGrid: {
+    gap: 12,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  featureIconSmall: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 107, 138, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  featureTextContainer: {
+    flex: 1,
+  },
+  featureText: {
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: '500',
+  },
+  featureDesc: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 2,
+  },
   featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
