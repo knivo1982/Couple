@@ -40,10 +40,15 @@ const BADGES = [
 ];
 
 export default function StatsScreen() {
+  const router = useRouter();
   const { user, stats, setStats } = useStore();
+  const { isPremium } = usePremiumStore();
   const [refreshing, setRefreshing] = useState(false);
   const [moodStats, setMoodStats] = useState<any>(null);
   const [entries, setEntries] = useState<any[]>([]);
+  const [allEntries, setAllEntries] = useState<any[]>([]); // All entries for filtering
+  const [selectedDate, setSelectedDate] = useState(new Date()); // Current month/year
+  const [filteredStats, setFilteredStats] = useState<any>(null);
 
   const loadData = async () => {
     if (!user?.couple_code) return;
@@ -54,7 +59,10 @@ export default function StatsScreen() {
         intimacyAPI.getAll(user.couple_code),
       ]);
       setStats(statsData);
-      setEntries(entriesData || []);
+      setAllEntries(entriesData || []);
+      
+      // Filter entries for selected month
+      filterEntriesForMonth(entriesData || [], selectedDate);
 
       try {
         const mood = await moodAPI.getStats(user.couple_code);
@@ -65,6 +73,56 @@ export default function StatsScreen() {
     } catch (error) {
       console.error('Error loading stats:', error);
     }
+  };
+
+  // Filter entries by selected month
+  const filterEntriesForMonth = (allData: any[], date: Date) => {
+    const monthStart = startOfMonth(date);
+    const monthEnd = endOfMonth(date);
+    
+    const filtered = allData.filter((entry: any) => {
+      const entryDate = new Date(entry.date);
+      return entryDate >= monthStart && entryDate <= monthEnd;
+    });
+    
+    setEntries(filtered);
+    
+    // Calculate stats for this month
+    const monthlyCount = filtered.length;
+    const avgQuality = filtered.length > 0 
+      ? filtered.reduce((sum: number, e: any) => sum + (e.quality_rating || 0), 0) / filtered.length 
+      : 0;
+    const totalDuration = filtered.reduce((sum: number, e: any) => sum + (e.duration || 0), 0);
+    const avgDuration = filtered.length > 0 ? Math.round(totalDuration / filtered.length) : 0;
+    const locations = [...new Set(filtered.map((e: any) => e.location).filter(Boolean))];
+    
+    setFilteredStats({
+      monthly_count: monthlyCount,
+      average_quality: avgQuality,
+      total_duration: totalDuration,
+      avg_duration: avgDuration,
+      unique_locations: locations.length,
+    });
+  };
+
+  // Change month (Premium only for past months)
+  const changeMonth = (direction: 'prev' | 'next') => {
+    const newDate = direction === 'prev' 
+      ? subMonths(selectedDate, 1) 
+      : subMonths(selectedDate, -1);
+    
+    // Don't go into future
+    if (newDate > new Date()) return;
+    
+    // Check if trying to view past months without Premium
+    const isCurrentMonth = isSameMonth(newDate, new Date());
+    if (!isCurrentMonth && !isPremium) {
+      router.push('/paywall');
+      return;
+    }
+    
+    setSelectedDate(newDate);
+    filterEntriesForMonth(allEntries, newDate);
   };
 
   useEffect(() => {
