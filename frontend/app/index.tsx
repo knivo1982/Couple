@@ -15,10 +15,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../store/useStore';
+import { usePremiumStore } from '../store/premiumStore';
 import { userAPI } from '../services/api';
 
 export default function Index() {
   const { user, isLoading, loadUser, saveUser } = useStore();
+  const { hasSeenOnboarding } = usePremiumStore();
   const [name, setName] = useState('');
   const [gender, setGender] = useState<'male' | 'female' | null>(null);
   const [coupleCode, setCoupleCode] = useState('');
@@ -31,9 +33,14 @@ export default function Index() {
 
   useEffect(() => {
     if (!isLoading && user) {
-      router.replace('/(tabs)');
+      // Se l'utente non ha visto l'onboarding, mostralo
+      if (!hasSeenOnboarding) {
+        router.replace('/onboarding');
+      } else {
+        router.replace('/(tabs)');
+      }
     }
-  }, [isLoading, user]);
+  }, [isLoading, user, hasSeenOnboarding]);
 
   const handleCreateAccount = async () => {
     if (!name.trim() || !gender) return;
@@ -42,7 +49,8 @@ export default function Index() {
     try {
       const newUser = await userAPI.create(name.trim(), gender);
       await saveUser(newUser);
-      router.replace('/(tabs)');
+      // Nuovo utente -> vai all'onboarding
+      router.replace('/onboarding');
     } catch (error) {
       console.error('Error creating user:', error);
       Alert.alert('Errore', 'Impossibile creare l\'account. Riprova.');
