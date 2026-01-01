@@ -361,26 +361,38 @@ export default function CalendarScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         {/* Legend - diversa per uomo e donna */}
         <View style={styles.legend}>
-          {user?.gender === 'male' ? (
-            <>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#2ed573' }]} />
-                <Text style={styles.legendText}>Sicuro</Text>
-              </View>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#ffa502' }]} />
-                <Text style={styles.legendText}>Attenzione</Text>
-              </View>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#ff4757' }]} />
-                <Text style={styles.legendText}>Pericolo</Text>
-              </View>
-              <View style={styles.legendItem}>
-                <Text style={{ fontSize: 14 }}>❤️</Text>
-                <Text style={styles.legendText}>Intimità</Text>
-              </View>
-            </>
+          {isMale ? (
+            canSeeFertility ? (
+              // Uomo PREMIUM - vede tutto
+              <>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#2ed573' }]} />
+                  <Text style={styles.legendText}>Sicuro</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#ffa502' }]} />
+                  <Text style={styles.legendText}>Attenzione</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#ff4757' }]} />
+                  <Text style={styles.legendText}>Pericolo</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <Text style={{ fontSize: 14 }}>❤️</Text>
+                  <Text style={styles.legendText}>Intimità</Text>
+                </View>
+              </>
+            ) : (
+              // Uomo FREE - solo intimità
+              <>
+                <View style={styles.legendItem}>
+                  <Text style={{ fontSize: 14 }}>❤️</Text>
+                  <Text style={styles.legendText}>Intimità</Text>
+                </View>
+              </>
+            )
           ) : (
+            // Donna - vede dettagli ciclo
             <>
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: '#ff4757' }]} />
