@@ -15,10 +15,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { useStore } from '../../store/useStore';
+import { usePremiumStore } from '../../store/premiumStore';
 import { cycleAPI, intimacyAPI, challengeAPI } from '../../services/api';
 import { format, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import Svg, { Path } from 'react-native-svg';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
