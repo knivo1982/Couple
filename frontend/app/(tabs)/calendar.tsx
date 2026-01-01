@@ -127,16 +127,28 @@ export default function CalendarScreen() {
         setPositions(suggestions.positions);
       }
 
-      const cycleData = await cycleAPI.get(user.id);
-      if (cycleData && cycleData.last_period_date) {
-        setLastPeriodDate(cycleData.last_period_date);
-        setCycleLength(String(cycleData.cycle_length));
-        setPeriodLength(String(cycleData.period_length));
-        setCycleConfigured(true);
+      // Se donna: carica il suo ciclo
+      // Se uomo: carica il ciclo della partner
+      if (user.gender === 'female') {
+        const cycleData = await cycleAPI.get(user.id);
+        if (cycleData && cycleData.last_period_date) {
+          setLastPeriodDate(cycleData.last_period_date);
+          setCycleLength(String(cycleData.cycle_length));
+          setPeriodLength(String(cycleData.period_length));
+          setCycleConfigured(true);
+        }
+        
+        const fertility = await cycleAPI.getFertility(user.id);
+        setFertilityData(fertility);
+      } else if (user.couple_code) {
+        // Uomo: carica fertilità della partner tramite couple_code
+        try {
+          const fertility = await cycleAPI.getFertilityByCouple(user.couple_code);
+          setFertilityData(fertility);
+        } catch (e) {
+          console.log('Partner fertility not available');
+        }
       }
-      
-      const fertility = await cycleAPI.getFertility(user.id);
-      setFertilityData(fertility);
 
       if (user.couple_code) {
         const entries = await intimacyAPI.getAll(user.couple_code);
