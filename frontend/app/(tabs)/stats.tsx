@@ -267,6 +267,21 @@ export default function StatsScreen() {
           </View>
         </View>
 
+        {/* 🔥 Calorie Card */}
+        <View style={styles.caloriesCard}>
+          <View style={styles.caloriesHeader}>
+            <Text style={styles.caloriesEmoji}>🔥</Text>
+            <Text style={styles.caloriesTitle}>Calorie Bruciate</Text>
+          </View>
+          <Text style={styles.caloriesValue}>{filteredStats?.total_calories || 0}</Text>
+          <Text style={styles.caloriesLabel}>kcal questo mese</Text>
+          <Text style={styles.caloriesEquivalent}>
+            {filteredStats?.total_calories > 0 
+              ? `≈ ${Math.round((filteredStats?.total_calories || 0) / 100)} barrette di cioccolato 🍫`
+              : 'Registra i tuoi momenti!'}
+          </Text>
+        </View>
+
         {/* Sessometro Main Card */}
         <View style={styles.sessometroCard}>
           <View style={styles.sessometroHeader}>
