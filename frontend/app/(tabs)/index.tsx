@@ -64,13 +64,21 @@ export default function Home() {
       setWeeklyChallenge(weekly);
       setSpecialDates(dates);
 
-      // Load fertility predictions
-      const predictions = await fertilityAPI.getPredictions(user.id);
-      setFertilityPredictions(predictions);
+      // Load fertility predictions (optional)
+      try {
+        const predictions = await fertilityAPI.getPredictions(user.id);
+        setFertilityPredictions(predictions);
+      } catch (e) {
+        console.log('No fertility predictions');
+      }
 
-      // Load fertility data
-      const fertility = await cycleAPI.getFertility(user.id);
-      setFertilityData(fertility);
+      // Load fertility data (optional)
+      try {
+        const fertility = await cycleAPI.getFertility(user.id);
+        setFertilityData(fertility);
+      } catch (e) {
+        console.log('No fertility data');
+      }
 
       // Load today's moods
       try {
