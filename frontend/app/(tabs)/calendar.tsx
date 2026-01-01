@@ -222,7 +222,6 @@ export default function CalendarScreen() {
     const isPeriod = periodDates.has(dateString);
     const isOvulation = ovulationDates.has(dateString);
     const isFertile = fertileDates.has(dateString);
-    const isMale = user?.gender === 'male';
     
     let bgColor = 'transparent';
     let textColor = state === 'disabled' ? '#444' : '#fff';
@@ -232,8 +231,8 @@ export default function CalendarScreen() {
     if (hasIntimacy) {
       showHeart = true;
       textColor = '#fff';
-    } else if (isMale) {
-      // Per l'uomo: mostra zone sicure vs fertili/pericolo
+    } else if (isMale && canSeeFertility) {
+      // Uomo PREMIUM: mostra zone sicure vs fertili/pericolo
       if (isOvulation || isFertile) {
         // Pericolo fecondazione - rosso/arancione
         bgColor = isOvulation ? '#ff4757' : '#ffa502';
@@ -245,6 +244,9 @@ export default function CalendarScreen() {
         textColor = '#2ed573';
       }
       // Altrimenti giorno normale (sicuro)
+    } else if (isMale && !canSeeFertility) {
+      // Uomo FREE: non vede nulla della fertilità, solo intimità
+      // Nessun colore speciale
     } else {
       // Per la donna: mostra dettagli ciclo
       if (isPeriod) {
