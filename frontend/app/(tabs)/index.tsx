@@ -257,6 +257,27 @@ export default function Home() {
           <Ionicons name="chevron-forward" size={24} color="#ff6b8a" />
         </TouchableOpacity>
 
+        {/* Secret Desires Card - Premium Feature */}
+        <TouchableOpacity 
+          style={styles.secretDesiresCard} 
+          onPress={() => router.push('/secret-desires')}
+        >
+          <View style={styles.secretDesiresGlow} />
+          <View style={styles.secretDesiresIcon}>
+            <Text style={{ fontSize: 32 }}>💭</Text>
+          </View>
+          <View style={styles.secretDesiresContent}>
+            <View style={styles.secretDesiresHeader}>
+              <Text style={styles.secretDesiresTitle}>Desideri Segreti</Text>
+              <View style={styles.newBadge}>
+                <Text style={styles.newBadgeText}>NEW</Text>
+              </View>
+            </View>
+            <Text style={styles.secretDesiresDesc}>Scopri le fantasie che avete in comune!</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={24} color="#9b59b6" />
+        </TouchableOpacity>
+
         {/* Sessometro Card */}
         <TouchableOpacity style={styles.sessometroCard} onPress={() => router.push('/(tabs)/stats')}>
           <View style={styles.sessometroHeader}>
