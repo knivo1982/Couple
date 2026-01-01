@@ -444,21 +444,31 @@ export default function CalendarScreen() {
           </TouchableOpacity>
         )}
 
-        {/* Messaggio per l'uomo quando non ci sono dati del ciclo */}
-        {user?.gender === 'male' && (!fertilityData || (!fertilityData.periods?.length && !fertilityData.fertile_days?.length)) && (
-          <View style={styles.maleInfoBanner}>
-            <View style={styles.setupIcon}>
-              <Ionicons name="information-circle" size={28} color="#3498db" />
+        {/* Banner PREMIUM per uomo FREE */}
+        {isMale && !isPremium && (
+          <TouchableOpacity 
+            style={styles.premiumBanner} 
+            onPress={() => router.push('/paywall')}
+          >
+            <View style={styles.premiumBannerContent}>
+              <View style={styles.premiumIconContainer}>
+                <Ionicons name="shield-checkmark" size={32} color="#f39c12" />
+              </View>
+              <View style={styles.premiumTextContainer}>
+                <Text style={styles.premiumBannerTitle}>🔒 Sblocca Fertilità</Text>
+                <Text style={styles.premiumBannerText}>
+                  Vedi quando è sicuro fare sesso e quando c'è rischio di fecondazione
+                </Text>
+              </View>
+              <View style={styles.premiumBadge}>
+                <Text style={styles.premiumBadgeText}>PRO</Text>
+              </View>
             </View>
-            <View style={styles.setupContent}>
-              <Text style={styles.setupTitle}>Info Fertilità</Text>
-              <Text style={styles.setupText}>Quando la tua partner configurerà il ciclo, vedrai qui i giorni sicuri e quelli a rischio fecondazione</Text>
-            </View>
-          </View>
+          </TouchableOpacity>
         )}
 
-        {/* Info box per l'uomo quando ci sono dati */}
-        {user?.gender === 'male' && fertilityData && (fertilityData.periods?.length > 0 || fertilityData.fertile_days?.length > 0) && (
+        {/* Info box per l'uomo PREMIUM quando ci sono dati */}
+        {isMale && canSeeFertility && fertilityData && (fertilityData.periods?.length > 0 || fertilityData.fertile_days?.length > 0) && (
           <View style={styles.maleInfoBox}>
             <Text style={styles.maleInfoTitle}>🛡️ Guida Rapida</Text>
             <View style={styles.maleInfoRow}>
@@ -467,11 +477,24 @@ export default function CalendarScreen() {
             </View>
             <View style={styles.maleInfoRow}>
               <View style={[styles.maleInfoDot, { backgroundColor: '#ffa502' }]} />
-              <Text style={styles.maleInfoText}><Text style={{fontWeight: 'bold'}}>Arancione</Text> = Attenzione (periodo fertile)</Text>
+              <Text style={styles.maleInfoText}><Text style={{fontWeight: 'bold'}}>Arancione</Text> = Attenzione (fertile)</Text>
             </View>
             <View style={styles.maleInfoRow}>
               <View style={[styles.maleInfoDot, { backgroundColor: '#ff4757' }]} />
               <Text style={styles.maleInfoText}><Text style={{fontWeight: 'bold'}}>Rosso</Text> = Pericolo (ovulazione)</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Messaggio per l'uomo PREMIUM quando la partner non ha configurato */}
+        {isMale && canSeeFertility && (!fertilityData || (!fertilityData.periods?.length && !fertilityData.fertile_days?.length)) && (
+          <View style={styles.maleInfoBanner}>
+            <View style={styles.setupIcon}>
+              <Ionicons name="information-circle" size={28} color="#3498db" />
+            </View>
+            <View style={styles.setupContent}>
+              <Text style={styles.setupTitle}>In attesa dei dati</Text>
+              <Text style={styles.setupText}>Quando la tua partner configurerà il ciclo, vedrai qui i giorni sicuri</Text>
             </View>
           </View>
         )}
