@@ -131,6 +131,14 @@ export default function StatsScreen() {
       total_duration: totalDuration,
       avg_duration: avgDuration,
       unique_locations: locations.length,
+      // Calcola calorie totali del mese
+      total_calories: filtered.reduce((sum: number, e: any) => {
+        return sum + calculateCalories(
+          e.duration || 15,
+          e.positions_used || [],
+          e.quality_rating || 3
+        );
+      }, 0),
     });
   };
 
