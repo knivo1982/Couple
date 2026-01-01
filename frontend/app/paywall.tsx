@@ -279,6 +279,48 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
   },
+  // Highlight Section
+  highlightSection: {
+    marginBottom: 24,
+  },
+  highlightTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 16,
+  },
+  highlightCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 107, 138, 0.15)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 138, 0.3)',
+  },
+  highlightIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#ff6b8a',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+  highlightContent: {
+    flex: 1,
+  },
+  highlightText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  highlightDesc: {
+    fontSize: 13,
+    color: '#ccc',
+    marginTop: 4,
+  },
   featuresContainer: {
     backgroundColor: '#2a2a4e',
     borderRadius: 20,
