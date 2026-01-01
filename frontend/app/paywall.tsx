@@ -114,22 +114,44 @@ export default function PaywallScreen() {
           <View style={styles.premiumBadge}>
             <Ionicons name="diamond" size={32} color="#f39c12" />
           </View>
-          <Text style={styles.title}>💖 Vivi la tua relazione senza limiti</Text>
+          <Text style={styles.title}>💖 Couple Bliss Premium</Text>
           <Text style={styles.subtitle}>
-            Sblocca tutte le funzioni Premium pensate per rafforzare la vostra complicità.
+            Sblocca tutte le funzionalità esclusive per vivere la vostra relazione al massimo!
           </Text>
         </View>
 
-        <View style={styles.featuresContainer}>
-          {PREMIUM_FEATURES.map((feature, index) => (
-            <View key={index} style={styles.featureRow}>
-              <View style={styles.featureIcon}>
-                <Ionicons name={feature.icon as any} size={20} color="#ff6b8a" />
+        {/* Highlight Features */}
+        <View style={styles.highlightSection}>
+          <Text style={styles.highlightTitle}>🔥 Funzionalità Esclusive</Text>
+          {PREMIUM_FEATURES.filter(f => f.highlight).map((feature, index) => (
+            <View key={index} style={styles.highlightCard}>
+              <View style={styles.highlightIcon}>
+                <Ionicons name={feature.icon as any} size={28} color="#fff" />
               </View>
-              <Text style={styles.featureText}>{feature.text}</Text>
-              <Ionicons name="checkmark-circle" size={22} color="#2ed573" />
+              <View style={styles.highlightContent}>
+                <Text style={styles.highlightText}>{feature.text}</Text>
+                <Text style={styles.highlightDesc}>{feature.desc}</Text>
+              </View>
             </View>
           ))}
+        </View>
+
+        {/* All Features */}
+        <View style={styles.featuresContainer}>
+          <Text style={styles.featuresTitle}>✨ Tutto incluso nel Premium</Text>
+          <View style={styles.featuresGrid}>
+            {PREMIUM_FEATURES.filter(f => !f.highlight).map((feature, index) => (
+              <View key={index} style={styles.featureItem}>
+                <View style={styles.featureIconSmall}>
+                  <Ionicons name={feature.icon as any} size={18} color="#ff6b8a" />
+                </View>
+                <View style={styles.featureTextContainer}>
+                  <Text style={styles.featureText}>{feature.text}</Text>
+                  <Text style={styles.featureDesc}>{feature.desc}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
         </View>
 
         <View style={styles.plansContainer}>
