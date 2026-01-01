@@ -750,4 +750,42 @@ const styles = StyleSheet.create({
   saveBtnText: { color: '#fff', fontSize: 17, fontWeight: '600' },
   actionButtons: { flexDirection: 'row', gap: 12, marginTop: 20 },
   deleteBtnStyle: { backgroundColor: '#ff4757', flex: 0.6, marginTop: 0 },
+  // Stili per info uomo
+  maleInfoBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(52, 152, 219, 0.15)',
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(52, 152, 219, 0.3)',
+  },
+  maleInfoBox: {
+    backgroundColor: '#2a2a4e',
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 16,
+  },
+  maleInfoTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 12,
+  },
+  maleInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  maleInfoDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 10,
+  },
+  maleInfoText: {
+    color: '#ccc',
+    fontSize: 14,
+  },
 });
