@@ -655,4 +655,44 @@ const styles = StyleSheet.create({
     color: '#888',
     marginTop: 4,
   },
+  // Calories Card
+  caloriesCard: {
+    backgroundColor: 'rgba(255, 107, 138, 0.15)',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 138, 0.3)',
+  },
+  caloriesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  caloriesEmoji: {
+    fontSize: 28,
+    marginRight: 8,
+  },
+  caloriesTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  caloriesValue: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#ff6b8a',
+  },
+  caloriesLabel: {
+    fontSize: 14,
+    color: '#aaa',
+    marginTop: 4,
+  },
+  caloriesEquivalent: {
+    fontSize: 13,
+    color: '#888',
+    marginTop: 8,
+    fontStyle: 'italic',
+  },
 });
