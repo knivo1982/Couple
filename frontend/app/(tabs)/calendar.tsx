@@ -348,24 +348,47 @@ export default function CalendarScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Legend */}
+        {/* Legend - diversa per uomo e donna */}
         <View style={styles.legend}>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: '#ff4757' }]} />
-            <Text style={styles.legendText}>Ciclo</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: '#ffa502' }]} />
-            <Text style={styles.legendText}>Ovulazione</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { borderWidth: 2, borderColor: '#2ed573' }]} />
-            <Text style={styles.legendText}>Fertile</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <Text style={{ fontSize: 14 }}>❤️</Text>
-            <Text style={styles.legendText}>Intimità</Text>
-          </View>
+          {user?.gender === 'male' ? (
+            <>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: '#2ed573' }]} />
+                <Text style={styles.legendText}>Sicuro</Text>
+              </View>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: '#ffa502' }]} />
+                <Text style={styles.legendText}>Attenzione</Text>
+              </View>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: '#ff4757' }]} />
+                <Text style={styles.legendText}>Pericolo</Text>
+              </View>
+              <View style={styles.legendItem}>
+                <Text style={{ fontSize: 14 }}>❤️</Text>
+                <Text style={styles.legendText}>Intimità</Text>
+              </View>
+            </>
+          ) : (
+            <>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: '#ff4757' }]} />
+                <Text style={styles.legendText}>Ciclo</Text>
+              </View>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: '#ffa502' }]} />
+                <Text style={styles.legendText}>Ovulazione</Text>
+              </View>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { borderWidth: 2, borderColor: '#2ed573' }]} />
+                <Text style={styles.legendText}>Fertile</Text>
+              </View>
+              <View style={styles.legendItem}>
+                <Text style={{ fontSize: 14 }}>❤️</Text>
+                <Text style={styles.legendText}>Intimità</Text>
+              </View>
+            </>
+          )}
         </View>
 
         <View style={styles.calendarContainer}>
