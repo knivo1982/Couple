@@ -420,6 +420,38 @@ export default function CalendarScreen() {
             <Ionicons name="chevron-forward" size={24} color="#ffa502" />
           </TouchableOpacity>
         )}
+
+        {/* Messaggio per l'uomo quando non ci sono dati del ciclo */}
+        {user?.gender === 'male' && (!fertilityData || (!fertilityData.periods?.length && !fertilityData.fertile_days?.length)) && (
+          <View style={styles.maleInfoBanner}>
+            <View style={styles.setupIcon}>
+              <Ionicons name="information-circle" size={28} color="#3498db" />
+            </View>
+            <View style={styles.setupContent}>
+              <Text style={styles.setupTitle}>Info Fertilità</Text>
+              <Text style={styles.setupText}>Quando la tua partner configurerà il ciclo, vedrai qui i giorni sicuri e quelli a rischio fecondazione</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Info box per l'uomo quando ci sono dati */}
+        {user?.gender === 'male' && fertilityData && (fertilityData.periods?.length > 0 || fertilityData.fertile_days?.length > 0) && (
+          <View style={styles.maleInfoBox}>
+            <Text style={styles.maleInfoTitle}>🛡️ Guida Rapida</Text>
+            <View style={styles.maleInfoRow}>
+              <View style={[styles.maleInfoDot, { backgroundColor: '#2ed573' }]} />
+              <Text style={styles.maleInfoText}><Text style={{fontWeight: 'bold'}}>Verde</Text> = Sesso sicuro (basso rischio)</Text>
+            </View>
+            <View style={styles.maleInfoRow}>
+              <View style={[styles.maleInfoDot, { backgroundColor: '#ffa502' }]} />
+              <Text style={styles.maleInfoText}><Text style={{fontWeight: 'bold'}}>Arancione</Text> = Attenzione (periodo fertile)</Text>
+            </View>
+            <View style={styles.maleInfoRow}>
+              <View style={[styles.maleInfoDot, { backgroundColor: '#ff4757' }]} />
+              <Text style={styles.maleInfoText}><Text style={{fontWeight: 'bold'}}>Rosso</Text> = Pericolo (ovulazione)</Text>
+            </View>
+          </View>
+        )}
       </ScrollView>
 
       {/* Cycle Modal with Inline Calendar */}
