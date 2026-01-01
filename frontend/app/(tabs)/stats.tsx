@@ -487,4 +487,120 @@ const styles = StyleSheet.create({
   activityMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   activityTag: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1a1a2e', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, gap: 4 },
   activityTagText: { fontSize: 11, color: '#888' },
+  // Month Selector Styles
+  monthSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#2a2a4e',
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 16,
+  },
+  monthArrow: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 107, 138, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  monthArrowDisabled: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  monthDisplay: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  monthText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    textTransform: 'capitalize',
+  },
+  historicBadge: {
+    backgroundColor: 'rgba(243, 156, 18, 0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginTop: 4,
+  },
+  historicBadgeText: {
+    fontSize: 10,
+    color: '#f39c12',
+    fontWeight: '600',
+  },
+  // Premium Stats Banner
+  premiumStatsBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(243, 156, 18, 0.15)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(243, 156, 18, 0.3)',
+  },
+  premiumStatsText: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  premiumStatsTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#f39c12',
+  },
+  premiumStatsDesc: {
+    fontSize: 12,
+    color: '#aaa',
+    marginTop: 2,
+  },
+  proBadge: {
+    backgroundColor: '#f39c12',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  proBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  // Monthly Stats Card
+  monthlyStatsCard: {
+    backgroundColor: '#2a2a4e',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+  },
+  monthlyStatsTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 16,
+    textTransform: 'capitalize',
+  },
+  monthlyStatsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  monthlyStatItem: {
+    width: (width - 80) / 2,
+    backgroundColor: 'rgba(255, 107, 138, 0.1)',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  monthlyStatValue: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#ff6b8a',
+  },
+  monthlyStatLabel: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 4,
+  },
 });
