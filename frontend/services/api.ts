@@ -52,6 +52,11 @@ export const cycleAPI = {
     const response = await api.get(`/cycle/fertility/${userId}`);
     return response.data;
   },
+  // Get fertility data by couple code (for male partner)
+  getFertilityByCouple: async (coupleCode: string) => {
+    const response = await api.get(`/cycle/fertility/couple/${coupleCode}`);
+    return response.data;
+  },
   // New: Start new period
   startPeriod: async (userId: string, periodStartDate: string, notes?: string) => {
     const response = await api.post('/cycle/start-period', {
