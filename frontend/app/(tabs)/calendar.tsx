@@ -213,6 +213,7 @@ export default function CalendarScreen() {
     const isPeriod = periodDates.has(dateString);
     const isOvulation = ovulationDates.has(dateString);
     const isFertile = fertileDates.has(dateString);
+    const isMale = user?.gender === 'male';
     
     let bgColor = 'transparent';
     let textColor = state === 'disabled' ? '#444' : '#fff';
@@ -222,15 +223,31 @@ export default function CalendarScreen() {
     if (hasIntimacy) {
       showHeart = true;
       textColor = '#fff';
-    } else if (isPeriod) {
-      bgColor = '#ff4757';
-      textColor = '#fff';
-    } else if (isOvulation) {
-      bgColor = '#ffa502';
-      textColor = '#fff';
-    } else if (isFertile) {
-      borderColor = '#2ed573';
-      textColor = '#2ed573';
+    } else if (isMale) {
+      // Per l'uomo: mostra zone sicure vs fertili/pericolo
+      if (isOvulation || isFertile) {
+        // Pericolo fecondazione - rosso/arancione
+        bgColor = isOvulation ? '#ff4757' : '#ffa502';
+        textColor = '#fff';
+      } else if (isPeriod) {
+        // Durante il ciclo - zona sicura (verde chiaro)
+        bgColor = '#2ed57340';
+        borderColor = '#2ed573';
+        textColor = '#2ed573';
+      }
+      // Altrimenti giorno normale (sicuro)
+    } else {
+      // Per la donna: mostra dettagli ciclo
+      if (isPeriod) {
+        bgColor = '#ff4757';
+        textColor = '#fff';
+      } else if (isOvulation) {
+        bgColor = '#ffa502';
+        textColor = '#fff';
+      } else if (isFertile) {
+        borderColor = '#2ed573';
+        textColor = '#2ed573';
+      }
     }
     
     if (isToday && !hasIntimacy && !isPeriod && !isOvulation) {
