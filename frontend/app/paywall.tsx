@@ -59,11 +59,14 @@ export default function PaywallScreen() {
 
   const handleClose = () => {
     setHasSeenPaywall(true);
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/(tabs)');
-    }
+    // Vai sempre alla schermata di login/registrazione
+    router.replace('/');
+  };
+
+  const handleContinueFree = () => {
+    setHasSeenPaywall(true);
+    // Continua gratis -> vai a registrazione
+    router.replace('/');
   };
 
   const handlePurchase = async () => {
@@ -78,7 +81,7 @@ export default function PaywallScreen() {
       Alert.alert(
         '🎉 Benvenuto in Premium!',
         "Hai sbloccato tutte le funzionalità di Couple Bliss. Goditi l'esperienza completa con il tuo partner!",
-        [{ text: 'Inizia', onPress: () => router.replace('/(tabs)') }]
+        [{ text: 'Inizia', onPress: () => router.replace('/') }]
       );
     } catch (error) {
       Alert.alert('Errore', "Impossibile completare l'acquisto. Riprova più tardi.");
