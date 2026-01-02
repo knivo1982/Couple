@@ -130,6 +130,12 @@ export default function CalendarScreen() {
 
   // Niente più polling automatico - dati già persistiti
 
+  // Carica dati dal server
+  useEffect(() => {
+    if (!user) return;
+    loadData();
+  }, [user]);
+
   const loadData = async () => {
     if (!user) return;
     
@@ -152,10 +158,10 @@ export default function CalendarScreen() {
           setFertilityData(fertility);
         }
       } else if (user.couple_code && isMale) {
-        // Maschio: carica e salva localmente
+        // Maschio: carica e salva con REF
         try {
           const fertility = await cycleAPI.getFertilityByCouple(user.couple_code);
-          await updateMaleFertility(fertility);
+          await saveMaleFertility(fertility);
         } catch (e) {
           // Usa cache
         }
