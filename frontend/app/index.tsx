@@ -23,34 +23,22 @@ const { width, height } = Dimensions.get('window');
 
 export default function Index() {
   const { user, isLoading, loadUser, saveUser } = useStore();
-  const { hasSeenOnboarding, loadOnboardingState } = usePremiumStore();
   const [name, setName] = useState('');
   const [gender, setGender] = useState<'male' | 'female' | null>(null);
   const [coupleCode, setCoupleCode] = useState('');
   const [step, setStep] = useState<'welcome' | 'name' | 'gender' | 'code'>('welcome');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const init = async () => {
-      await loadUser();
-      await loadOnboardingState();
-      setIsInitialized(true);
-    };
-    init();
+    loadUser();
   }, []);
 
   useEffect(() => {
-    // Only navigate when fully initialized
-    if (!isInitialized || isLoading) return;
-    
-    if (user) {
-      // User già esistente - vai direttamente alla home
-      // L'onboarding è solo per NUOVI utenti (dopo registrazione)
+    // Utente già registrato -> vai diretto alla home
+    if (!isLoading && user) {
       router.replace('/(tabs)');
     }
-    // If no user, show registration form (don't navigate)
-  }, [isInitialized, isLoading, user]);
+  }, [isLoading, user]);
 
   const handleCreateAccount = async () => {
     if (!name.trim() || !gender) return;
