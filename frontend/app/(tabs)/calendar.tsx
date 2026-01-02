@@ -89,7 +89,14 @@ export default function CalendarScreen() {
   const fertileDates = new Set(fertilityData?.fertile_days || []);
 
   useEffect(() => {
-    loadData();
+    // Prima carica i dati salvati, poi aggiorna dal server
+    const init = async () => {
+      // Carica fertilità da cache locale (per evitare perdita dati)
+      await loadFertilityData();
+      // Poi carica dati freschi dal server
+      loadData();
+    };
+    init();
     
     // Auto-refresh every 30 seconds for real-time sync
     const pollInterval = setInterval(() => {
