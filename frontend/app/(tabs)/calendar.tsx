@@ -122,11 +122,17 @@ export default function CalendarScreen() {
         if (user.gender === 'male') {
           try {
             const fertility = await cycleAPI.getFertilityByCouple(user.couple_code);
-            if (fertility) {
+            // SOLO se i dati sono validi (non vuoti), aggiorna
+            if (fertility && 
+                (fertility.periods?.length > 0 || 
+                 fertility.fertile_days?.length > 0 || 
+                 fertility.ovulation_days?.length > 0)) {
               setFertilityData(fertility);
             }
+            // Se vuoti, mantieni i dati esistenti (non fare nulla)
           } catch (e) {
             // Partner data not available, keep existing
+            console.log('Keeping existing fertility data');
           }
         }
       }
