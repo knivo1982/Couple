@@ -93,6 +93,9 @@ export default function StatsScreen() {
       
       // Filter entries for selected month
       filterEntriesForMonth(entriesData || [], selectedDate);
+      
+      // Load calories from backend
+      loadCaloriesData(selectedDate);
 
       try {
         const mood = await moodAPI.getStats(user.couple_code);
@@ -102,6 +105,23 @@ export default function StatsScreen() {
       }
     } catch (error) {
       console.error('Error loading stats:', error);
+    }
+  };
+  
+  // Load calories data from backend
+  const loadCaloriesData = async (date: Date) => {
+    if (!user?.couple_code) return;
+    
+    try {
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+      const caloriesResponse = await caloriesAPI.getMonthly(user.couple_code, month, year);
+      if (caloriesResponse.success) {
+        setCaloriesData(caloriesResponse);
+      }
+    } catch (e) {
+      console.log('Calories endpoint not available, using local calculation');
+      setCaloriesData(null);
     }
   };
 
