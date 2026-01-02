@@ -23,26 +23,37 @@ const { width, height } = Dimensions.get('window');
 
 export default function Index() {
   const { user, isLoading, loadUser, saveUser } = useStore();
-  const { hasSeenOnboarding } = usePremiumStore();
+  const { hasSeenOnboarding, loadOnboardingState } = usePremiumStore();
   const [name, setName] = useState('');
   const [gender, setGender] = useState<'male' | 'female' | null>(null);
   const [coupleCode, setCoupleCode] = useState('');
   const [step, setStep] = useState<'welcome' | 'name' | 'gender' | 'code'>('welcome');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    loadUser();
+    const init = async () => {
+      await loadUser();
+      await loadOnboardingState();
+      setIsInitialized(true);
+    };
+    init();
   }, []);
 
   useEffect(() => {
-    if (!isLoading && user) {
+    // Only navigate when fully initialized
+    if (!isInitialized || isLoading) return;
+    
+    if (user) {
+      // User exists - check if they've seen onboarding
       if (!hasSeenOnboarding) {
         router.replace('/onboarding');
       } else {
         router.replace('/(tabs)');
       }
     }
-  }, [isLoading, user, hasSeenOnboarding]);
+    // If no user, show registration form (don't navigate)
+  }, [isInitialized, isLoading, user, hasSeenOnboarding]);
 
   const handleCreateAccount = async () => {
     if (!name.trim() || !gender) return;
