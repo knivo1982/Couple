@@ -181,6 +181,7 @@ export default function StatsScreen() {
     
     setSelectedDate(newDate);
     filterEntriesForMonth(allEntries, newDate);
+    loadCaloriesData(newDate);
   };
 
   useEffect(() => {
