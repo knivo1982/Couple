@@ -24,6 +24,7 @@
         "backgroundColor": "#1a1a2e"
       },
       "package": "com.couplebliss.app",
+      "versionCode": 3,
       "edgeToEdgeEnabled": true
     },
     "web": {
