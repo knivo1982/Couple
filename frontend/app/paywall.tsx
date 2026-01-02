@@ -519,6 +519,16 @@ const styles = StyleSheet.create({
     color: '#888',
     textDecorationLine: 'underline',
   },
+  skipButton: {
+    alignItems: 'center',
+    paddingVertical: 16,
+    marginTop: 8,
+  },
+  skipText: {
+    fontSize: 16,
+    color: '#ff6b8a',
+    fontWeight: '600',
+  },
   legalText: {
     fontSize: 11,
     color: '#666',
