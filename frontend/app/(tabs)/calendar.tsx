@@ -110,6 +110,18 @@ export default function CalendarScreen() {
       if (user.couple_code) {
         const entries = await intimacyAPI.getAll(user.couple_code);
         setIntimacyEntries(entries);
+        
+        // Per uomo: ricarica anche dati fertilità della partner
+        if (user.gender === 'male') {
+          try {
+            const fertility = await cycleAPI.getFertilityByCouple(user.couple_code);
+            if (fertility) {
+              setFertilityData(fertility);
+            }
+          } catch (e) {
+            // Partner data not available, keep existing
+          }
+        }
       }
     } catch (error) {
       console.error('Polling error:', error);
