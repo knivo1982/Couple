@@ -156,9 +156,13 @@ export default function CalendarScreen() {
         // Uomo: carica fertilità della partner tramite couple_code
         try {
           const fertility = await cycleAPI.getFertilityByCouple(user.couple_code);
-          setFertilityData(fertility);
+          if (fertility && (fertility.periods?.length > 0 || fertility.fertile_days?.length > 0 || fertility.ovulation_days?.length > 0)) {
+            setFertilityData(fertility);
+          }
+          // Se fertility è vuoto ma non errore, la partner non ha ancora configurato
         } catch (e) {
-          console.log('Partner fertility not available');
+          console.log('Partner fertility not available yet - keeping existing data');
+          // NON azzerare i dati esistenti in caso di errore
         }
       }
 
