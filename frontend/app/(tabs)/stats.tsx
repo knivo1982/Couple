@@ -142,7 +142,7 @@ export default function StatsScreen() {
     const avgQuality = filtered.length > 0 
       ? filtered.reduce((sum: number, e: any) => sum + (e.quality_rating || 0), 0) / filtered.length 
       : 0;
-    const totalDuration = filtered.reduce((sum: number, e: any) => sum + (e.duration || 0), 0);
+    const totalDuration = filtered.reduce((sum: number, e: any) => sum + (e.duration_minutes || e.duration || 0), 0);
     const avgDuration = filtered.length > 0 ? Math.round(totalDuration / filtered.length) : 0;
     const locations = [...new Set(filtered.map((e: any) => e.location).filter(Boolean))];
     
