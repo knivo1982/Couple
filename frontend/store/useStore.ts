@@ -30,30 +30,33 @@ interface Stats {
   sessometro_score: number;
 }
 
+interface FertilityData {
+  periods: string[];
+  fertile_days: string[];
+  ovulation_days: string[];
+}
+
 interface AppStore {
   user: User | null;
   cycleData: CycleData | null;
   intimacyEntries: IntimacyEntry[];
   stats: Stats | null;
-  fertilityData: {
-    periods: string[];
-    fertile_days: string[];
-    ovulation_days: string[];
-  };
+  fertilityData: FertilityData;
   isLoading: boolean;
   
   setUser: (user: User | null) => void;
   setCycleData: (data: CycleData | null) => void;
   setIntimacyEntries: (entries: IntimacyEntry[]) => void;
   setStats: (stats: Stats | null) => void;
-  setFertilityData: (data: { periods: string[]; fertile_days: string[]; ovulation_days: string[] }) => void;
+  setFertilityData: (data: FertilityData) => void;
   setLoading: (loading: boolean) => void;
   loadUser: () => Promise<void>;
   saveUser: (user: User) => Promise<void>;
+  loadFertilityData: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
-export const useStore = create<AppStore>((set) => ({
+export const useStore = create<AppStore>((set, get) => ({
   user: null,
   cycleData: null,
   intimacyEntries: [],
@@ -65,7 +68,20 @@ export const useStore = create<AppStore>((set) => ({
   setCycleData: (cycleData) => set({ cycleData }),
   setIntimacyEntries: (intimacyEntries) => set({ intimacyEntries }),
   setStats: (stats) => set({ stats }),
-  setFertilityData: (fertilityData) => set({ fertilityData }),
+  
+  // Salva fertilityData anche in AsyncStorage
+  setFertilityData: async (fertilityData) => {
+    set({ fertilityData });
+    // Persisti in AsyncStorage per il maschio
+    try {
+      if (fertilityData && (fertilityData.periods?.length > 0 || fertilityData.fertile_days?.length > 0)) {
+        await AsyncStorage.setItem('fertilityData', JSON.stringify(fertilityData));
+      }
+    } catch (e) {
+      console.log('Error saving fertility data');
+    }
+  },
+  
   setLoading: (isLoading) => set({ isLoading }),
 
   loadUser: async () => {
@@ -81,6 +97,19 @@ export const useStore = create<AppStore>((set) => ({
       set({ isLoading: false });
     }
   },
+  
+  // Carica fertilityData da AsyncStorage
+  loadFertilityData: async () => {
+    try {
+      const data = await AsyncStorage.getItem('fertilityData');
+      if (data) {
+        const parsed = JSON.parse(data);
+        set({ fertilityData: parsed });
+      }
+    } catch (e) {
+      console.log('Error loading fertility data');
+    }
+  },
 
   saveUser: async (user) => {
     try {
@@ -94,7 +123,8 @@ export const useStore = create<AppStore>((set) => ({
   logout: async () => {
     try {
       await AsyncStorage.removeItem('user');
-      set({ user: null, cycleData: null, intimacyEntries: [], stats: null });
+      await AsyncStorage.removeItem('fertilityData');
+      set({ user: null, cycleData: null, intimacyEntries: [], stats: null, fertilityData: { periods: [], fertile_days: [], ovulation_days: [] } });
     } catch (error) {
       console.error('Error logging out:', error);
     }
