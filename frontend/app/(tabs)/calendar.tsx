@@ -78,75 +78,60 @@ export default function CalendarScreen() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarKey, setCalendarKey] = useState(0);
   
-  // STATO LOCALE per fertilità maschio - non dipende dallo store!
-  const [localFertilityData, setLocalFertilityData] = useState<{
+  // STATO LOCALE PERMANENTE per fertilità maschio
+  const [maleFertility, setMaleFertility] = useState<{
     periods: string[];
     fertile_days: string[];
     ovulation_days: string[];
-  } | null>(null);
+  }>({ periods: [], fertile_days: [], ovulation_days: [] });
+  const [fertilityLoaded, setFertilityLoaded] = useState(false);
   
-  // Check if male user can see fertility (Premium only)
   const isMale = user?.gender === 'male';
-  const canSeeFertility = !isMale || isPremium; // Women always see, men need Premium
+  const canSeeFertility = !isMale || isPremium;
 
-  // Usa dati locali per maschio, store per donna
-  const activeFertilityData = isMale ? (localFertilityData || fertilityData) : fertilityData;
+  // Per maschio usa SOLO maleFertility, per donna usa store
+  const activeFertility = isMale ? maleFertility : fertilityData;
 
-  // Create sets for faster lookup
   const intimacyDates = new Set(intimacyEntries?.map((e: any) => e.date) || []);
-  const periodDates = new Set(activeFertilityData?.periods || []);
-  const ovulationDates = new Set(activeFertilityData?.ovulation_days || []);
-  const fertileDates = new Set(activeFertilityData?.fertile_days || []);
+  const periodDates = new Set(activeFertility?.periods || []);
+  const ovulationDates = new Set(activeFertility?.ovulation_days || []);
+  const fertileDates = new Set(activeFertility?.fertile_days || []);
 
-  // Carica fertilità locale da AsyncStorage per maschio
-  const loadLocalFertility = async () => {
-    if (!isMale) return;
-    try {
-      const saved = await AsyncStorage.getItem('maleFertilityData');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.periods?.length > 0 || parsed.fertile_days?.length > 0) {
-          setLocalFertilityData(parsed);
-        }
-      }
-    } catch (e) {
-      console.log('Error loading local fertility');
-    }
-  };
-  
-  // Salva fertilità locale per maschio
-  const saveLocalFertility = async (data: any) => {
-    if (!isMale || !data) return;
-    try {
-      if (data.periods?.length > 0 || data.fertile_days?.length > 0) {
-        await AsyncStorage.setItem('maleFertilityData', JSON.stringify(data));
-        setLocalFertilityData(data);
-      }
-    } catch (e) {
-      console.log('Error saving local fertility');
-    }
-  };
-
+  // Carica fertilità maschio da AsyncStorage UNA SOLA VOLTA
   useEffect(() => {
-    const init = async () => {
-      // Per maschio: carica prima da AsyncStorage locale
-      if (isMale) {
-        await loadLocalFertility();
+    if (!isMale || fertilityLoaded) return;
+    
+    const loadMaleFertility = async () => {
+      try {
+        const saved = await AsyncStorage.getItem('MALE_FERTILITY_CACHE');
+        if (saved) {
+          const data = JSON.parse(saved);
+          if (data.periods?.length > 0 || data.fertile_days?.length > 0) {
+            setMaleFertility(data);
+          }
+        }
+        setFertilityLoaded(true);
+      } catch (e) {
+        setFertilityLoaded(true);
       }
-      // Poi carica dati freschi dal server
-      loadData();
     };
-    init();
-    
-    // Auto-refresh every 60 seconds (aumentato da 30)
-    const pollInterval = setInterval(() => {
-      if (!isPolling && !intimacyModalVisible && !cycleModalVisible) {
-        loadDataSilent();
-      }
-    }, 60000);
-    
-    return () => clearInterval(pollInterval);
+    loadMaleFertility();
+  }, [isMale, fertilityLoaded]);
+
+  // Carica dati dal server
+  useEffect(() => {
+    if (!user) return;
+    loadData();
   }, [user]);
+
+  // Aggiorna fertilità maschio dal server (solo se valido)
+  const updateMaleFertility = async (data: any) => {
+    if (!data) return;
+    if (data.periods?.length > 0 || data.fertile_days?.length > 0 || data.ovulation_days?.length > 0) {
+      setMaleFertility(data);
+      await AsyncStorage.setItem('MALE_FERTILITY_CACHE', JSON.stringify(data));
+    }
+  };
 
   // Silent load for polling (no loading state changes)
   const loadDataSilent = async () => {
