@@ -158,7 +158,7 @@ export default function CalendarScreen() {
         setIntimacyEntries(entries);
         
         // Per uomo: ricarica anche dati fertilità della partner
-        if (user.gender === 'male') {
+        if (isMale) {
           try {
             const fertility = await cycleAPI.getFertilityByCouple(user.couple_code);
             // SOLO se i dati sono validi (non vuoti), aggiorna
@@ -166,7 +166,7 @@ export default function CalendarScreen() {
                 (fertility.periods?.length > 0 || 
                  fertility.fertile_days?.length > 0 || 
                  fertility.ovulation_days?.length > 0)) {
-              setFertilityData(fertility);
+              await saveLocalFertility(fertility);
             }
             // Se vuoti, mantieni i dati esistenti (non fare nulla)
           } catch (e) {
