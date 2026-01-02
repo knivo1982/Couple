@@ -97,7 +97,7 @@ export default function Index() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !isInitialized) {
     return (
       <View style={styles.loadingContainer}>
         <View style={styles.loadingLogo}>
