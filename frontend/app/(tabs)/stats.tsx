@@ -78,6 +78,7 @@ export default function StatsScreen() {
   const [allEntries, setAllEntries] = useState<any[]>([]); // All entries for filtering
   const [selectedDate, setSelectedDate] = useState(new Date()); // Current month/year
   const [filteredStats, setFilteredStats] = useState<any>(null);
+  const [caloriesData, setCaloriesData] = useState<any>(null); // New: calories from backend
 
   const loadData = async () => {
     if (!user?.couple_code) return;
