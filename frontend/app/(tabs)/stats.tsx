@@ -748,4 +748,42 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontStyle: 'italic',
   },
+  // Equivalents Grid
+  equivalentsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 107, 138, 0.2)',
+  },
+  equivalentItem: {
+    alignItems: 'center',
+  },
+  equivalentEmoji: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
+  equivalentValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  equivalentLabel: {
+    fontSize: 10,
+    color: '#888',
+    marginTop: 2,
+  },
+  proBadgeSmall: {
+    backgroundColor: '#f39c12',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginLeft: 8,
+  },
+  proBadgeTextSmall: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
 });
