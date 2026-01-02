@@ -177,8 +177,6 @@ export default function CalendarScreen() {
         setPositions(suggestions.positions);
       }
 
-      // Se donna: carica il suo ciclo
-      // Se uomo: carica il ciclo della partner
       if (user.gender === 'female') {
         const cycleData = await cycleAPI.get(user.id);
         if (cycleData && cycleData.last_period_date) {
@@ -187,24 +185,17 @@ export default function CalendarScreen() {
           setPeriodLength(String(cycleData.period_length));
           setCycleConfigured(true);
         }
-        
         const fertility = await cycleAPI.getFertility(user.id);
         if (fertility) {
           setFertilityData(fertility);
         }
       } else if (user.couple_code && isMale) {
-        // Uomo: carica fertilità della partner e salva LOCALMENTE
+        // Maschio: carica e salva localmente
         try {
           const fertility = await cycleAPI.getFertilityByCouple(user.couple_code);
-          if (fertility && 
-              (fertility.periods?.length > 0 || 
-               fertility.fertile_days?.length > 0 || 
-               fertility.ovulation_days?.length > 0)) {
-            // Salva nello stato locale E in AsyncStorage
-            await saveLocalFertility(fertility);
-          }
+          await updateMaleFertility(fertility);
         } catch (e) {
-          console.log('Partner fertility error - using cached data');
+          // Usa cache
         }
       }
 
