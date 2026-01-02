@@ -133,40 +133,7 @@ export default function CalendarScreen() {
     }
   };
 
-  // Silent load for polling (no loading state changes)
-  const loadDataSilent = async () => {
-    if (!user || isPolling) return;
-    setIsPolling(true);
-    
-    try {
-      if (user.couple_code) {
-        const entries = await intimacyAPI.getAll(user.couple_code);
-        setIntimacyEntries(entries);
-        
-        // Per uomo: ricarica anche dati fertilità della partner
-        if (isMale) {
-          try {
-            const fertility = await cycleAPI.getFertilityByCouple(user.couple_code);
-            // SOLO se i dati sono validi (non vuoti), aggiorna
-            if (fertility && 
-                (fertility.periods?.length > 0 || 
-                 fertility.fertile_days?.length > 0 || 
-                 fertility.ovulation_days?.length > 0)) {
-              await saveLocalFertility(fertility);
-            }
-            // Se vuoti, mantieni i dati esistenti (non fare nulla)
-          } catch (e) {
-            // Partner data not available, keep existing
-            console.log('Keeping existing fertility data');
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Polling error:', error);
-    } finally {
-      setIsPolling(false);
-    }
-  };
+  // Niente più polling automatico - dati già persistiti
 
   const loadData = async () => {
     if (!user) return;
