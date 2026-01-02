@@ -72,12 +72,16 @@ export default function Home() {
         console.log('No fertility predictions');
       }
 
-      // Load fertility data (optional)
-      try {
-        const fertility = await cycleAPI.getFertility(user.id);
-        setFertilityData(fertility);
-      } catch (e) {
-        console.log('No fertility data');
+      // Load fertility data (SOLO per donne - il maschio usa getFertilityByCouple nel calendario)
+      if (user.gender === 'female') {
+        try {
+          const fertility = await cycleAPI.getFertility(user.id);
+          if (fertility) {
+            setFertilityData(fertility);
+          }
+        } catch (e) {
+          console.log('No fertility data');
+        }
       }
 
       // Load today's moods
