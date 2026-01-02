@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../../store/useStore';
 import { usePremiumStore } from '../../store/premiumStore';
-import { intimacyAPI, moodAPI } from '../../services/api';
+import { intimacyAPI, moodAPI, caloriesAPI } from '../../services/api';
 import { format, startOfMonth, endOfMonth, subMonths, isSameMonth } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { useRouter } from 'expo-router';
