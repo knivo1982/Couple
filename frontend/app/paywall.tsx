@@ -226,6 +226,10 @@ export default function PaywallScreen() {
           <Text style={styles.restoreText}>Ripristina acquisti</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity style={styles.skipButton} onPress={handleContinueFree}>
+          <Text style={styles.skipText}>Continua gratis →</Text>
+        </TouchableOpacity>
+
         <Text style={styles.legalText}>
           L'abbonamento si rinnova automaticamente. Puoi annullare in qualsiasi momento dalle impostazioni del tuo account Apple.
         </Text>
