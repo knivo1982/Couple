@@ -289,19 +289,50 @@ export default function StatsScreen() {
           </View>
         </View>
 
-        {/* 🔥 Calorie Card */}
+        {/* 🔥 Calorie Card - Enhanced */}
         <View style={styles.caloriesCard}>
           <View style={styles.caloriesHeader}>
             <Text style={styles.caloriesEmoji}>🔥</Text>
             <Text style={styles.caloriesTitle}>Calorie Bruciate</Text>
+            {isPremium && <View style={styles.proBadgeSmall}><Text style={styles.proBadgeTextSmall}>PRO</Text></View>}
           </View>
-          <Text style={styles.caloriesValue}>{filteredStats?.total_calories || 0}</Text>
-          <Text style={styles.caloriesLabel}>kcal questo mese</Text>
-          <Text style={styles.caloriesEquivalent}>
-            {filteredStats?.total_calories > 0 
-              ? `≈ ${Math.round((filteredStats?.total_calories || 0) / 100)} barrette di cioccolato 🍫`
-              : 'Registra i tuoi momenti!'}
+          <Text style={styles.caloriesValue}>
+            {caloriesData?.total_calories || filteredStats?.total_calories || 0}
           </Text>
+          <Text style={styles.caloriesLabel}>kcal questo mese</Text>
+          
+          {/* Equivalents Grid */}
+          {(caloriesData?.total_calories > 0 || filteredStats?.total_calories > 0) && (
+            <View style={styles.equivalentsGrid}>
+              <View style={styles.equivalentItem}>
+                <Text style={styles.equivalentEmoji}>🍫</Text>
+                <Text style={styles.equivalentValue}>
+                  {caloriesData?.equivalents?.chocolate_bars || Math.round((filteredStats?.total_calories || 0) / 100)}
+                </Text>
+                <Text style={styles.equivalentLabel}>barrette</Text>
+              </View>
+              <View style={styles.equivalentItem}>
+                <Text style={styles.equivalentEmoji}>🍕</Text>
+                <Text style={styles.equivalentValue}>
+                  {caloriesData?.equivalents?.pizza_slices || Math.round((filteredStats?.total_calories || 0) / 285)}
+                </Text>
+                <Text style={styles.equivalentLabel}>fette pizza</Text>
+              </View>
+              <View style={styles.equivalentItem}>
+                <Text style={styles.equivalentEmoji}>🏃</Text>
+                <Text style={styles.equivalentValue}>
+                  {caloriesData?.equivalents?.km_running || Math.round((filteredStats?.total_calories || 0) / 60)}
+                </Text>
+                <Text style={styles.equivalentLabel}>km corsa</Text>
+              </View>
+            </View>
+          )}
+          
+          {(!caloriesData?.total_calories && !filteredStats?.total_calories) && (
+            <Text style={styles.caloriesEquivalent}>
+              Registra i tuoi momenti per vedere le calorie! 💪
+            </Text>
+          )}
         </View>
 
         {/* Sessometro Main Card */}
