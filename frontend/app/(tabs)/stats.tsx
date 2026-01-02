@@ -155,7 +155,7 @@ export default function StatsScreen() {
       // Calcola calorie totali del mese
       total_calories: filtered.reduce((sum: number, e: any) => {
         return sum + calculateCalories(
-          e.duration || 15,
+          e.duration_minutes || e.duration || 15,
           e.positions_used || [],
           e.quality_rating || 3
         );
