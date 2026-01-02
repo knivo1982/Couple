@@ -70,12 +70,34 @@ export const useStore = create<AppStore>((set, get) => ({
   setStats: (stats) => set({ stats }),
   
   // Salva fertilityData anche in AsyncStorage
-  setFertilityData: async (fertilityData) => {
-    set({ fertilityData });
-    // Persisti in AsyncStorage per il maschio
+  // NON sovrascrive dati validi con dati vuoti
+  setFertilityData: async (newFertilityData) => {
+    const currentData = get().fertilityData;
+    
+    // Se i nuovi dati sono vuoti ma abbiamo già dati validi, NON sovrascrivere
+    const newDataIsEmpty = !newFertilityData || 
+      ((!newFertilityData.periods || newFertilityData.periods.length === 0) &&
+       (!newFertilityData.fertile_days || newFertilityData.fertile_days.length === 0) &&
+       (!newFertilityData.ovulation_days || newFertilityData.ovulation_days.length === 0));
+    
+    const currentDataHasValues = currentData && 
+      ((currentData.periods && currentData.periods.length > 0) ||
+       (currentData.fertile_days && currentData.fertile_days.length > 0) ||
+       (currentData.ovulation_days && currentData.ovulation_days.length > 0));
+    
+    // Se nuovi dati vuoti e abbiamo già dati validi -> non fare nulla
+    if (newDataIsEmpty && currentDataHasValues) {
+      console.log('Skipping empty fertility update - keeping existing data');
+      return;
+    }
+    
+    // Altrimenti aggiorna
+    set({ fertilityData: newFertilityData });
+    
+    // Persisti in AsyncStorage
     try {
-      if (fertilityData && (fertilityData.periods?.length > 0 || fertilityData.fertile_days?.length > 0)) {
-        await AsyncStorage.setItem('fertilityData', JSON.stringify(fertilityData));
+      if (!newDataIsEmpty) {
+        await AsyncStorage.setItem('fertilityData', JSON.stringify(newFertilityData));
       }
     } catch (e) {
       console.log('Error saving fertility data');
