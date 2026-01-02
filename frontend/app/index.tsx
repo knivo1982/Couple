@@ -45,15 +45,12 @@ export default function Index() {
     if (!isInitialized || isLoading) return;
     
     if (user) {
-      // User exists - check if they've seen onboarding
-      if (!hasSeenOnboarding) {
-        router.replace('/onboarding');
-      } else {
-        router.replace('/(tabs)');
-      }
+      // User già esistente - vai direttamente alla home
+      // L'onboarding è solo per NUOVI utenti (dopo registrazione)
+      router.replace('/(tabs)');
     }
     // If no user, show registration form (don't navigate)
-  }, [isInitialized, isLoading, user, hasSeenOnboarding]);
+  }, [isInitialized, isLoading, user]);
 
   const handleCreateAccount = async () => {
     if (!name.trim() || !gender) return;
