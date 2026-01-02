@@ -55,7 +55,7 @@ const LOCATIONS = [
 
 export default function CalendarScreen() {
   const router = useRouter();
-  const { user, fertilityData, setFertilityData, intimacyEntries, setIntimacyEntries, setStats } = useStore();
+  const { user, fertilityData, setFertilityData, intimacyEntries, setIntimacyEntries, setStats, loadFertilityData } = useStore();
   const { isPremium } = usePremiumStore();
   const [cycleModalVisible, setCycleModalVisible] = useState(false);
   const [intimacyModalVisible, setIntimacyModalVisible] = useState(false);
