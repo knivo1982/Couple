@@ -164,18 +164,28 @@ export default function CalendarScreen() {
         }
         
         const fertility = await cycleAPI.getFertility(user.id);
-        setFertilityData(fertility);
+        if (fertility) {
+          setFertilityData(fertility);
+        }
       } else if (user.couple_code) {
         // Uomo: carica fertilità della partner tramite couple_code
         try {
+          console.log('Loading fertility for male user...');
           const fertility = await cycleAPI.getFertilityByCouple(user.couple_code);
-          if (fertility && (fertility.periods?.length > 0 || fertility.fertile_days?.length > 0 || fertility.ovulation_days?.length > 0)) {
+          console.log('Fertility response:', JSON.stringify(fertility));
+          
+          // SOLO se i dati sono validi e NON vuoti, aggiorna
+          if (fertility && 
+              (fertility.periods?.length > 0 || 
+               fertility.fertile_days?.length > 0 || 
+               fertility.ovulation_days?.length > 0)) {
+            console.log('Setting valid fertility data');
             setFertilityData(fertility);
+          } else {
+            console.log('Fertility data empty, keeping existing');
           }
-          // Se fertility è vuoto ma non errore, la partner non ha ancora configurato
         } catch (e) {
-          console.log('Partner fertility not available yet - keeping existing data');
-          // NON azzerare i dati esistenti in caso di errore
+          console.log('Partner fertility error - keeping existing data:', e);
         }
       }
 
