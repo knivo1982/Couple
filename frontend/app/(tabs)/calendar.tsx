@@ -133,10 +133,6 @@ export default function CalendarScreen() {
     
     loadMaleData();
   }, [isMale, user?.couple_code, dataLoaded]);
-    try {
-      await AsyncStorage.setItem('MALE_FERTILITY_PERMANENT', JSON.stringify(data));
-    } catch (e) {}
-  };
 
   // Niente più polling automatico - dati già persistiti
 
