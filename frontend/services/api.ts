@@ -306,4 +306,28 @@ export const aiCoachAPI = {
   },
 };
 
+// ================= CALORIES API =================
+export const caloriesAPI = {
+  // Calculate calories for a single session
+  calculate: async (duration: number, positions: string[], quality: number, weight?: number) => {
+    const response = await api.post('/calculate-calories', {
+      duration,
+      positions,
+      quality,
+      weight: weight || 70,
+    });
+    return response.data;
+  },
+  // Get monthly calories summary
+  getMonthly: async (coupleCode: string, month?: number, year?: number) => {
+    let url = `/calories/monthly/${coupleCode}`;
+    const params = [];
+    if (month) params.push(`month=${month}`);
+    if (year) params.push(`year=${year}`);
+    if (params.length > 0) url += '?' + params.join('&');
+    const response = await api.get(url);
+    return response.data;
+  },
+};
+
 export default api;
