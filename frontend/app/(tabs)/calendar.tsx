@@ -206,25 +206,19 @@ export default function CalendarScreen() {
         if (fertility) {
           setFertilityData(fertility);
         }
-      } else if (user.couple_code) {
-        // Uomo: carica fertilità della partner tramite couple_code
+      } else if (user.couple_code && isMale) {
+        // Uomo: carica fertilità della partner e salva LOCALMENTE
         try {
-          console.log('Loading fertility for male user...');
           const fertility = await cycleAPI.getFertilityByCouple(user.couple_code);
-          console.log('Fertility response:', JSON.stringify(fertility));
-          
-          // SOLO se i dati sono validi e NON vuoti, aggiorna
           if (fertility && 
               (fertility.periods?.length > 0 || 
                fertility.fertile_days?.length > 0 || 
                fertility.ovulation_days?.length > 0)) {
-            console.log('Setting valid fertility data');
-            setFertilityData(fertility);
-          } else {
-            console.log('Fertility data empty, keeping existing');
+            // Salva nello stato locale E in AsyncStorage
+            await saveLocalFertility(fertility);
           }
         } catch (e) {
-          console.log('Partner fertility error - keeping existing data:', e);
+          console.log('Partner fertility error - using cached data');
         }
       }
 
