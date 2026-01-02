@@ -205,7 +205,7 @@ export default function StatsScreen() {
   const earnedBadges = stats?.badges || [];
 
   // Calculate fun stats
-  const totalMinutes = entries.reduce((sum: number, e: any) => sum + (e.duration || 0), 0);
+  const totalMinutes = entries.reduce((sum: number, e: any) => sum + (e.duration_minutes || e.duration || 0), 0);
   const avgDuration = entries.length > 0 ? Math.round(totalMinutes / entries.length) : 0;
   const uniqueLocations = [...new Set(entries.map((e: any) => e.location).filter(Boolean))].length;
   const favoriteDay = stats?.day_frequency?.[0]?.[0] || null;
