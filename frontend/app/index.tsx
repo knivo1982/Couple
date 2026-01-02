@@ -12,6 +12,7 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,17 +28,32 @@ export default function Index() {
   const [coupleCode, setCoupleCode] = useState('');
   const [step, setStep] = useState<'welcome' | 'name' | 'gender' | 'code'>('welcome');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [checkingFirstLaunch, setCheckingFirstLaunch] = useState(true);
 
   useEffect(() => {
-    loadUser();
+    const init = async () => {
+      await loadUser();
+      
+      // Controlla se è il primo lancio
+      const hasLaunched = await AsyncStorage.getItem('HAS_LAUNCHED_BEFORE');
+      if (!hasLaunched) {
+        // Primo lancio -> mostra paywall
+        await AsyncStorage.setItem('HAS_LAUNCHED_BEFORE', 'true');
+        router.replace('/paywall');
+        return;
+      }
+      
+      setCheckingFirstLaunch(false);
+    };
+    init();
   }, []);
 
   useEffect(() => {
     // Utente già registrato -> vai diretto alla home
-    if (!isLoading && user) {
+    if (!isLoading && !checkingFirstLaunch && user) {
       router.replace('/(tabs)');
     }
-  }, [isLoading, user]);
+  }, [isLoading, user, checkingFirstLaunch]);
 
   const handleCreateAccount = async () => {
     if (!name.trim() || !gender) return;
@@ -46,7 +62,8 @@ export default function Index() {
     try {
       const newUser = await userAPI.create(name.trim(), gender);
       await saveUser(newUser);
-      router.replace('/onboarding');
+      // Dopo registrazione vai alla home (non più onboarding)
+      router.replace('/(tabs)');
     } catch (error) {
       console.error('Error creating user:', error);
       Alert.alert('Errore', 'Impossibile creare l\'account. Riprova.');
