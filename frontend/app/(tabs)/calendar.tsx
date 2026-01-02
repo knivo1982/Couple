@@ -140,7 +140,7 @@ export default function CalendarScreen() {
 
   // Niente più polling automatico - dati già persistiti
 
-  // Carica dati dal server
+  // Carica altri dati dal server
   useEffect(() => {
     if (!user) return;
     loadData();
@@ -167,15 +167,8 @@ export default function CalendarScreen() {
         if (fertility) {
           setFertilityData(fertility);
         }
-      } else if (user.couple_code && isMale) {
-        // Maschio: carica e salva con REF
-        try {
-          const fertility = await cycleAPI.getFertilityByCouple(user.couple_code);
-          await saveMaleFertility(fertility);
-        } catch (e) {
-          // Usa cache
-        }
       }
+      // Per maschio i dati fertilità sono già caricati nell'altro useEffect
 
       if (user.couple_code) {
         const entries = await intimacyAPI.getAll(user.couple_code);
