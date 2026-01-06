@@ -753,6 +753,9 @@ const styles = StyleSheet.create({
   configButton: { width: 44, height: 44, borderRadius: 16, backgroundColor: '#2a2a4e', justifyContent: 'center', alignItems: 'center' },
   content: { padding: 20, paddingTop: 0, paddingBottom: 100 },
   
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 },
+  loadingText: { color: '#888', fontSize: 16, marginTop: 16 },
+  
   legend: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 16, marginBottom: 16 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   legendDot: { width: 14, height: 14, borderRadius: 4 },
