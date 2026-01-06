@@ -11,7 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.couplebliss.app",
-      "buildNumber": "5",
+      "buildNumber": "6",
       "infoPlist": {
         "NSCameraUsageDescription": "Per scattare foto da condividere con il tuo partner",
         "NSPhotoLibraryUsageDescription": "Per scegliere foto da condividere",
