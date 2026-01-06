@@ -138,12 +138,6 @@ export default function CalendarScreen() {
 
   // Niente più polling automatico - dati già persistiti
 
-  // Carica altri dati dal server
-  useEffect(() => {
-    if (!user) return;
-    loadData();
-  }, [user]);
-
   const loadData = async () => {
     if (!user) return;
     
