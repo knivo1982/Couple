@@ -88,6 +88,11 @@ export default function StatsScreen() {
         intimacyAPI.getStats(user.couple_code),
         intimacyAPI.getAll(user.couple_code),
       ]);
+      
+      console.log('=== STATS DEBUG ===');
+      console.log('Entries loaded:', entriesData?.length);
+      console.log('First entry:', JSON.stringify(entriesData?.[0]));
+      
       setStats(statsData);
       setAllEntries(entriesData || []);
       
