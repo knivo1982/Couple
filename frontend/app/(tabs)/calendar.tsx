@@ -492,7 +492,7 @@ export default function CalendarScreen() {
         )}
 
         {/* Info box per l'uomo PREMIUM quando ci sono dati */}
-        {isMale && canSeeFertility && fertilityData && (fertilityData.periods?.length > 0 || fertilityData.fertile_days?.length > 0) && (
+        {isMale && canSeeFertility && activeFertility && (activeFertility.periods?.length > 0 || activeFertility.fertile_days?.length > 0) && (
           <View style={styles.maleInfoBox}>
             <Text style={styles.maleInfoTitle}>🛡️ Guida Rapida</Text>
             <View style={styles.maleInfoRow}>
@@ -511,7 +511,7 @@ export default function CalendarScreen() {
         )}
 
         {/* Messaggio per l'uomo PREMIUM quando la partner non ha configurato */}
-        {isMale && canSeeFertility && (!fertilityData || (!fertilityData.periods?.length && !fertilityData.fertile_days?.length)) && (
+        {isMale && canSeeFertility && (!activeFertility || (!activeFertility.periods?.length && !activeFertility.fertile_days?.length)) && (
           <View style={styles.maleInfoBanner}>
             <View style={styles.setupIcon}>
               <Ionicons name="information-circle" size={28} color="#3498db" />
