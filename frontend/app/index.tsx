@@ -28,32 +28,40 @@ export default function Index() {
   const [coupleCode, setCoupleCode] = useState('');
   const [step, setStep] = useState<'welcome' | 'name' | 'gender' | 'code'>('welcome');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [checkingFirstLaunch, setCheckingFirstLaunch] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const init = async () => {
+      // Carica utente
       await loadUser();
       
-      // Controlla se è il primo lancio
-      const hasLaunched = await AsyncStorage.getItem('HAS_LAUNCHED_BEFORE');
+      // Controlla se è il primo lancio IN ASSOLUTO
+      const hasLaunched = await AsyncStorage.getItem('APP_FIRST_LAUNCH_DONE');
+      
       if (!hasLaunched) {
-        // Primo lancio -> mostra paywall
-        await AsyncStorage.setItem('HAS_LAUNCHED_BEFORE', 'true');
+        // PRIMO LANCIO -> salva subito il flag e mostra paywall
+        await AsyncStorage.setItem('APP_FIRST_LAUNCH_DONE', 'true');
+        setIsInitialized(true);
         router.replace('/paywall');
         return;
       }
       
-      setCheckingFirstLaunch(false);
+      // Non è il primo lancio
+      setIsInitialized(true);
     };
     init();
   }, []);
 
   useEffect(() => {
-    // Utente già registrato -> vai diretto alla home
-    if (!isLoading && !checkingFirstLaunch && user) {
+    // Solo quando inizializzato e non in loading
+    if (!isInitialized || isLoading) return;
+    
+    // Se utente esiste -> vai alla home
+    if (user) {
       router.replace('/(tabs)');
     }
-  }, [isLoading, user, checkingFirstLaunch]);
+    // Altrimenti mostra schermata registrazione (già qui)
+  }, [isInitialized, isLoading, user]);
 
   const handleCreateAccount = async () => {
     if (!name.trim() || !gender) return;
