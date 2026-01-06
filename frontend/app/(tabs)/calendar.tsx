@@ -529,6 +529,7 @@ export default function CalendarScreen() {
           </View>
         )}
       </ScrollView>
+      )}
 
       {/* Cycle Modal with Inline Calendar */}
       <Modal visible={cycleModalVisible} animationType="slide" transparent>
