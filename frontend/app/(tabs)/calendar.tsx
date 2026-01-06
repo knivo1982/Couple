@@ -382,7 +382,13 @@ export default function CalendarScreen() {
         )}
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#ff6b8a" />
+          <Text style={styles.loadingText}>Caricamento calendario...</Text>
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={styles.content}>
         {/* Legend - diversa per uomo e donna */}
         <View style={styles.legend}>
           {isMale ? (
