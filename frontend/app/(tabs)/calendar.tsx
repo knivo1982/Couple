@@ -71,68 +71,70 @@ export default function CalendarScreen() {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [duration, setDuration] = useState('');
   const [notes, setNotes] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start with loading true
   const [isPolling, setIsPolling] = useState(false);
   const [cycleConfigured, setCycleConfigured] = useState(false);
   const [positions, setPositions] = useState<any[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarKey, setCalendarKey] = useState(0);
   
-  // STATO SEMPLICE per fertilità maschio
-  const [malePeriods, setMalePeriods] = useState<string[]>([]);
-  const [maleFertileDays, setMaleFertileDays] = useState<string[]>([]);
-  const [maleOvulationDays, setMaleOvulationDays] = useState<string[]>([]);
-  const [dataLoaded, setDataLoaded] = useState(false);
+  // STATO SEMPLICE per fertilità maschio - inizializzato da AsyncStorage
+  const [maleFertilityData, setMaleFertilityData] = useState<{
+    periods: string[];
+    fertile_days: string[];
+    ovulation_days: string[];
+  }>({ periods: [], fertile_days: [], ovulation_days: [] });
   
   const isMale = user?.gender === 'male';
   const canSeeFertility = !isMale || isPremium;
 
   // Usa dati locali per maschio, store per donna
-  const periodDates = new Set(isMale ? malePeriods : (fertilityData?.periods || []));
-  const fertileDates = new Set(isMale ? maleFertileDays : (fertilityData?.fertile_days || []));
-  const ovulationDates = new Set(isMale ? maleOvulationDays : (fertilityData?.ovulation_days || []));
+  const activeFertility = isMale ? maleFertilityData : fertilityData;
+  const periodDates = new Set(activeFertility?.periods || []);
+  const fertileDates = new Set(activeFertility?.fertile_days || []);
+  const ovulationDates = new Set(activeFertility?.ovulation_days || []);
   const intimacyDates = new Set(intimacyEntries?.map((e: any) => e.date) || []);
 
-  // Carica dati maschio UNA sola volta all'avvio
+  // Carica TUTTO all'avvio - prima di mostrare il calendario
   useEffect(() => {
-    if (!isMale || dataLoaded) return;
-    
-    const loadMaleData = async () => {
-      // Prima prova AsyncStorage
-      try {
-        const cached = await AsyncStorage.getItem('MALE_CAL_DATA');
-        if (cached) {
-          const data = JSON.parse(cached);
-          if (data.p?.length > 0) {
-            setMalePeriods(data.p);
-            setMaleFertileDays(data.f || []);
-            setMaleOvulationDays(data.o || []);
+    const initializeCalendar = async () => {
+      setIsLoading(true);
+      
+      // Se maschio, carica prima i dati fertilità da cache
+      if (user?.gender === 'male') {
+        try {
+          const cached = await AsyncStorage.getItem('MALE_FERTILITY_V2');
+          if (cached) {
+            const data = JSON.parse(cached);
+            setMaleFertilityData(data);
+          }
+        } catch (e) {
+          console.log('No cached fertility');
+        }
+        
+        // Poi carica dal server
+        if (user?.couple_code) {
+          try {
+            const fertility = await cycleAPI.getFertilityByCouple(user.couple_code);
+            if (fertility?.periods?.length > 0 || fertility?.fertile_days?.length > 0) {
+              setMaleFertilityData(fertility);
+              await AsyncStorage.setItem('MALE_FERTILITY_V2', JSON.stringify(fertility));
+            }
+          } catch (e) {
+            console.log('Server fertility error');
           }
         }
-      } catch (e) {}
-      
-      // Poi carica dal server
-      if (user?.couple_code) {
-        try {
-          const fertility = await cycleAPI.getFertilityByCouple(user.couple_code);
-          if (fertility?.periods?.length > 0) {
-            setMalePeriods(fertility.periods);
-            setMaleFertileDays(fertility.fertile_days || []);
-            setMaleOvulationDays(fertility.ovulation_days || []);
-            // Salva in cache
-            await AsyncStorage.setItem('MALE_CAL_DATA', JSON.stringify({
-              p: fertility.periods,
-              f: fertility.fertile_days,
-              o: fertility.ovulation_days
-            }));
-          }
-        } catch (e) {}
       }
-      setDataLoaded(true);
+      
+      // Carica altri dati
+      await loadData();
+      setIsLoading(false);
     };
     
-    loadMaleData();
-  }, [isMale, user?.couple_code, dataLoaded]);
+    if (user) {
+      initializeCalendar();
+    }
+  }, [user?.id]);
 
   // Niente più polling automatico - dati già persistiti
 
