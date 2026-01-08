@@ -18,9 +18,8 @@ import Purchases, { PurchasesPackage, LOG_LEVEL } from 'react-native-purchases';
 
 const { width } = Dimensions.get('window');
 
-// RevenueCat API Keys - INSERISCI LA TUA KEY
-// Ottienila da: https://app.revenuecat.com -> Project Settings -> API Keys
-const REVENUECAT_API_KEY_IOS = 'appl_INSERISCI_LA_TUA_API_KEY_QUI';
+// RevenueCat API Keys
+const REVENUECAT_API_KEY_IOS = 'test_AneLYuVCDeRAsvrgPBxeJFaFdjt';
 const REVENUECAT_API_KEY_ANDROID = 'goog_INSERISCI_LA_TUA_API_KEY_QUI';
 
 const PREMIUM_FEATURES = [
