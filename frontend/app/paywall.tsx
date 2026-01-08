@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,13 +8,22 @@ import {
   Alert,
   ActivityIndicator,
   ScrollView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { usePremiumStore } from '../store/premiumStore';
+import * as RNIap from 'react-native-iap';
 
 const { width } = Dimensions.get('window');
+
+// Product IDs - devono corrispondere a quelli su App Store Connect
+const PRODUCT_IDS = Platform.select({
+  ios: ['couple_bliss_monthly', 'couple_bliss_yearly'],
+  android: ['couple_bliss_monthly', 'couple_bliss_yearly'],
+  default: [],
+});
 
 const PREMIUM_FEATURES = [
   { icon: 'eye', text: 'Calendario Fertilità', desc: 'Vedi giorni sicuri e pericolosi', highlight: true },
@@ -28,7 +37,18 @@ const PREMIUM_FEATURES = [
   { icon: 'infinite', text: 'Zero Limiti', desc: 'Tutte le funzionalità sbloccate', highlight: false },
 ];
 
-const PLANS = [
+interface ProductInfo {
+  id: string;
+  name: string;
+  price: string;
+  period: string;
+  pricePerMonth: string | null;
+  savings: string | null;
+  popular: boolean;
+  productId: string;
+}
+
+const DEFAULT_PLANS: ProductInfo[] = [
   {
     id: 'yearly',
     name: 'Annuale',
@@ -53,39 +73,130 @@ const PLANS = [
 
 export default function PaywallScreen() {
   const router = useRouter();
-  const { setPurchaseInfo, setHasSeenPaywall } = usePremiumStore();
+  const { setPurchaseInfo, setHasSeenPaywall, setIsPremium } = usePremiumStore();
   const [selectedPlan, setSelectedPlan] = useState('yearly');
   const [isLoading, setIsLoading] = useState(false);
+  const [products, setProducts] = useState<RNIap.Product[]>([]);
+  const [plans, setPlans] = useState<ProductInfo[]>(DEFAULT_PLANS);
+
+  // Inizializza StoreKit
+  useEffect(() => {
+    const initIAP = async () => {
+      try {
+        await RNIap.initConnection();
+        console.log('IAP Connection initialized');
+        
+        // Carica i prodotti da App Store
+        if (PRODUCT_IDS && PRODUCT_IDS.length > 0) {
+          const availableProducts = await RNIap.getSubscriptions({ skus: PRODUCT_IDS });
+          console.log('Available products:', availableProducts);
+          setProducts(availableProducts);
+          
+          // Aggiorna i prezzi con quelli reali da App Store
+          if (availableProducts.length > 0) {
+            const updatedPlans = DEFAULT_PLANS.map(plan => {
+              const product = availableProducts.find(p => p.productId === plan.productId);
+              if (product) {
+                return {
+                  ...plan,
+                  price: product.localizedPrice || plan.price,
+                };
+              }
+              return plan;
+            });
+            setPlans(updatedPlans);
+          }
+        }
+      } catch (error) {
+        console.log('IAP init error:', error);
+        // In development/simulator, IAP non funziona - usa prezzi default
+      }
+    };
+
+    initIAP();
+
+    // Listener per acquisti completati
+    const purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(async (purchase) => {
+      console.log('Purchase updated:', purchase);
+      
+      const receipt = purchase.transactionReceipt;
+      if (receipt) {
+        try {
+          // Conferma l'acquisto con Apple
+          await RNIap.finishTransaction({ purchase, isConsumable: false });
+          
+          // Salva lo stato premium
+          const purchaseDate = new Date().toISOString();
+          const planType = purchase.productId.includes('yearly') ? 'yearly' : 'monthly';
+          setPurchaseInfo(planType, purchaseDate);
+          setIsPremium(true);
+          
+          Alert.alert(
+            '🎉 Benvenuto in Premium!',
+            "Hai sbloccato tutte le funzionalità di Couple Bliss!",
+            [{ text: 'Inizia', onPress: () => router.replace('/') }]
+          );
+        } catch (error) {
+          console.log('Finish transaction error:', error);
+        }
+      }
+      setIsLoading(false);
+    });
+
+    // Listener per errori
+    const purchaseErrorSubscription = RNIap.purchaseErrorListener((error) => {
+      console.log('Purchase error:', error);
+      if (error.code !== 'E_USER_CANCELLED') {
+        Alert.alert('Errore', "Impossibile completare l'acquisto. Riprova.");
+      }
+      setIsLoading(false);
+    });
+
+    return () => {
+      purchaseUpdateSubscription.remove();
+      purchaseErrorSubscription.remove();
+      RNIap.endConnection();
+    };
+  }, []);
 
   const handleClose = () => {
     setHasSeenPaywall(true);
-    // Vai sempre alla schermata di login/registrazione
     router.replace('/');
   };
 
   const handleContinueFree = () => {
     setHasSeenPaywall(true);
-    // Continua gratis -> vai a registrazione
     router.replace('/');
   };
 
   const handlePurchase = async () => {
     setIsLoading(true);
     
+    const selectedProduct = plans.find(p => p.id === selectedPlan);
+    if (!selectedProduct) {
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Avvia l'acquisto con StoreKit
+      await RNIap.requestSubscription({ sku: selectedProduct.productId });
+      // Il listener purchaseUpdatedListener gestirà il completamento
+    } catch (error: any) {
+      console.log('Request subscription error:', error);
       
-      const purchaseDate = new Date().toISOString();
-      setPurchaseInfo(selectedPlan as 'monthly' | 'yearly', purchaseDate);
-      
-      Alert.alert(
-        '🎉 Benvenuto in Premium!',
-        "Hai sbloccato tutte le funzionalità di Couple Bliss. Goditi l'esperienza completa con il tuo partner!",
-        [{ text: 'Inizia', onPress: () => router.replace('/') }]
-      );
-    } catch (error) {
-      Alert.alert('Errore', "Impossibile completare l'acquisto. Riprova più tardi.");
-    } finally {
+      if (error.code === 'E_USER_CANCELLED') {
+        // Utente ha annullato - non mostrare errore
+      } else if (error.message?.includes('Simulator') || error.message?.includes('not available')) {
+        // Siamo nel simulatore - simula acquisto per test
+        Alert.alert(
+          'Ambiente di Test',
+          'Gli acquisti in-app non sono disponibili nel simulatore. In produzione, questo attiverà Apple Pay.',
+          [{ text: 'OK' }]
+        );
+      } else {
+        Alert.alert('Errore', "Impossibile completare l'acquisto. Riprova più tardi.");
+      }
       setIsLoading(false);
     }
   };
@@ -93,9 +204,34 @@ export default function PaywallScreen() {
   const handleRestore = async () => {
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      Alert.alert('Info', 'Nessun acquisto precedente trovato.');
+      const purchases = await RNIap.getAvailablePurchases();
+      console.log('Available purchases:', purchases);
+      
+      if (purchases && purchases.length > 0) {
+        // Trova l'acquisto più recente
+        const validPurchase = purchases.find(p => 
+          p.productId.includes('couple_bliss')
+        );
+        
+        if (validPurchase) {
+          const purchaseDate = new Date().toISOString();
+          const planType = validPurchase.productId.includes('yearly') ? 'yearly' : 'monthly';
+          setPurchaseInfo(planType, purchaseDate);
+          setIsPremium(true);
+          
+          Alert.alert(
+            '✅ Acquisto Ripristinato',
+            'Il tuo abbonamento Premium è stato ripristinato!',
+            [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
+          );
+        } else {
+          Alert.alert('Info', 'Nessun acquisto precedente trovato.');
+        }
+      } else {
+        Alert.alert('Info', 'Nessun acquisto precedente trovato.');
+      }
     } catch (error) {
+      console.log('Restore error:', error);
       Alert.alert('Errore', 'Impossibile ripristinare gli acquisti.');
     } finally {
       setIsLoading(false);
@@ -104,6 +240,7 @@ export default function PaywallScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Close Button */}
       <TouchableOpacity 
         style={styles.closeButton} 
         onPress={handleClose}
@@ -112,53 +249,42 @@ export default function PaywallScreen() {
         <Ionicons name="close-circle" size={32} color="#fff" />
       </TouchableOpacity>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Header */}
         <View style={styles.header}>
-          <View style={styles.premiumBadge}>
-            <Ionicons name="diamond" size={32} color="#f39c12" />
-          </View>
-          <Text style={styles.title}>💖 Couple Bliss Premium</Text>
-          <Text style={styles.subtitle}>
-            Sblocca tutte le funzionalità esclusive per vivere la vostra relazione al massimo!
-          </Text>
-        </View>
-
-        {/* Highlight Features */}
-        <View style={styles.highlightSection}>
-          <Text style={styles.highlightTitle}>🔥 Funzionalità Esclusive</Text>
-          {PREMIUM_FEATURES.filter(f => f.highlight).map((feature, index) => (
-            <View key={index} style={styles.highlightCard}>
-              <View style={styles.highlightIcon}>
-                <Ionicons name={feature.icon as any} size={28} color="#fff" />
-              </View>
-              <View style={styles.highlightContent}>
-                <Text style={styles.highlightText}>{feature.text}</Text>
-                <Text style={styles.highlightDesc}>{feature.desc}</Text>
-              </View>
-            </View>
-          ))}
+          <Text style={styles.crown}>👑</Text>
+          <Text style={styles.title}>Couple Bliss Premium</Text>
+          <Text style={styles.subtitle}>Sblocca tutte le funzionalità per la tua relazione</Text>
         </View>
 
         {/* All Features */}
         <View style={styles.featuresContainer}>
-          <Text style={styles.featuresTitle}>✨ Tutto incluso nel Premium</Text>
-          <View style={styles.featuresGrid}>
-            {PREMIUM_FEATURES.filter(f => !f.highlight).map((feature, index) => (
-              <View key={index} style={styles.featureItem}>
-                <View style={styles.featureIconSmall}>
-                  <Ionicons name={feature.icon as any} size={18} color="#ff6b8a" />
-                </View>
-                <View style={styles.featureTextContainer}>
-                  <Text style={styles.featureText}>{feature.text}</Text>
-                  <Text style={styles.featureDesc}>{feature.desc}</Text>
-                </View>
+          {PREMIUM_FEATURES.map((feature, index) => (
+            <View key={index} style={[styles.featureRow, feature.highlight && styles.featureHighlight]}>
+              <View style={[styles.featureIconContainer, feature.highlight && styles.featureIconHighlight]}>
+                <Ionicons name={feature.icon as any} size={20} color={feature.highlight ? "#ff6b8a" : "#888"} />
               </View>
-            ))}
-          </View>
+              <View style={styles.featureTextContainer}>
+                <Text style={[styles.featureText, feature.highlight && styles.featureTextHighlight]}>
+                  {feature.text}
+                </Text>
+                <Text style={styles.featureDesc}>{feature.desc}</Text>
+              </View>
+              {feature.highlight && (
+                <View style={styles.newBadge}>
+                  <Text style={styles.newBadgeText}>NEW</Text>
+                </View>
+              )}
+            </View>
+          ))}
         </View>
 
+        {/* Plans */}
         <View style={styles.plansContainer}>
-          {PLANS.map((plan) => (
+          {plans.map((plan) => (
             <TouchableOpacity
               key={plan.id}
               style={[
@@ -167,17 +293,18 @@ export default function PaywallScreen() {
                 plan.popular && styles.planCardPopular,
               ]}
               onPress={() => setSelectedPlan(plan.id)}
+              activeOpacity={0.8}
             >
               {plan.popular && (
                 <View style={styles.popularBadge}>
-                  <Text style={styles.popularText}>⭐ PIÙ POPOLARE</Text>
+                  <Text style={styles.popularText}>PIÙ POPOLARE</Text>
                 </View>
               )}
               
               <View style={styles.planHeader}>
                 <View style={[
                   styles.radioOuter,
-                  selectedPlan === plan.id && styles.radioOuterSelected,
+                  selectedPlan === plan.id && styles.radioOuterSelected
                 ]}>
                   {selectedPlan === plan.id && <View style={styles.radioInner} />}
                 </View>
@@ -189,36 +316,31 @@ export default function PaywallScreen() {
                 <Text style={styles.planPeriod}>{plan.period}</Text>
               </View>
               
+              {plan.pricePerMonth && (
+                <Text style={styles.pricePerMonth}>{plan.pricePerMonth}</Text>
+              )}
+              
               {plan.savings && (
                 <View style={styles.savingsBadge}>
                   <Text style={styles.savingsText}>{plan.savings}</Text>
                 </View>
               )}
-              
-              {plan.pricePerMonth && (
-                <Text style={styles.pricePerMonth}>{plan.pricePerMonth}</Text>
-              )}
             </TouchableOpacity>
           ))}
         </View>
 
-        <View style={styles.trialInfo}>
-          <Ionicons name="shield-checkmark" size={20} color="#2ed573" />
-          <Text style={styles.trialText}>7 giorni di prova gratuita</Text>
-        </View>
-
+        {/* Purchase Button */}
         <TouchableOpacity
-          style={styles.purchaseButton}
+          style={[styles.purchaseButton, isLoading && styles.purchaseButtonDisabled]}
           onPress={handlePurchase}
           disabled={isLoading}
         >
           {isLoading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <>
-              <Ionicons name="diamond" size={22} color="#fff" />
-              <Text style={styles.purchaseButtonText}>Attiva Premium</Text>
-            </>
+            <Text style={styles.purchaseButtonText}>
+              Attiva Premium
+            </Text>
           )}
         </TouchableOpacity>
 
@@ -231,7 +353,7 @@ export default function PaywallScreen() {
         </TouchableOpacity>
 
         <Text style={styles.legalText}>
-          L'abbonamento si rinnova automaticamente. Puoi annullare in qualsiasi momento dalle impostazioni del tuo account Apple.
+          L'abbonamento si rinnova automaticamente. Puoi annullare in qualsiasi momento dalle impostazioni del tuo account Apple. Il pagamento verrà addebitato sul tuo account iTunes.
         </Text>
       </ScrollView>
     </SafeAreaView>
@@ -243,179 +365,117 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1a1a2e',
   },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
   closeButton: {
     position: 'absolute',
     top: 50,
-    right: 16,
-    zIndex: 100,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scrollContent: {
-    padding: 24,
-    paddingTop: 80,
-    paddingBottom: 40,
+    right: 20,
+    zIndex: 10,
+    opacity: 0.7,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 30,
+    marginTop: 20,
+    marginBottom: 24,
   },
-  premiumBadge: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(243, 156, 18, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
+  crown: {
+    fontSize: 48,
+    marginBottom: 12,
   },
   title: {
     fontSize: 26,
     fontWeight: 'bold',
     color: '#fff',
-    textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#aaa',
+    fontSize: 15,
+    color: '#888',
     textAlign: 'center',
-    lineHeight: 24,
-  },
-  // Highlight Section
-  highlightSection: {
-    marginBottom: 24,
-  },
-  highlightTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 16,
-  },
-  highlightCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 107, 138, 0.15)',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 107, 138, 0.3)',
-  },
-  highlightIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#ff6b8a',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 14,
-  },
-  highlightContent: {
-    flex: 1,
-  },
-  highlightText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  highlightDesc: {
-    fontSize: 13,
-    color: '#ccc',
-    marginTop: 4,
   },
   featuresContainer: {
-    backgroundColor: '#2a2a4e',
-    borderRadius: 20,
-    padding: 20,
     marginBottom: 24,
-  },
-  featuresTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 16,
-  },
-  featuresGrid: {
-    gap: 12,
-  },
-  featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  featureIconSmall: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 107, 138, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  featureTextContainer: {
-    flex: 1,
-  },
-  featureText: {
-    fontSize: 14,
-    color: '#fff',
-    fontWeight: '500',
-  },
-  featureDesc: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 2,
   },
   featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#3a3a5e',
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginBottom: 4,
   },
-  featureIcon: {
+  featureHighlight: {
+    backgroundColor: 'rgba(255, 107, 138, 0.1)',
+  },
+  featureIconContainer: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(255, 107, 138, 0.15)',
+    backgroundColor: 'rgba(255,255,255,0.1)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 14,
+    marginRight: 12,
+  },
+  featureIconHighlight: {
+    backgroundColor: 'rgba(255, 107, 138, 0.2)',
+  },
+  featureTextContainer: {
+    flex: 1,
   },
   featureText: {
-    flex: 1,
     fontSize: 15,
+    color: '#fff',
+    fontWeight: '500',
+  },
+  featureTextHighlight: {
+    color: '#ff6b8a',
+    fontWeight: '600',
+  },
+  featureDesc: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
+  },
+  newBadge: {
+    backgroundColor: '#ff6b8a',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  newBadgeText: {
+    fontSize: 10,
+    fontWeight: 'bold',
     color: '#fff',
   },
   plansContainer: {
-    gap: 12,
     marginBottom: 20,
   },
   planCard: {
-    backgroundColor: '#2a2a4e',
+    backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: 16,
-    padding: 20,
+    padding: 16,
+    marginBottom: 12,
     borderWidth: 2,
-    borderColor: '#3a3a5e',
+    borderColor: 'transparent',
   },
   planCardSelected: {
     borderColor: '#ff6b8a',
     backgroundColor: 'rgba(255, 107, 138, 0.1)',
   },
   planCardPopular: {
-    borderColor: '#f39c12',
+    borderColor: '#ff6b8a',
   },
   popularBadge: {
     position: 'absolute',
-    top: -12,
+    top: -10,
     right: 16,
-    backgroundColor: '#f39c12',
-    paddingHorizontal: 12,
+    backgroundColor: '#ff6b8a',
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 10,
   },
   popularText: {
     fontSize: 10,
@@ -425,17 +485,17 @@ const styles = StyleSheet.create({
   planHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   radioOuter: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     borderWidth: 2,
-    borderColor: '#555',
+    borderColor: '#444',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 10,
   },
   radioOuterSelected: {
     borderColor: '#ff6b8a',
@@ -447,14 +507,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#ff6b8a',
   },
   planName: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: 'bold',
     color: '#fff',
   },
   planPricing: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    marginBottom: 8,
+    marginLeft: 32,
   },
   planPrice: {
     fontSize: 28,
@@ -462,52 +522,48 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   planPeriod: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#888',
     marginLeft: 4,
+  },
+  pricePerMonth: {
+    fontSize: 13,
+    color: '#888',
+    marginLeft: 32,
+    marginTop: 2,
   },
   savingsBadge: {
     alignSelf: 'flex-start',
     backgroundColor: 'rgba(46, 213, 115, 0.2)',
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
-    marginBottom: 4,
+    borderRadius: 10,
+    marginLeft: 32,
+    marginTop: 8,
   },
   savingsText: {
     fontSize: 12,
     fontWeight: '600',
     color: '#2ed573',
   },
-  pricePerMonth: {
-    fontSize: 14,
-    color: '#888',
-  },
-  trialInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginBottom: 20,
-  },
-  trialText: {
-    fontSize: 14,
-    color: '#2ed573',
-    fontWeight: '500',
-  },
   purchaseButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: '#ff6b8a',
-    paddingVertical: 18,
-    borderRadius: 16,
-    gap: 10,
-    marginBottom: 16,
+    paddingVertical: 16,
+    borderRadius: 30,
+    alignItems: 'center',
+    marginBottom: 12,
+    shadowColor: '#ff6b8a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  purchaseButtonDisabled: {
+    opacity: 0.7,
   },
   purchaseButtonText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: 'bold',
     color: '#fff',
   },
   restoreButton: {
