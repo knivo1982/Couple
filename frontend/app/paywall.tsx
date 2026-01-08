@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,21 +9,14 @@ import {
   ActivityIndicator,
   ScrollView,
   Platform,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { usePremiumStore } from '../store/premiumStore';
-import * as RNIap from 'react-native-iap';
 
 const { width } = Dimensions.get('window');
-
-// Product IDs - devono corrispondere a quelli su App Store Connect
-const PRODUCT_IDS = Platform.select({
-  ios: ['couple_bliss_monthly', 'couple_bliss_yearly'],
-  android: ['couple_bliss_monthly', 'couple_bliss_yearly'],
-  default: [],
-});
 
 const PREMIUM_FEATURES = [
   { icon: 'eye', text: 'Calendario Fertilità', desc: 'Vedi giorni sicuri e pericolosi', highlight: true },
@@ -48,7 +41,7 @@ interface ProductInfo {
   productId: string;
 }
 
-const DEFAULT_PLANS: ProductInfo[] = [
+const PLANS: ProductInfo[] = [
   {
     id: 'yearly',
     name: 'Annuale',
@@ -76,88 +69,6 @@ export default function PaywallScreen() {
   const { setPurchaseInfo, setHasSeenPaywall, setIsPremium } = usePremiumStore();
   const [selectedPlan, setSelectedPlan] = useState('yearly');
   const [isLoading, setIsLoading] = useState(false);
-  const [products, setProducts] = useState<RNIap.Product[]>([]);
-  const [plans, setPlans] = useState<ProductInfo[]>(DEFAULT_PLANS);
-
-  // Inizializza StoreKit
-  useEffect(() => {
-    const initIAP = async () => {
-      try {
-        await RNIap.initConnection();
-        console.log('IAP Connection initialized');
-        
-        // Carica i prodotti da App Store
-        if (PRODUCT_IDS && PRODUCT_IDS.length > 0) {
-          const availableProducts = await RNIap.getSubscriptions({ skus: PRODUCT_IDS });
-          console.log('Available products:', availableProducts);
-          setProducts(availableProducts);
-          
-          // Aggiorna i prezzi con quelli reali da App Store
-          if (availableProducts.length > 0) {
-            const updatedPlans = DEFAULT_PLANS.map(plan => {
-              const product = availableProducts.find(p => p.productId === plan.productId);
-              if (product) {
-                return {
-                  ...plan,
-                  price: product.localizedPrice || plan.price,
-                };
-              }
-              return plan;
-            });
-            setPlans(updatedPlans);
-          }
-        }
-      } catch (error) {
-        console.log('IAP init error:', error);
-        // In development/simulator, IAP non funziona - usa prezzi default
-      }
-    };
-
-    initIAP();
-
-    // Listener per acquisti completati
-    const purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(async (purchase) => {
-      console.log('Purchase updated:', purchase);
-      
-      const receipt = purchase.transactionReceipt;
-      if (receipt) {
-        try {
-          // Conferma l'acquisto con Apple
-          await RNIap.finishTransaction({ purchase, isConsumable: false });
-          
-          // Salva lo stato premium
-          const purchaseDate = new Date().toISOString();
-          const planType = purchase.productId.includes('yearly') ? 'yearly' : 'monthly';
-          setPurchaseInfo(planType, purchaseDate);
-          setIsPremium(true);
-          
-          Alert.alert(
-            '🎉 Benvenuto in Premium!',
-            "Hai sbloccato tutte le funzionalità di Couple Bliss!",
-            [{ text: 'Inizia', onPress: () => router.replace('/') }]
-          );
-        } catch (error) {
-          console.log('Finish transaction error:', error);
-        }
-      }
-      setIsLoading(false);
-    });
-
-    // Listener per errori
-    const purchaseErrorSubscription = RNIap.purchaseErrorListener((error) => {
-      console.log('Purchase error:', error);
-      if (error.code !== 'E_USER_CANCELLED') {
-        Alert.alert('Errore', "Impossibile completare l'acquisto. Riprova.");
-      }
-      setIsLoading(false);
-    });
-
-    return () => {
-      purchaseUpdateSubscription.remove();
-      purchaseErrorSubscription.remove();
-      RNIap.endConnection();
-    };
-  }, []);
 
   const handleClose = () => {
     setHasSeenPaywall(true);
@@ -172,70 +83,29 @@ export default function PaywallScreen() {
   const handlePurchase = async () => {
     setIsLoading(true);
     
-    const selectedProduct = plans.find(p => p.id === selectedPlan);
-    if (!selectedProduct) {
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      // Avvia l'acquisto con StoreKit
-      await RNIap.requestSubscription({ sku: selectedProduct.productId });
-      // Il listener purchaseUpdatedListener gestirà il completamento
-    } catch (error: any) {
-      console.log('Request subscription error:', error);
-      
-      if (error.code === 'E_USER_CANCELLED') {
-        // Utente ha annullato - non mostrare errore
-      } else if (error.message?.includes('Simulator') || error.message?.includes('not available')) {
-        // Siamo nel simulatore - simula acquisto per test
-        Alert.alert(
-          'Ambiente di Test',
-          'Gli acquisti in-app non sono disponibili nel simulatore. In produzione, questo attiverà Apple Pay.',
-          [{ text: 'OK' }]
-        );
-      } else {
-        Alert.alert('Errore', "Impossibile completare l'acquisto. Riprova più tardi.");
-      }
+      // TODO: Implementare StoreKit reale
+      // Per ora mostra messaggio che gli acquisti saranno disponibili a breve
+      Alert.alert(
+        'Acquisti In-App',
+        'Gli abbonamenti Premium saranno disponibili a breve! Per ora puoi provare l\'app gratuitamente.',
+        [
+          { text: 'OK', onPress: () => router.replace('/') }
+        ]
+      );
+    } catch (error) {
+      Alert.alert('Errore', "Impossibile completare l'acquisto. Riprova più tardi.");
+    } finally {
       setIsLoading(false);
     }
   };
 
   const handleRestore = async () => {
-    setIsLoading(true);
-    try {
-      const purchases = await RNIap.getAvailablePurchases();
-      console.log('Available purchases:', purchases);
-      
-      if (purchases && purchases.length > 0) {
-        // Trova l'acquisto più recente
-        const validPurchase = purchases.find(p => 
-          p.productId.includes('couple_bliss')
-        );
-        
-        if (validPurchase) {
-          const purchaseDate = new Date().toISOString();
-          const planType = validPurchase.productId.includes('yearly') ? 'yearly' : 'monthly';
-          setPurchaseInfo(planType, purchaseDate);
-          setIsPremium(true);
-          
-          Alert.alert(
-            '✅ Acquisto Ripristinato',
-            'Il tuo abbonamento Premium è stato ripristinato!',
-            [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
-          );
-        } else {
-          Alert.alert('Info', 'Nessun acquisto precedente trovato.');
-        }
-      } else {
-        Alert.alert('Info', 'Nessun acquisto precedente trovato.');
-      }
-    } catch (error) {
-      console.log('Restore error:', error);
-      Alert.alert('Errore', 'Impossibile ripristinare gli acquisti.');
-    } finally {
-      setIsLoading(false);
-    }
+    Alert.alert(
+      'Ripristino Acquisti',
+      'Gli abbonamenti Premium saranno disponibili a breve!',
+      [{ text: 'OK' }]
+    );
   };
 
   return (
@@ -284,7 +154,7 @@ export default function PaywallScreen() {
 
         {/* Plans */}
         <View style={styles.plansContainer}>
-          {plans.map((plan) => (
+          {PLANS.map((plan) => (
             <TouchableOpacity
               key={plan.id}
               style={[
