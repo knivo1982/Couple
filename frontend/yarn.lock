@@ -6081,10 +6081,10 @@ react-native-gifted-charts@^1.4.70:
   dependencies:
     gifted-charts-core "0.1.72"
 
-react-native-iap@12.15.5:
-  version "12.15.5"
-  resolved "https://registry.yarnpkg.com/react-native-iap/-/react-native-iap-12.15.5.tgz#2802c33c0ded6151eff96b10ae94e26c472244d2"
-  integrity sha512-Pmqoj0Ge0oEor+HuKkBkYSXau+5boRRvzQHB5G9Dz1S16NA2eiVzT+LO1mk9IhRabK3PS5P7kJJtyCdQ+hfMRQ==
+react-native-iap@11.0.0:
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-iap/-/react-native-iap-11.0.0.tgz#3a7df42da50cadc88278135d2872de2c6a1b6dab"
+  integrity sha512-y6g0JeH0C9U8Qp3YZDirQVPmbpZEGbpQ0nFgBuuPvCO1ezf9VmjzZWpr43rHJOOPpMZ+irWnMu7KvHU23i90yw==
 
 react-native-is-edge-to-edge@^1.1.6, react-native-is-edge-to-edge@^1.2.1:
   version "1.2.1"
