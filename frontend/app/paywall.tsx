@@ -103,8 +103,8 @@ export default function PaywallScreen() {
         // Aggiorna i prezzi con quelli reali
         const updatedPlans = plans.map(plan => {
           const pkg = availablePackages.find(p => 
-            (plan.id === 'yearly' && p.packageType === 'ANNUAL') ||
-            (plan.id === 'monthly' && p.packageType === 'MONTHLY')
+            (plan.id === 'yearly' && (p.packageType === 'ANNUAL' || p.product.identifier === PRODUCT_ID_YEARLY)) ||
+            (plan.id === 'monthly' && (p.packageType === 'MONTHLY' || p.product.identifier === PRODUCT_ID_MONTHLY))
           );
           
           if (pkg) {
