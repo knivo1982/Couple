@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -11,11 +11,13 @@ import {
   addNotificationResponseListener 
 } from '../services/notifications';
 import * as Notifications from 'expo-notifications';
+import AnimatedSplash from '../components/AnimatedSplash';
 
 export default function RootLayout() {
   const { loadUser, user } = useStore();
   const notificationListener = useRef<any>();
   const responseListener = useRef<any>();
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
     loadUser();
@@ -60,6 +62,13 @@ export default function RootLayout() {
       console.log('Notification setup error:', error);
     }
   };
+
+  // Mostra la splash animata
+  if (showSplash) {
+    return (
+      <AnimatedSplash onAnimationComplete={() => setShowSplash(false)} />
+    );
+  }
 
   return (
     <SafeAreaProvider>
