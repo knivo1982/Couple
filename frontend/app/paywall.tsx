@@ -18,9 +18,13 @@ import Purchases, { PurchasesPackage, LOG_LEVEL } from 'react-native-purchases';
 
 const { width } = Dimensions.get('window');
 
-// RevenueCat API Keys - sostituisci con le tue
-const REVENUECAT_API_KEY_IOS = 'appl_YOUR_REVENUECAT_IOS_KEY';
-const REVENUECAT_API_KEY_ANDROID = 'goog_YOUR_REVENUECAT_ANDROID_KEY';
+// RevenueCat API Keys - inserisci la tua API key da RevenueCat dashboard
+const REVENUECAT_API_KEY_IOS = 'YOUR_REVENUECAT_IOS_API_KEY'; // Sostituisci con la tua key
+const REVENUECAT_API_KEY_ANDROID = 'YOUR_REVENUECAT_ANDROID_API_KEY';
+
+// Product IDs da App Store Connect
+const PRODUCT_ID_MONTHLY = 'couple_bliss_monthly';
+const PRODUCT_ID_YEARLY = 'couple_bliss_yearly';
 
 const PREMIUM_FEATURES = [
   { icon: 'eye', text: 'Calendario Fertilità', desc: 'Vedi giorni sicuri e pericolosi', highlight: true },
