@@ -14,17 +14,25 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { usePremiumStore } from '../store/premiumStore';
-import Purchases, { PurchasesPackage, LOG_LEVEL } from 'react-native-purchases';
+import {
+  initConnection,
+  endConnection,
+  getProducts,
+  requestPurchase,
+  getAvailablePurchases,
+  finishTransaction,
+  purchaseUpdatedListener,
+  purchaseErrorListener,
+  Product,
+  PurchaseError,
+  SubscriptionPurchase,
+  ProductPurchase,
+} from 'react-native-iap';
 
 const { width } = Dimensions.get('window');
 
-// RevenueCat API Keys - inserisci la tua API key da RevenueCat dashboard
-const REVENUECAT_API_KEY_IOS = 'YOUR_REVENUECAT_IOS_API_KEY'; // Sostituisci con la tua key
-const REVENUECAT_API_KEY_ANDROID = 'YOUR_REVENUECAT_ANDROID_API_KEY';
-
 // Product IDs da App Store Connect
-const PRODUCT_ID_MONTHLY = 'couple_bliss_monthly';
-const PRODUCT_ID_YEARLY = 'couple_bliss_yearly';
+const PRODUCT_IDS = ['couple_bliss_monthly', 'couple_bliss_yearly'];
 
 const PREMIUM_FEATURES = [
   { icon: 'eye', text: 'Calendario Fertilità', desc: 'Vedi giorni sicuri e pericolosi', highlight: true },
@@ -40,13 +48,13 @@ const PREMIUM_FEATURES = [
 
 interface PlanInfo {
   id: string;
+  productId: string;
   name: string;
   price: string;
   period: string;
   pricePerMonth: string | null;
   savings: string | null;
   popular: boolean;
-  package: PurchasesPackage | null;
 }
 
 export default function PaywallScreen() {
@@ -54,74 +62,121 @@ export default function PaywallScreen() {
   const { setPurchaseInfo, setHasSeenPaywall, setIsPremium } = usePremiumStore();
   const [selectedPlan, setSelectedPlan] = useState('yearly');
   const [isLoading, setIsLoading] = useState(false);
-  const [packages, setPackages] = useState<PurchasesPackage[]>([]);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [products, setProducts] = useState<Product[]>([]);
   const [plans, setPlans] = useState<PlanInfo[]>([
     {
       id: 'yearly',
+      productId: 'couple_bliss_yearly',
       name: 'Annuale',
       price: '€29,99',
       period: '/anno',
       pricePerMonth: '€2,50/mese',
       savings: 'Risparmi il 35%',
       popular: true,
-      package: null,
     },
     {
       id: 'monthly',
+      productId: 'couple_bliss_monthly',
       name: 'Mensile',
       price: '€3,99',
       period: '/mese',
       pricePerMonth: null,
       savings: null,
       popular: false,
-      package: null,
     },
   ]);
 
   useEffect(() => {
-    initializePurchases();
+    let purchaseUpdateSubscription: any;
+    let purchaseErrorSubscription: any;
+
+    const init = async () => {
+      try {
+        // Inizializza connessione con App Store
+        await initConnection();
+        console.log('IAP Connection initialized');
+
+        // Listener per acquisti completati
+        purchaseUpdateSubscription = purchaseUpdatedListener(
+          async (purchase: SubscriptionPurchase | ProductPurchase) => {
+            console.log('Purchase updated:', purchase);
+            
+            const receipt = purchase.transactionReceipt;
+            if (receipt) {
+              // Completa la transazione
+              await finishTransaction({ purchase, isConsumable: false });
+              
+              // Attiva premium
+              const purchaseDate = new Date().toISOString();
+              const planType = purchase.productId.includes('yearly') ? 'yearly' : 'monthly';
+              setPurchaseInfo(planType, purchaseDate);
+              setIsPremium(true);
+              
+              Alert.alert(
+                '🎉 Benvenuto in Premium!',
+                'Hai sbloccato tutte le funzionalità di Couple Bliss!',
+                [{ text: 'Inizia', onPress: () => router.replace('/(tabs)') }]
+              );
+            }
+            setIsLoading(false);
+          }
+        );
+
+        // Listener per errori
+        purchaseErrorSubscription = purchaseErrorListener((error: PurchaseError) => {
+          console.log('Purchase error:', error);
+          if (error.code !== 'E_USER_CANCELLED') {
+            Alert.alert('Errore', 'Impossibile completare l\'acquisto. Riprova più tardi.');
+          }
+          setIsLoading(false);
+        });
+
+        // Carica i prodotti da App Store
+        await loadProducts();
+        
+      } catch (error) {
+        console.log('IAP init error:', error);
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+
+    init();
+
+    return () => {
+      if (purchaseUpdateSubscription) {
+        purchaseUpdateSubscription.remove();
+      }
+      if (purchaseErrorSubscription) {
+        purchaseErrorSubscription.remove();
+      }
+      endConnection();
+    };
   }, []);
 
-  const initializePurchases = async () => {
+  const loadProducts = async () => {
     try {
-      // Configura RevenueCat
-      Purchases.setLogLevel(LOG_LEVEL.DEBUG);
-      
-      if (Platform.OS === 'ios') {
-        await Purchases.configure({ apiKey: REVENUECAT_API_KEY_IOS });
-      } else if (Platform.OS === 'android') {
-        await Purchases.configure({ apiKey: REVENUECAT_API_KEY_ANDROID });
-      }
+      const loadedProducts = await getProducts({ skus: PRODUCT_IDS });
+      console.log('Loaded products:', loadedProducts);
+      setProducts(loadedProducts);
 
-      // Carica le offerte disponibili
-      const offerings = await Purchases.getOfferings();
-      
-      if (offerings.current && offerings.current.availablePackages.length > 0) {
-        const availablePackages = offerings.current.availablePackages;
-        setPackages(availablePackages);
-        
-        // Aggiorna i prezzi con quelli reali
+      if (loadedProducts.length > 0) {
+        // Aggiorna i prezzi con quelli reali da App Store
         const updatedPlans = plans.map(plan => {
-          const pkg = availablePackages.find(p => 
-            (plan.id === 'yearly' && (p.packageType === 'ANNUAL' || p.product.identifier === PRODUCT_ID_YEARLY)) ||
-            (plan.id === 'monthly' && (p.packageType === 'MONTHLY' || p.product.identifier === PRODUCT_ID_MONTHLY))
-          );
-          
-          if (pkg) {
+          const product = loadedProducts.find(p => p.productId === plan.productId);
+          if (product) {
             return {
               ...plan,
-              price: pkg.product.priceString,
-              package: pkg,
+              price: product.localizedPrice,
             };
           }
           return plan;
         });
-        
         setPlans(updatedPlans);
       }
     } catch (error) {
-      console.log('RevenueCat init error:', error);
-      // In development o senza configurazione, usa prezzi default
+      console.log('Error loading products:', error);
     }
   };
 
@@ -136,42 +191,32 @@ export default function PaywallScreen() {
   };
 
   const handlePurchase = async () => {
-    setIsLoading(true);
-    
     const selectedPlanInfo = plans.find(p => p.id === selectedPlan);
+    if (!selectedPlanInfo) return;
+
+    const product = products.find(p => p.productId === selectedPlanInfo.productId);
     
-    if (!selectedPlanInfo?.package) {
-      // Se non ci sono pacchetti configurati, mostra messaggio
+    if (!product) {
+      // Se i prodotti non sono caricati (es. in development)
       Alert.alert(
         'Acquisti In-App',
-        'Gli abbonamenti Premium saranno disponibili a breve! Per ora puoi provare l\'app gratuitamente.',
+        'Gli abbonamenti saranno disponibili nella versione App Store. Per ora puoi provare l\'app gratuitamente.',
         [{ text: 'OK', onPress: () => router.replace('/') }]
       );
-      setIsLoading(false);
       return;
     }
 
+    setIsLoading(true);
+    
     try {
-      // Effettua l'acquisto tramite RevenueCat/StoreKit
-      const { customerInfo } = await Purchases.purchasePackage(selectedPlanInfo.package);
-      
-      // Verifica se l'utente ha accesso premium
-      if (customerInfo.entitlements.active['premium']) {
-        const purchaseDate = new Date().toISOString();
-        setPurchaseInfo(selectedPlan as 'monthly' | 'yearly', purchaseDate);
-        setIsPremium(true);
-        
-        Alert.alert(
-          '🎉 Benvenuto in Premium!',
-          "Hai sbloccato tutte le funzionalità di Couple Bliss!",
-          [{ text: 'Inizia', onPress: () => router.replace('/(tabs)') }]
-        );
-      }
+      // Richiedi l'acquisto tramite StoreKit
+      await requestPurchase({ sku: selectedPlanInfo.productId });
+      // Il risultato viene gestito dal purchaseUpdatedListener
     } catch (error: any) {
-      if (!error.userCancelled) {
-        Alert.alert('Errore', "Impossibile completare l'acquisto. Riprova più tardi.");
+      console.log('Purchase request error:', error);
+      if (error.code !== 'E_USER_CANCELLED') {
+        Alert.alert('Errore', 'Impossibile avviare l\'acquisto.');
       }
-    } finally {
       setIsLoading(false);
     }
   };
@@ -179,11 +224,18 @@ export default function PaywallScreen() {
   const handleRestore = async () => {
     setIsLoading(true);
     try {
-      const customerInfo = await Purchases.restorePurchases();
+      const purchases = await getAvailablePurchases();
+      console.log('Available purchases:', purchases);
       
-      if (customerInfo.entitlements.active['premium']) {
+      const validPurchase = purchases.find(p => 
+        p.productId === 'couple_bliss_monthly' || 
+        p.productId === 'couple_bliss_yearly'
+      );
+
+      if (validPurchase) {
         const purchaseDate = new Date().toISOString();
-        setPurchaseInfo('yearly', purchaseDate);
+        const planType = validPurchase.productId.includes('yearly') ? 'yearly' : 'monthly';
+        setPurchaseInfo(planType, purchaseDate);
         setIsPremium(true);
         
         Alert.alert(
@@ -195,6 +247,7 @@ export default function PaywallScreen() {
         Alert.alert('Info', 'Nessun acquisto precedente trovato.');
       }
     } catch (error) {
+      console.log('Restore error:', error);
       Alert.alert('Errore', 'Impossibile ripristinare gli acquisti.');
     } finally {
       setIsLoading(false);
@@ -296,9 +349,9 @@ export default function PaywallScreen() {
         <TouchableOpacity
           style={[styles.purchaseButton, isLoading && styles.purchaseButtonDisabled]}
           onPress={handlePurchase}
-          disabled={isLoading}
+          disabled={isLoading || isInitializing}
         >
-          {isLoading ? (
+          {isLoading || isInitializing ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <Text style={styles.purchaseButtonText}>
@@ -307,7 +360,7 @@ export default function PaywallScreen() {
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.restoreButton} onPress={handleRestore}>
+        <TouchableOpacity style={styles.restoreButton} onPress={handleRestore} disabled={isLoading}>
           <Text style={styles.restoreText}>Ripristina acquisti</Text>
         </TouchableOpacity>
 
