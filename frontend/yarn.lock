@@ -1894,11 +1894,6 @@
   dependencies:
     nanoid "^3.3.11"
 
-"@revenuecat/purchases-typescript-internal@13.2.0":
-  version "13.2.0"
-  resolved "https://registry.yarnpkg.com/@revenuecat/purchases-typescript-internal/-/purchases-typescript-internal-13.2.0.tgz#5fcbd28919c5138efa882a4446e7a699489220ca"
-  integrity sha512-GTevFT13QFeV4z/qfqxfniTyc8egPikRnwA0xn7HGx/feUKfJDWbrNIWt/m6u5mV/BWT19HTFsaAgEYxGN55HA==
-
 "@rtsao/scc@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@rtsao/scc/-/scc-1.1.0.tgz#927dd2fae9bc3361403ac2c7a00c32ddce9ad7e8"
@@ -6086,17 +6081,15 @@ react-native-gifted-charts@^1.4.70:
   dependencies:
     gifted-charts-core "0.1.72"
 
+react-native-iap@9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-iap/-/react-native-iap-9.0.0.tgz#42130976e45d916694b2196f9726916e1172cc70"
+  integrity sha512-ERydB2nvmOnlg6495hkUfSTLg3AxYil5KXqrYmZV/McINN3fNHJ4EAi27Y4Lgr2NAL3rkW7WC5n1zp6VkZHEVw==
+
 react-native-is-edge-to-edge@^1.1.6, react-native-is-edge-to-edge@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/react-native-is-edge-to-edge/-/react-native-is-edge-to-edge-1.2.1.tgz#64e10851abd9d176cbf2b40562f751622bde3358"
   integrity sha512-FLbPWl/MyYQWz+KwqOZsSyj2JmLKglHatd3xLZWskXOpRaio4LfEDEz8E/A6uD8QoTHW6Aobw1jbEwK7KMgR7Q==
-
-react-native-purchases@8.2.0:
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/react-native-purchases/-/react-native-purchases-8.2.0.tgz#f527afaa95ca69befa8312d62f2226ad51de350b"
-  integrity sha512-+VzXAaQNYvq9cfgtk5Axe/T7+wmF15U46ZALdV8eN50H+REZPD0f3ZRCoQyAowhICuVhL8DVEsnk7bcyyTikLg==
-  dependencies:
-    "@revenuecat/purchases-typescript-internal" "13.2.0"
 
 react-native-reanimated@~4.1.1:
   version "4.1.6"
