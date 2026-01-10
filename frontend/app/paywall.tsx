@@ -9,18 +9,21 @@ import {
   ActivityIndicator,
   ScrollView,
   Platform,
+  EmitterSubscription,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { usePremiumStore } from '../store/premiumStore';
-import Purchases, { PurchasesPackage, LOG_LEVEL } from 'react-native-purchases';
+import * as RNIap from 'react-native-iap';
 
 const { width } = Dimensions.get('window');
 
-// RevenueCat API Keys
-const REVENUECAT_API_KEY_IOS = 'test_AneLYuVCDeRAsvrgPBxeJFaFdjt';
-const REVENUECAT_API_KEY_ANDROID = 'goog_INSERISCI_LA_TUA_API_KEY_QUI';
+// Product IDs da App Store Connect
+const productIds = Platform.select({
+  ios: ['couple_bliss_monthly', 'couple_bliss_yearly'],
+  android: ['couple_bliss_monthly', 'couple_bliss_yearly'],
+}) as string[];
 
 const PREMIUM_FEATURES = [
   { icon: 'eye', text: 'Calendario Fertilità', desc: 'Vedi giorni sicuri e pericolosi', highlight: true },
@@ -36,13 +39,13 @@ const PREMIUM_FEATURES = [
 
 interface PlanInfo {
   id: string;
+  productId: string;
   name: string;
   price: string;
   period: string;
   pricePerMonth: string | null;
   savings: string | null;
   popular: boolean;
-  package: PurchasesPackage | null;
 }
 
 export default function PaywallScreen() {
@@ -50,81 +53,132 @@ export default function PaywallScreen() {
   const { setPurchaseInfo, setHasSeenPaywall, setIsPremium } = usePremiumStore();
   const [selectedPlan, setSelectedPlan] = useState('yearly');
   const [isLoading, setIsLoading] = useState(false);
-  const [isConfigured, setIsConfigured] = useState(false);
+  const [products, setProducts] = useState<RNIap.Product[]>([]);
   const [plans, setPlans] = useState<PlanInfo[]>([
     {
       id: 'yearly',
+      productId: 'couple_bliss_yearly',
       name: 'Annuale',
       price: '€29,99',
       period: '/anno',
       pricePerMonth: '€2,50/mese',
       savings: 'Risparmi il 35%',
       popular: true,
-      package: null,
     },
     {
       id: 'monthly',
+      productId: 'couple_bliss_monthly',
       name: 'Mensile',
       price: '€3,99',
       period: '/mese',
       pricePerMonth: null,
       savings: null,
       popular: false,
-      package: null,
     },
   ]);
 
   useEffect(() => {
-    initializePurchases();
+    let purchaseUpdateSubscription: EmitterSubscription | null = null;
+    let purchaseErrorSubscription: EmitterSubscription | null = null;
+
+    const initIAP = async () => {
+      try {
+        // Inizializza connessione IAP
+        const result = await RNIap.initConnection();
+        console.log('IAP connection result:', result);
+
+        // Listener per acquisti completati
+        purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(async (purchase) => {
+          console.log('Purchase updated:', purchase);
+          
+          if (purchase.transactionReceipt) {
+            try {
+              // Conferma la transazione
+              if (Platform.OS === 'ios') {
+                await RNIap.finishTransactionIOS(purchase.transactionId || '');
+              } else {
+                await RNIap.acknowledgePurchaseAndroid(purchase.purchaseToken || '');
+              }
+
+              // Attiva premium
+              const purchaseDate = new Date().toISOString();
+              const planType = purchase.productId.includes('yearly') ? 'yearly' : 'monthly';
+              setPurchaseInfo(planType as 'monthly' | 'yearly', purchaseDate);
+              setIsPremium(true);
+
+              Alert.alert(
+                '🎉 Benvenuto in Premium!',
+                'Hai sbloccato tutte le funzionalità di Couple Bliss!',
+                [{ text: 'Inizia', onPress: () => router.replace('/(tabs)') }]
+              );
+            } catch (err) {
+              console.log('Finish transaction error:', err);
+            }
+          }
+          setIsLoading(false);
+        });
+
+        // Listener per errori
+        purchaseErrorSubscription = RNIap.purchaseErrorListener((error) => {
+          console.log('Purchase error:', error);
+          if (error.code !== 'E_USER_CANCELLED') {
+            Alert.alert('Errore', "Impossibile completare l'acquisto. Riprova più tardi.");
+          }
+          setIsLoading(false);
+        });
+
+        // Carica i prodotti
+        await loadProducts();
+
+      } catch (err) {
+        console.log('IAP init error:', err);
+      }
+    };
+
+    initIAP();
+
+    return () => {
+      if (purchaseUpdateSubscription) {
+        purchaseUpdateSubscription.remove();
+      }
+      if (purchaseErrorSubscription) {
+        purchaseErrorSubscription.remove();
+      }
+      RNIap.endConnection();
+    };
   }, []);
 
-  const initializePurchases = async () => {
+  const loadProducts = async () => {
     try {
-      // Configura RevenueCat
-      Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+      // Carica abbonamenti da App Store
+      const loadedProducts = await RNIap.getSubscriptions(productIds);
+      console.log('Loaded subscriptions:', loadedProducts);
       
-      const apiKey = Platform.OS === 'ios' 
-        ? REVENUECAT_API_KEY_IOS 
-        : REVENUECAT_API_KEY_ANDROID;
-      
-      // Skip se API key non configurata
-      if (apiKey.includes('INSERISCI')) {
-        console.log('RevenueCat API key not configured');
-        return;
-      }
-
-      await Purchases.configure({ apiKey });
-      setIsConfigured(true);
-      console.log('RevenueCat configured');
-
-      // Carica le offerte disponibili
-      const offerings = await Purchases.getOfferings();
-      console.log('Offerings:', offerings);
-      
-      if (offerings.current && offerings.current.availablePackages.length > 0) {
-        const availablePackages = offerings.current.availablePackages;
+      if (loadedProducts.length > 0) {
+        setProducts(loadedProducts);
         
-        // Aggiorna i prezzi con quelli reali
+        // Aggiorna prezzi con quelli reali
         const updatedPlans = plans.map(plan => {
-          const pkg = availablePackages.find(p => 
-            (plan.id === 'yearly' && (p.packageType === 'ANNUAL' || p.identifier.includes('yearly'))) ||
-            (plan.id === 'monthly' && (p.packageType === 'MONTHLY' || p.identifier.includes('monthly')))
-          );
-          
-          if (pkg) {
+          const product = loadedProducts.find(p => p.productId === plan.productId);
+          if (product) {
             return {
               ...plan,
-              price: pkg.product.priceString,
-              package: pkg,
+              price: product.localizedPrice || plan.price,
             };
           }
           return plan;
         });
-        
         setPlans(updatedPlans);
+      } else {
+        // Fallback: prova a caricare come prodotti normali
+        const fallbackProducts = await RNIap.getProducts(productIds);
+        console.log('Fallback products:', fallbackProducts);
+        if (fallbackProducts.length > 0) {
+          setProducts(fallbackProducts);
+        }
       }
     } catch (error) {
-      console.log('RevenueCat init error:', error);
+      console.log('Error loading products:', error);
     }
   };
 
@@ -139,66 +193,52 @@ export default function PaywallScreen() {
   };
 
   const handlePurchase = async () => {
-    setIsLoading(true);
-    
     const selectedPlanInfo = plans.find(p => p.id === selectedPlan);
-    
-    if (!selectedPlanInfo?.package || !isConfigured) {
-      // Se RevenueCat non è configurato
+    if (!selectedPlanInfo) return;
+
+    const product = products.find(p => p.productId === selectedPlanInfo.productId);
+
+    if (!product) {
       Alert.alert(
-        'Configurazione Richiesta',
-        'Gli acquisti in-app richiedono la configurazione di RevenueCat. Contatta lo sviluppatore.',
+        'Prodotti non disponibili',
+        'Gli abbonamenti non sono ancora disponibili. Riprova più tardi.',
         [{ text: 'OK' }]
       );
-      setIsLoading(false);
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      // Effettua l'acquisto tramite RevenueCat/StoreKit
-      const { customerInfo } = await Purchases.purchasePackage(selectedPlanInfo.package);
-      
-      // Verifica se l'utente ha accesso premium
-      if (customerInfo.entitlements.active['premium'] || 
-          customerInfo.entitlements.active['Premium'] ||
-          Object.keys(customerInfo.entitlements.active).length > 0) {
-        const purchaseDate = new Date().toISOString();
-        setPurchaseInfo(selectedPlan as 'monthly' | 'yearly', purchaseDate);
-        setIsPremium(true);
-        
-        Alert.alert(
-          '🎉 Benvenuto in Premium!',
-          "Hai sbloccato tutte le funzionalità di Couple Bliss!",
-          [{ text: 'Inizia', onPress: () => router.replace('/(tabs)') }]
-        );
-      }
+      // Richiedi acquisto abbonamento
+      await RNIap.requestSubscription(selectedPlanInfo.productId);
+      // Il risultato viene gestito dal listener
     } catch (error: any) {
-      console.log('Purchase error:', error);
-      if (!error.userCancelled) {
-        Alert.alert('Errore', "Impossibile completare l'acquisto. Riprova più tardi.");
+      console.log('Request subscription error:', error);
+      if (error.code !== 'E_USER_CANCELLED') {
+        Alert.alert('Errore', "Impossibile avviare l'acquisto.");
       }
-    } finally {
       setIsLoading(false);
     }
   };
 
   const handleRestore = async () => {
-    if (!isConfigured) {
-      Alert.alert('Info', 'RevenueCat non configurato.');
-      return;
-    }
-
     setIsLoading(true);
     try {
-      const customerInfo = await Purchases.restorePurchases();
-      
-      if (customerInfo.entitlements.active['premium'] || 
-          customerInfo.entitlements.active['Premium'] ||
-          Object.keys(customerInfo.entitlements.active).length > 0) {
+      const purchases = await RNIap.getAvailablePurchases();
+      console.log('Available purchases:', purchases);
+
+      const validPurchase = purchases.find(p =>
+        p.productId === 'couple_bliss_monthly' ||
+        p.productId === 'couple_bliss_yearly'
+      );
+
+      if (validPurchase) {
         const purchaseDate = new Date().toISOString();
-        setPurchaseInfo('yearly', purchaseDate);
+        const planType = validPurchase.productId.includes('yearly') ? 'yearly' : 'monthly';
+        setPurchaseInfo(planType as 'monthly' | 'yearly', purchaseDate);
         setIsPremium(true);
-        
+
         Alert.alert(
           '✅ Acquisto Ripristinato',
           'Il tuo abbonamento Premium è stato ripristinato!',
@@ -218,15 +258,15 @@ export default function PaywallScreen() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Close Button */}
-      <TouchableOpacity 
-        style={styles.closeButton} 
+      <TouchableOpacity
+        style={styles.closeButton}
         onPress={handleClose}
         hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
       >
         <Ionicons name="close-circle" size={32} color="#fff" />
       </TouchableOpacity>
 
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
@@ -277,7 +317,7 @@ export default function PaywallScreen() {
                   <Text style={styles.popularText}>PIÙ POPOLARE</Text>
                 </View>
               )}
-              
+
               <View style={styles.planHeader}>
                 <View style={[
                   styles.radioOuter,
@@ -287,16 +327,16 @@ export default function PaywallScreen() {
                 </View>
                 <Text style={styles.planName}>{plan.name}</Text>
               </View>
-              
+
               <View style={styles.planPricing}>
                 <Text style={styles.planPrice}>{plan.price}</Text>
                 <Text style={styles.planPeriod}>{plan.period}</Text>
               </View>
-              
+
               {plan.pricePerMonth && (
                 <Text style={styles.pricePerMonth}>{plan.pricePerMonth}</Text>
               )}
-              
+
               {plan.savings && (
                 <View style={styles.savingsBadge}>
                   <Text style={styles.savingsText}>{plan.savings}</Text>
@@ -321,7 +361,7 @@ export default function PaywallScreen() {
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.restoreButton} onPress={handleRestore}>
+        <TouchableOpacity style={styles.restoreButton} onPress={handleRestore} disabled={isLoading}>
           <Text style={styles.restoreText}>Ripristina acquisti</Text>
         </TouchableOpacity>
 
