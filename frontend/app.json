@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "couplebliss",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.couplebliss.app",
