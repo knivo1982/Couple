@@ -196,27 +196,17 @@ export default function PaywallScreen() {
     const selectedPlanInfo = plans.find(p => p.id === selectedPlan);
     if (!selectedPlanInfo) return;
 
-    const product = products.find(p => p.productId === selectedPlanInfo.productId);
-
-    if (!product) {
-      Alert.alert(
-        'Prodotti non disponibili',
-        'Gli abbonamenti non sono ancora disponibili. Riprova più tardi.',
-        [{ text: 'OK' }]
-      );
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      // Richiedi acquisto abbonamento
+      // Richiedi acquisto abbonamento direttamente con il productId
+      // StoreKit gestirà il caricamento del prodotto
       await RNIap.requestSubscription(selectedPlanInfo.productId);
       // Il risultato viene gestito dal listener
     } catch (error: any) {
       console.log('Request subscription error:', error);
       if (error.code !== 'E_USER_CANCELLED') {
-        Alert.alert('Errore', "Impossibile avviare l'acquisto.");
+        Alert.alert('Errore Acquisto', error.message || "Impossibile completare l'acquisto. Verifica di essere connesso al tuo account App Store.");
       }
       setIsLoading(false);
     }
